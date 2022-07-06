@@ -331,20 +331,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d9fe76395732daf4f9833ef1757d5e31, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  cards:
-  - {fileID: 8713357493971281527, guid: 161b26963f8341f48aaf591ec6fb8091, type: 3}
-  - {fileID: 4728769083773931331, guid: 0cbd7cdb6a600084f9ee8fb2f8e4b55a, type: 3}
-  - {fileID: 2407788585431381547, guid: 0498cafc7fbb0bb41a61980ec82ffb7c, type: 3}
-  - {fileID: 8607722703119711929, guid: a9616e049bfa71f41b2af31da2a43be1, type: 3}
-  - {fileID: 14266837350846585, guid: e5c79d80f05b27b4a81d67570fa9e890, type: 3}
-  - {fileID: 5157621696908248286, guid: 0019a1da9c643e4418c7157eb3f3ac61, type: 3}
-  - {fileID: 4326086016779330002, guid: d461d13e8d0f4cf4cbc2378c6cea2062, type: 3}
-  - {fileID: 1535433599517909325, guid: 6343d69146d68234484b32152c1f0fdc, type: 3}
-  - {fileID: 4272227442516388497, guid: e03234d86c4463c498ec390101117772, type: 3}
-  - {fileID: 2194625916379401999, guid: 16b429640cb6fea4587cb370694f654a, type: 3}
-  - {fileID: 797663579735092538, guid: 44ebf5846c8224547aefb0febd23e4a6, type: 3}
-  - {fileID: 4974323665272148467, guid: cf62813a7427bc1488a79533eae23cc6, type: 3}
-  - {fileID: 8387379401857513986, guid: 549e7a41de0611e49ac07e9279149811, type: 3}
+  cardNames: []
+  cards: []
 --- !u!1 &519420028
 GameObject:
   m_ObjectHideFlags: 0
