@@ -26,6 +26,13 @@ public class GameManager : MonoBehaviour
     [HideInInspector]
     public GamePlayer[] players;
 
+    public static GameManager instance;
+
+    public GameObject cardsParent;
+    public GameObject uiParent;
+
+    public bool phaseChangeFlag;
+
     private void Awake()
     {
         MakeCardNameList();
@@ -33,25 +40,35 @@ public class GameManager : MonoBehaviour
 
     void Start()
     {
+        InitializeVariables();
         InstantiateCards();
         InitializePlayers();
 
         ShuffleCards(ref cards);
 
-        StartPlay();
+        instance = this;
+
+        StartCoroutine(StartPlay());
     }
 
-    // Update is called once per frame
-    void Update()
+    IEnumerator StartPlay()
     {
-        //RenderCards(cards.GetRange(0, GlobalInfo.numberOfCardsPlay).OrderBy(x => x.value).ToList());
+        SplitCardsToPlayer(GlobalInfo.numberOfCardsLargeTichuPhase);
+        StartCoroutine(StartLargeTichuPhaseCoroutine());
+        yield return new WaitUntil(()=>phaseChangeFlag);
+        phaseChangeFlag = false;
+
+        //SplitCardsToPlayer(GlobalInfo.numberOfCardsSmallTichuPhase);
     }
 
-    void StartPlay()
+    IEnumerator StartLargeTichuPhaseCoroutine()
     {
-        SplitCardsToPlayer(GlobalInfo.numberOfCardsGrandTichuPhase);
-
-        //StartCoroutine(RenderTestCoroutine());
+        foreach (var player in players)
+        {
+            player.ChooseLargeTichu();
+            yield return new WaitUntil(() => player.coroutineFinishFlag);
+        }
+        phaseChangeFlag = true;
     }
 
     IEnumerator RenderTestCoroutine()
@@ -59,7 +76,6 @@ public class GameManager : MonoBehaviour
         int cnt = GlobalInfo.numberOfPlayers;
         while(cnt-->0)
         {
-            foreach (var item in cards) item.cardObject.transform.position = GlobalInfo.hiddenCardPosition;
             RenderCards(players[cnt].cards.OrderBy(x => x.value).ToList());
             yield return new WaitForSeconds(3.0f);
         }
@@ -117,14 +133,13 @@ public class GameManager : MonoBehaviour
     {
         Vector3 initialPosition = GlobalInfo.hiddenCardPosition;
         Quaternion initialRotation = Quaternion.identity;
-        GameObject cardParent = GameObject.Find("Cards");
 
         foreach (var item in cards)
         {
             item.cardObject = Instantiate(Resources.Load(GlobalInfo.prefabPath + item.cardName),
                                           initialPosition,
                                           initialRotation,
-                                          cardParent.transform) as GameObject;
+                                          cardsParent.transform) as GameObject;
 
             //Debug.Log("이름: " + item.cardName + " 타입: " + item.type + " 값: " + item.value);
         }
@@ -141,14 +156,22 @@ public class GameManager : MonoBehaviour
         };
     }
 
+    void InitializeVariables()
+    {
+        cardsParent = GameObject.Find(GlobalInfo.cardsParentObjectName);
+        uiParent    = GameObject.Find(GlobalInfo.uiParentObjectName);
+    }
+
     void ShuffleCards(ref List<Card> cardList)
     {
         RNGCryptoServiceProvider random = new RNGCryptoServiceProvider();
         cardList = cardList.OrderBy(x => Next(random)).ToList();
     }
-
-    void RenderCards(List<Card> cardList)
+    
+    public void RenderCards(List<Card> cardList) //중심좌표, 한 줄당 렌더링할 카드 개수, 카드 리스트
     {
+        foreach (var item in cards) item.cardObject.transform.position = GlobalInfo.hiddenCardPosition;
+
         float initialCardPosition = -1.6f;
         float heightFactor = -0.001f;
         float summonPositionX = initialCardPosition;
