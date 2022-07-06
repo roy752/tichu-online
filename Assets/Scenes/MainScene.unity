@@ -166,6 +166,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c3f1b90d91b907145bd4d912352a1319, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  chooseFlag: 0
+  coroutineFinishFlag: 0
+  largeTichuFlag: 0
 --- !u!1 &83440081
 GameObject:
   m_ObjectHideFlags: 0
@@ -239,6 +242,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c3f1b90d91b907145bd4d912352a1319, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  chooseFlag: 0
+  coroutineFinishFlag: 0
+  largeTichuFlag: 0
 --- !u!1 &138321605
 GameObject:
   m_ObjectHideFlags: 0
@@ -492,6 +498,7 @@ MonoBehaviour:
   - {fileID: 0}
   cardsParent: {fileID: 0}
   uiParent: {fileID: 0}
+  phaseChangeFlag: 0
 --- !u!1 &519420028
 GameObject:
   m_ObjectHideFlags: 0
@@ -1124,6 +1131,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c3f1b90d91b907145bd4d912352a1319, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  chooseFlag: 0
+  coroutineFinishFlag: 0
+  largeTichuFlag: 0
 --- !u!1 &1682067121
 GameObject:
   m_ObjectHideFlags: 0
@@ -1167,6 +1177,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c3f1b90d91b907145bd4d912352a1319, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  chooseFlag: 0
+  coroutineFinishFlag: 0
+  largeTichuFlag: 0
 --- !u!1001 &1984460618
 PrefabInstance:
   m_ObjectHideFlags: 0

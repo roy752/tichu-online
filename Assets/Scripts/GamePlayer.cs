@@ -51,7 +51,7 @@ public class GamePlayer : MonoBehaviour
     {
         coroutineFinishFlag = false;
         chooseFlag = false;
-        GameManager.instance.RenderCards(cards.OrderBy(x => x.value).ToList());
+        GameManager.instance.RenderCards(GlobalInfo.initialPosition,4,cards.OrderBy(x => x.value).ToList());
 
         GameObject yesButtonObject = GameManager.instance.uiParent.transform.Find(GlobalInfo.buttons.ltYesButtonName).gameObject;
         GameObject noButtonObject  = GameManager.instance.uiParent.transform.Find(GlobalInfo.buttons.ltNoButtonName).gameObject;

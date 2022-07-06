@@ -70,7 +70,7 @@ public class GameManager : MonoBehaviour
         }
         phaseChangeFlag = true;
     }
-
+    /*
     IEnumerator RenderTestCoroutine()
     {
         int cnt = GlobalInfo.numberOfPlayers;
@@ -80,7 +80,7 @@ public class GameManager : MonoBehaviour
             yield return new WaitForSeconds(3.0f);
         }
     }
-
+    */
     void SplitCardsToPlayer(int num)
     {
         int idx = 0;
@@ -141,7 +141,8 @@ public class GameManager : MonoBehaviour
                                           initialRotation,
                                           cardsParent.transform) as GameObject;
 
-            //Debug.Log("이름: " + item.cardName + " 타입: " + item.type + " 값: " + item.value);
+            item.cardObject.transform.rotation   = GlobalInfo.initialCardRotation;
+            item.cardObject.transform.localScale = GlobalInfo.initialScale;
         }
     }
 
@@ -168,34 +169,34 @@ public class GameManager : MonoBehaviour
         cardList = cardList.OrderBy(x => Next(random)).ToList();
     }
     
-    public void RenderCards(List<Card> cardList) //중심좌표, 한 줄당 렌더링할 카드 개수, 카드 리스트
+    public void RenderCards(Vector3 centerPosition, int numberOfCardsForLine, List<Card> cardList) 
     {
         foreach (var item in cards) item.cardObject.transform.position = GlobalInfo.hiddenCardPosition;
 
-        float initialCardPosition = -1.6f;
-        float heightFactor = -0.001f;
-        float summonPositionX = initialCardPosition;
-        float summonPositionY = -2.9f; //-2.9가 적당.
-        float summonPositionZ = -1f;
-        int idx = 0;
-        float cardScaleFactor = 0.2f;
-        Vector3 initialCardScale = new Vector3(cardScaleFactor, cardScaleFactor, cardScaleFactor);
-        Quaternion initialCardRotation = Quaternion.Euler(270f, 180f, 180f);
+        float offsetX = GlobalInfo.width / (numberOfCardsForLine - 1);
+        float offsetY = GlobalInfo.offsetY;
+        float offsetZ = GlobalInfo.offsetZ;
 
-        foreach (var item in cardList)
+        Vector3 initialPosition = centerPosition + new Vector3(-offsetX * ((float)(numberOfCardsForLine - 1) / 2f), offsetY*((cardList.Count-1)/numberOfCardsForLine), 0);
+
+        Vector3 pos = Vector3.zero;
+
+        int cnt = 0;
+        foreach(var item in cardList)
         {
-            if ((idx - 1) / 7 != idx / 7)
+            if(cnt==numberOfCardsForLine)
             {
-                summonPositionY -= 0.9f;
-                summonPositionX = initialCardPosition;
+                pos.x = 0;
+                pos.y -= offsetY;
+                cnt = 0;
             }
-            ++idx;
-            item.cardObject.transform.position = new Vector3(summonPositionX, summonPositionY, summonPositionZ);
-            item.cardObject.transform.rotation = initialCardRotation;
-            item.cardObject.transform.localScale = initialCardScale;
-            summonPositionZ += heightFactor;
-            summonPositionX += 0.52f;
+
+            item.cardObject.transform.position = initialPosition + pos;
+            pos.x += offsetX;
+            pos.z -= offsetZ;
+            ++cnt;
         }
+
     }
 
     static int Next(RNGCryptoServiceProvider random)

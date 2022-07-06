@@ -28,6 +28,15 @@ public static class GlobalInfo
     public static string uiParentObjectName = "GameUI";
     public static string cardsParentObjectName = "Cards";
 
+    public static float width = 3.5f;
+    public static float offsetY = 0.9f;
+    public static float offsetZ = 0.001f;
+
+
+    public static Quaternion initialCardRotation = Quaternion.Euler(270f, 180f, 180f);
+    public static Vector3 initialPosition = new Vector3(0f, -3.9f, -1f);
+    public static Vector3 initialScale = new Vector3(0.2f,0.2f, 0.2f);
+
     public struct ButtonNames
     {
         public string ltYesButtonName;
