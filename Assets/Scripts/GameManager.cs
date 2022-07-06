@@ -25,7 +25,7 @@ public class GameManager : MonoBehaviour
     void Start()
     {
         float initialCardPosition = -1.6f;
-        float heightFactor = -0.01f;
+        float heightFactor = -0.001f;
         float summonPositionX = initialCardPosition;
         float summonPositionY = 3.3f; //-2.9°¡ Àû´ç.
         float summonPositionZ = -1f;
