@@ -11,6 +11,9 @@ public class GameManager : MonoBehaviour
     public List<Card> cards = new List<Card>();
 
     [HideInInspector]
+    public List<Card> cardsObjectPool = new List<Card>();
+
+    [HideInInspector]
     public class Card
     {
         public GameObject cardObject;
@@ -21,13 +24,7 @@ public class GameManager : MonoBehaviour
     }
 
     [HideInInspector]
-    public GamePlayer[] players = new GamePlayer[]
-        {
-            new GamePlayer(),
-            new GamePlayer(),
-            new GamePlayer(),
-            new GamePlayer()
-        };
+    public GamePlayer[] players;
 
     private void Awake()
     {
@@ -37,22 +34,51 @@ public class GameManager : MonoBehaviour
     void Start()
     {
         InstantiateCards();
+        InitializePlayers();
 
         ShuffleCards(ref cards);
 
+        StartPlay();
     }
 
     // Update is called once per frame
     void Update()
     {
-
-
         //RenderCards(cards.GetRange(0, GlobalInfo.numberOfCardsPlay).OrderBy(x => x.value).ToList());
+    }
+
+    void StartPlay()
+    {
+        SplitCardsToPlayer(GlobalInfo.numberOfCardsGrandTichuPhase);
+
+        //StartCoroutine(RenderTestCoroutine());
+    }
+
+    IEnumerator RenderTestCoroutine()
+    {
+        int cnt = GlobalInfo.numberOfPlayers;
+        while(cnt-->0)
+        {
+            foreach (var item in cards) item.cardObject.transform.position = GlobalInfo.hiddenCardPosition;
+            RenderCards(players[cnt].cards.OrderBy(x => x.value).ToList());
+            yield return new WaitForSeconds(3.0f);
+        }
+    }
+
+    void SplitCardsToPlayer(int num)
+    {
+        int idx = 0;
+        foreach(var player in players)
+        {
+            player.AddCards(cards.GetRange(idx, num));
+            idx += num;
+        }
     }
 
     void MakeCardNameList()
     {
         int type = 0;
+        int id = 0;
 
         foreach (string cardName in System.Enum.GetNames(typeof(GlobalInfo.GeneralCardName)))
         {
@@ -63,8 +89,10 @@ public class GameManager : MonoBehaviour
                 cardInstance.cardName = cardName + i.ToString("D2");
                 cardInstance.type     = type;
                 cardInstance.value    = i==1? GlobalInfo.aceCardsValue: i;
+                cardInstance.id       = id;
 
                 cards.Add(cardInstance);
+                id++;
             }
             type++;
         }
@@ -76,8 +104,10 @@ public class GameManager : MonoBehaviour
             cardInstance.cardName = cardName;
             cardInstance.type     = type;
             cardInstance.value    = GlobalInfo.specialCardsValue[idx];
+            cardInstance.id       = id;
 
             cards.Add(cardInstance);
+            id++;
             idx++;
             type++;
         }
@@ -87,18 +117,28 @@ public class GameManager : MonoBehaviour
     {
         Vector3 initialPosition = GlobalInfo.hiddenCardPosition;
         Quaternion initialRotation = Quaternion.identity;
+        GameObject cardParent = GameObject.Find("Cards");
 
-        foreach(var item in cards)
+        foreach (var item in cards)
         {
             item.cardObject = Instantiate(Resources.Load(GlobalInfo.prefabPath + item.cardName),
                                           initialPosition,
                                           initialRotation,
-                                          transform) as GameObject;
+                                          cardParent.transform) as GameObject;
 
-            Debug.Log("이름: " + item.cardName + " 타입: " + item.type + " 값: " + item.value);
+            //Debug.Log("이름: " + item.cardName + " 타입: " + item.type + " 값: " + item.value);
         }
+    }
 
-        
+    void InitializePlayers()
+    {
+        players = new GamePlayer[]
+        {
+            GameObject.Find(GlobalInfo.playerObjectNames[0]).GetComponent<GamePlayer>(),
+            GameObject.Find(GlobalInfo.playerObjectNames[1]).GetComponent<GamePlayer>(),
+            GameObject.Find(GlobalInfo.playerObjectNames[2]).GetComponent<GamePlayer>(),
+            GameObject.Find(GlobalInfo.playerObjectNames[3]).GetComponent<GamePlayer>()
+        };
     }
 
     void ShuffleCards(ref List<Card> cardList)
