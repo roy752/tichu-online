@@ -20,11 +20,11 @@ Material:
     serializedVersion: 3
     m_TexEnvs:
     - _MainTex:
-        m_Texture: {fileID: 2800000, guid: 4e971e766a1d91244b70910f646c762a, type: 3}
+        m_Texture: {fileID: 2800000, guid: 35f544c26ad229747a049807727f0ffa, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _MainTex2:
-        m_Texture: {fileID: 2800000, guid: 63f290116fc70cd4f848189b8e656e49, type: 3}
+        m_Texture: {fileID: 2800000, guid: 37b815f0639229a4eb251967b7d6652a, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _NormalMap:
@@ -32,7 +32,7 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     m_Floats:
-    - _Cutoff: 0.5
+    - _Cutoff: 0
     - _Glossiness: 0.2
     - _Metallic: 0
     - _NormalMapIntensity: 1
