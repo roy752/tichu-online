@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using System.Linq;
+using UnityEngine.UI;
 using System.Security.Cryptography;
 
 public class GameManager : MonoBehaviour
@@ -28,9 +29,10 @@ public class GameManager : MonoBehaviour
 
     public static GameManager instance;
 
+    [HideInInspector]
     public GameObject cardsParent;
-    public GameObject uiParent;
 
+    [HideInInspector]
     public bool phaseChangeFlag;
 
     private void Awake()
@@ -70,17 +72,7 @@ public class GameManager : MonoBehaviour
         }
         phaseChangeFlag = true;
     }
-    /*
-    IEnumerator RenderTestCoroutine()
-    {
-        int cnt = GlobalInfo.numberOfPlayers;
-        while(cnt-->0)
-        {
-            RenderCards(players[cnt].cards.OrderBy(x => x.value).ToList());
-            yield return new WaitForSeconds(3.0f);
-        }
-    }
-    */
+    
     void SplitCardsToPlayer(int num)
     {
         int idx = 0;
@@ -160,7 +152,6 @@ public class GameManager : MonoBehaviour
     void InitializeVariables()
     {
         cardsParent = GameObject.Find(GlobalInfo.cardsParentObjectName);
-        uiParent    = GameObject.Find(GlobalInfo.uiParentObjectName);
     }
 
     void ShuffleCards(ref List<Card> cardList)
@@ -198,11 +189,12 @@ public class GameManager : MonoBehaviour
         }
 
     }
-
     static int Next(RNGCryptoServiceProvider random)
     {
         byte[] randomInt = new byte[4];
         random.GetBytes(randomInt);
         return Convert.ToInt32(randomInt[0]);
     }
+
+    
 }

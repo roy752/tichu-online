@@ -27,6 +27,7 @@ public static class GlobalInfo
 
     public static string uiParentObjectName = "GameUI";
     public static string cardsParentObjectName = "Cards";
+    public static string infoBarObjectName = "InfoBar";
 
     public static float width = 3.5f;
     public static float offsetY = 0.9f;
@@ -48,6 +49,8 @@ public static class GlobalInfo
                                        ltYesButtonName = "LargeTichuDeclareButton",
                                        ltNoButtonName  = "LargeTichuSkipButton"
                                      };
+
+    public static string largeTichuInfo = "라지 티츄 여부를 결정하세요.";
 
     public enum GeneralCardName
     {
