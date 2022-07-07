@@ -21,7 +21,7 @@ public static class GlobalInfo
 
     public static int numberOfPlayers = 4;
 
-    public static float largeTichuDuration = 5f;
+    public static float largeTichuDuration = 20.5f;
 
     public static float tick = 0.1f;
 

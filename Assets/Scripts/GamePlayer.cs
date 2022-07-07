@@ -19,11 +19,12 @@ public class GamePlayer : MonoBehaviour
         cards.AddRange(cardList);
     }
 
-    public IEnumerator DurationCoroutine()
+    public IEnumerator TimerCoroutine(float inputDuration)
     {
-        duration = GlobalInfo.largeTichuDuration;
+        duration = inputDuration;
         while(duration>=0)
         {
+            UIManager.instance.ShowTimer(((int)(duration)).ToString());
             duration -= GlobalInfo.tick;
             yield return new WaitForSeconds(GlobalInfo.tick);
         }
@@ -43,26 +44,31 @@ public class GamePlayer : MonoBehaviour
 
     public void ChooseLargeTichu()
     {
-        StartCoroutine(DurationCoroutine());
         StartCoroutine(ChooseLargeTichuCoroutine());
     }
 
-
     public IEnumerator ChooseLargeTichuCoroutine()
     {
+        IEnumerator t = TimerCoroutine(GlobalInfo.largeTichuDuration);
 
         coroutineFinishFlag = false;
+        
         chooseFlag = false;
-
         GameManager.instance.RenderCards(GlobalInfo.initialPosition, 4, cards);
+        
+
+        UIManager.instance.ActivateTimer();
+        StartCoroutine(t);
+
 
         UIManager.instance.ActivateLargeTichu(DeclareLargeTichu, SkipLargeTichu);
-
         yield return new WaitUntil(()=>chooseFlag == true || duration<0);
-
-        StopCoroutine(DurationCoroutine());
-
         UIManager.instance.DeactivateLargeTichu();
+        
+        
+        StopCoroutine(t);
+        UIManager.instance.DeactivateTimer();
+
 
         coroutineFinishFlag = true;
     }
