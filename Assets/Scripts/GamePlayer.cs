@@ -7,11 +7,11 @@ using System.Linq;
 public class GamePlayer : MonoBehaviour
 {
     public List<GameManager.Card> cards = new List<GameManager.Card>();
+    public string playerName;
 
     public bool chooseFlag = false;
     public bool coroutineFinishFlag = false;
     public bool largeTichuFlag = false;
-    
     float       duration;
 
     public void AddCards(List<GameManager.Card> cardList)

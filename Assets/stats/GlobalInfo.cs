@@ -51,6 +51,7 @@ public static class GlobalInfo
                                      };
 
     public static string largeTichuInfo = "라지 티츄 여부를 결정하세요.";
+    public static string exchangeCardInfo = "카드를 한장씩 나눠주세요.";
 
     public enum GeneralCardName
     {
