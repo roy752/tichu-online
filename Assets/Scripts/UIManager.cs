@@ -40,6 +40,8 @@ public class UIManager : MonoBehaviour
 
     private Timer timer = new Timer();
 
+    private GameObject exchangeCardObject;
+
     private void Start()
     {
         InitializeVariables();
@@ -64,6 +66,9 @@ public class UIManager : MonoBehaviour
         //타이머 오브젝트
         timer.timerObject = uiParent.transform.Find("Timer").gameObject;
         timer.timerText = timer.timerObject.GetComponent<TMP_Text>();
+
+        //카드 교환 팝업 오브젝트
+        exchangeCardObject = uiParent.transform.Find(GlobalInfo.exchangeCardObjectName).gameObject;
     }
 
     public void ShowInfo(string text)
@@ -114,5 +119,19 @@ public class UIManager : MonoBehaviour
     {
         timer.timerText.text = null;
         timer.timerObject.SetActive(false);
+    }
+
+    public void ActivateExchangeCardsPopup()
+    {
+        ShowInfo(GlobalInfo.exchangeCardInfo);
+        exchangeCardObject.SetActive(true);
+
+        //버튼에 보내기 call 할당
+    }
+    public void DeactivateExchangeCardsPopup()
+    {
+        //버튼에 call 삭제
+        exchangeCardObject.SetActive(false);
+        HideInfo();
     }
 }

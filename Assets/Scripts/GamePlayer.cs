@@ -7,7 +7,9 @@ using System.Linq;
 public class GamePlayer : MonoBehaviour
 {
     public List<GameManager.Card> cards = new List<GameManager.Card>();
+    public List<GameManager.Card> cardBuffer = new List<GameManager.Card>();
     public string playerName;
+    public int playerNumber;
 
     public bool chooseFlag = false;
     public bool coroutineFinishFlag = false;
@@ -17,6 +19,11 @@ public class GamePlayer : MonoBehaviour
     public void AddCards(List<GameManager.Card> cardList)
     {
         cards.AddRange(cardList);
+    }
+
+    public void RemoveCard(GameManager.Card card)
+    {
+        cards.Remove(card);
     }
 
     public IEnumerator TimerCoroutine(float inputDuration)
@@ -69,6 +76,30 @@ public class GamePlayer : MonoBehaviour
         StopCoroutine(t);
         UIManager.instance.DeactivateTimer();
 
+
+        coroutineFinishFlag = true;
+    }
+
+    public void ExchangeCards()
+    {
+        StartCoroutine(ExchangeCardsCoroutine());
+    }
+    public IEnumerator ExchangeCardsCoroutine()
+    {
+        IEnumerator t = TimerCoroutine(GlobalInfo.exchangeCardsDuration);
+
+        coroutineFinishFlag = false;
+        GameManager.instance.RenderCards(GlobalInfo.initialPosition, 7, cards);
+
+        UIManager.instance.ActivateTimer();
+        StartCoroutine(t);
+
+        UIManager.instance.ActivateExchangeCardsPopup();
+        yield return new WaitUntil(() => chooseFlag == true || duration < 0);
+        UIManager.instance.DeactivateExchangeCardsPopup();
+
+        StopCoroutine(t);
+        UIManager.instance.DeactivateTimer();
 
         coroutineFinishFlag = true;
     }

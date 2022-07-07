@@ -15,19 +15,22 @@ public static class GlobalInfo
 
     public static string prefabPath = "Prefab/Cards/";
 
-    public static string[] playerObjectNames = new string[] { "Player1", "Player2", "Player3", "Player4" };
+    public static string[] playerObjectNames = new string[] { "Player0", "Player1", "Player2", "Player3" };
 
     public static Vector3 hiddenCardPosition = new Vector3(-100f, -100f, -100f);
 
     public static int numberOfPlayers = 4;
 
     public static float largeTichuDuration = 20.5f;
+    public static float exchangeCardsDuration = 30.5f;
 
     public static float tick = 0.1f;
 
     public static string uiParentObjectName = "GameUI";
     public static string cardsParentObjectName = "Cards";
     public static string infoBarObjectName = "InfoBar";
+    public static string exchangeCardObjectName = "CardExchangePopup";
+    public static string cardEdgeObjectName = "EdgePanel";
 
     public static float width = 3.5f;
     public static float offsetY = 0.9f;

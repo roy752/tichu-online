@@ -152,7 +152,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 371965478}
-  m_RootOrder: 1
+  m_RootOrder: 2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &42275121
 MonoBehaviour:
@@ -167,6 +167,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   playerName: Player2
+  playerNumber: 0
   chooseFlag: 0
   coroutineFinishFlag: 0
   largeTichuFlag: 0
@@ -363,7 +364,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 371965478}
-  m_RootOrder: 2
+  m_RootOrder: 3
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &132319123
 MonoBehaviour:
@@ -378,6 +379,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   playerName: Player3
+  playerNumber: 0
   chooseFlag: 0
   coroutineFinishFlag: 0
   largeTichuFlag: 0
@@ -731,13 +733,13 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 371965477}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalPosition: {x: 0, y: -3, z: -1}
+  m_LocalScale: {x: 5, y: 4, z: 2}
   m_Children:
+  - {fileID: 1214989475}
   - {fileID: 1682067122}
   - {fileID: 42275120}
   - {fileID: 132319122}
-  - {fileID: 1214989475}
   m_Father: {fileID: 415409403}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -832,7 +834,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 415409402}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0.033318885, y: 0.022145486, z: -4.1144657}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 371965478}
@@ -857,6 +859,7 @@ MonoBehaviour:
   - {fileID: 0}
   - {fileID: 0}
   - {fileID: 0}
+  currentPlayer: {fileID: 0}
   cardsParent: {fileID: 0}
   phaseChangeFlag: 0
 --- !u!1 &519420028
@@ -1724,7 +1727,7 @@ GameObject:
   - component: {fileID: 1214989475}
   - component: {fileID: 1214989476}
   m_Layer: 0
-  m_Name: Player4
+  m_Name: Player0
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1742,7 +1745,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 371965478}
-  m_RootOrder: 3
+  m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &1214989476
 MonoBehaviour:
@@ -1757,6 +1760,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   playerName: Player4
+  playerNumber: 0
   chooseFlag: 0
   coroutineFinishFlag: 0
   largeTichuFlag: 0
@@ -1999,7 +2003,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 371965478}
-  m_RootOrder: 0
+  m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &1682067123
 MonoBehaviour:
@@ -2014,6 +2018,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   playerName: Player1
+  playerNumber: 0
   chooseFlag: 0
   coroutineFinishFlag: 0
   largeTichuFlag: 0

@@ -5,6 +5,7 @@ using UnityEngine;
 using System.Linq;
 using UnityEngine.UI;
 using System.Security.Cryptography;
+using UnityEngine.EventSystems;
 
 public class GameManager : MonoBehaviour
 {
@@ -27,6 +28,11 @@ public class GameManager : MonoBehaviour
     [HideInInspector]
     public GamePlayer[] players;
 
+    [HideInInspector]
+    public GamePlayer currentPlayer;
+    [HideInInspector]
+    public Card currentCard;
+
     public static GameManager instance;
 
     [HideInInspector]
@@ -35,22 +41,64 @@ public class GameManager : MonoBehaviour
     [HideInInspector]
     public bool phaseChangeFlag;
 
+    [HideInInspector]
+    public bool isMultipleSelectionAllowed;
+
+    private int splitCardIdx = 0;
+
     private void Awake()
     {
         MakeCardNameList();
+        InitializeVariables();
+        InstantiateCards();
+        InitializePlayers();
+        ShuffleCards(ref cards);
+
+        instance = this;
     }
 
     void Start()
     {
-        InitializeVariables();
-        InstantiateCards();
-        InitializePlayers();
-
-        ShuffleCards(ref cards);
-
-        instance = this;
-
         StartCoroutine(StartPlay());
+    }
+
+    private void Update()
+    {
+        if (Input.touchCount > 0 || Input.GetMouseButtonDown(0))
+        {
+            Vector3 touchPos = Input.GetTouch(0).position;//Camera.main.ScreenToWorldPoint(Input.mousePosition); //Input.GetTouch(0);
+            Ray ray = new Ray(new Vector3(touchPos.x, touchPos.y, -10f), Vector3.forward);
+            RaycastHit hitInformation;
+            Physics.Raycast(ray,out hitInformation);
+            if (hitInformation.collider != null)
+            {
+                GameObject touchedObject = hitInformation.transform.gameObject;
+
+                CardSelectHandler selectHandler = touchedObject.GetComponent<CardSelectHandler>();
+                if (selectHandler != null)
+                {
+                    if (isMultipleSelectionAllowed)
+                    {
+
+                    }
+                    else
+                    {
+                        selectHandler.ToggleSelection();
+                        if (currentCard != null)
+                        {
+                            if (currentCard.cardObject == touchedObject) currentCard = null;
+                            else
+                            {
+                                currentCard.cardObject.GetComponent<CardSelectHandler>().ToggleSelection();
+                                SetCurrentCard(touchedObject);
+                            }
+                        }
+                        else SetCurrentCard(touchedObject);
+                    }
+                }
+            }
+            else Debug.Log("what");
+        }
     }
 
     IEnumerator StartPlay()
@@ -60,7 +108,10 @@ public class GameManager : MonoBehaviour
         yield return new WaitUntil(()=>phaseChangeFlag);
         phaseChangeFlag = false;
 
-        //SplitCardsToPlayer(GlobalInfo.numberOfCardsSmallTichuPhase);
+        SplitCardsToPlayer(GlobalInfo.numberOfCardsSmallTichuPhase);
+        //StartCoroutine(StartExchangeCardPhaseCoroutine());
+        //yield return new WaitUntil(() => phaseChangeFlag);
+        //phaseChangeFlag = false;
     }
 
     IEnumerator StartLargeTichuPhaseCoroutine()
@@ -73,13 +124,22 @@ public class GameManager : MonoBehaviour
         phaseChangeFlag = true;
     }
     
-    void SplitCardsToPlayer(int num)
+    IEnumerator StartExchangeCardPhaseCoroutine()
     {
-        int idx = 0;
         foreach(var player in players)
         {
-            player.AddCards(cards.GetRange(idx, num));
-            idx += num;
+            currentPlayer = player;
+            player.ExchangeCards();
+            yield return new WaitUntil(() => player.coroutineFinishFlag);
+        }
+    }
+
+    void SplitCardsToPlayer(int num)
+    {
+        foreach(var player in players)
+        {
+            player.AddCards(cards.GetRange(splitCardIdx, num));
+            splitCardIdx += num;
         }
     }
 
@@ -88,7 +148,7 @@ public class GameManager : MonoBehaviour
         int type = 0;
         int id = 0;
 
-        foreach (string cardName in System.Enum.GetNames(typeof(GlobalInfo.GeneralCardName)))
+        foreach (string cardName in Enum.GetNames(typeof(GlobalInfo.GeneralCardName)))
         {
             for (int i = 1; i <= GlobalInfo.numberOfCardsGeneral; ++i)
             {
@@ -105,7 +165,7 @@ public class GameManager : MonoBehaviour
             type++;
         }
         int idx = 0;
-        foreach (string cardName in System.Enum.GetNames(typeof(GlobalInfo.SpecialCardName)))
+        foreach (string cardName in Enum.GetNames(typeof(GlobalInfo.SpecialCardName)))
         {
             Card cardInstance = new Card();
 
@@ -132,9 +192,12 @@ public class GameManager : MonoBehaviour
                                           initialPosition,
                                           initialRotation,
                                           cardsParent.transform) as GameObject;
-
+            item.cardObject.name = item.cardName;
             item.cardObject.transform.rotation   = GlobalInfo.initialCardRotation;
             item.cardObject.transform.localScale = GlobalInfo.initialScale;
+
+            GameObject edgeObject = Instantiate(Resources.Load("Prefab/etc/EdgePanel"),item.cardObject.transform) as GameObject;
+            edgeObject.name = GlobalInfo.cardEdgeObjectName;
         }
     }
 
@@ -147,6 +210,13 @@ public class GameManager : MonoBehaviour
             GameObject.Find(GlobalInfo.playerObjectNames[2]).GetComponent<GamePlayer>(),
             GameObject.Find(GlobalInfo.playerObjectNames[3]).GetComponent<GamePlayer>()
         };
+        int num = 0;
+        foreach (var player in players)
+        {
+            
+            player.playerNumber = num;
+            player.playerName = "Player" + num.ToString();
+        }
     }
 
     void InitializeVariables()
@@ -196,5 +266,15 @@ public class GameManager : MonoBehaviour
         return Convert.ToInt32(randomInt[0]);
     }
 
-    
+    public void SetCurrentCard(GameObject inputObject)
+    {
+        foreach(var item in cards)
+        {
+            if(item.cardObject==inputObject)
+            {
+                currentCard = item;
+                break;
+            }
+        }
+    }
 }
