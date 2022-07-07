@@ -32,6 +32,14 @@ public class UIManager : MonoBehaviour
 
     private InfoBar infoBar = new InfoBar();
 
+    private struct Timer
+    {
+        public GameObject timerObject;
+        public TMP_Text timerText;
+    }
+
+    private Timer timer = new Timer();
+
     private void Start()
     {
         InitializeVariables();
@@ -53,6 +61,9 @@ public class UIManager : MonoBehaviour
         infoBar.infoBarObject = uiParent.transform.Find(GlobalInfo.infoBarObjectName).gameObject;
         infoBar.infoBarText = infoBar.infoBarObject.transform.Find("Text").GetComponent<TMP_Text>();
 
+        //타이머 오브젝트
+        timer.timerObject = uiParent.transform.Find("Timer").gameObject;
+        timer.timerText = timer.timerObject.GetComponent<TMP_Text>();
     }
 
     public void ShowInfo(string text)
@@ -87,5 +98,21 @@ public class UIManager : MonoBehaviour
         largeTichu.skipObject.SetActive(false);
 
         HideInfo();
+    }
+
+    public void ActivateTimer()
+    {
+        timer.timerObject.SetActive(true);
+    }
+
+    public void ShowTimer(string text)
+    {
+        timer.timerText.text = text;
+    }
+
+    public void DeactivateTimer()
+    {
+        timer.timerText.text = null;
+        timer.timerObject.SetActive(false);
     }
 }
