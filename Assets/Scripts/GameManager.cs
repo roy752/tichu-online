@@ -26,6 +26,13 @@ public class GameManager : MonoBehaviour
     [HideInInspector]
     public GamePlayer[] players;
 
+    public static GameManager instance;
+
+    public GameObject cardsParent;
+    public GameObject uiParent;
+
+    public bool phaseChangeFlag;
+
     private void Awake()
     {
         MakeCardNameList();
@@ -33,38 +40,47 @@ public class GameManager : MonoBehaviour
 
     void Start()
     {
+        InitializeVariables();
         InstantiateCards();
         InitializePlayers();
 
         ShuffleCards(ref cards);
 
-        StartPlay();
+        instance = this;
+
+        StartCoroutine(StartPlay());
     }
 
-    // Update is called once per frame
-    void Update()
+    IEnumerator StartPlay()
     {
-        //RenderCards(cards.GetRange(0, GlobalInfo.numberOfCardsPlay).OrderBy(x => x.value).ToList());
+        SplitCardsToPlayer(GlobalInfo.numberOfCardsLargeTichuPhase);
+        StartCoroutine(StartLargeTichuPhaseCoroutine());
+        yield return new WaitUntil(()=>phaseChangeFlag);
+        phaseChangeFlag = false;
+
+        //SplitCardsToPlayer(GlobalInfo.numberOfCardsSmallTichuPhase);
     }
 
-    void StartPlay()
+    IEnumerator StartLargeTichuPhaseCoroutine()
     {
-        SplitCardsToPlayer(GlobalInfo.numberOfCardsGrandTichuPhase);
-
-        //StartCoroutine(RenderTestCoroutine());
+        foreach (var player in players)
+        {
+            player.ChooseLargeTichu();
+            yield return new WaitUntil(() => player.coroutineFinishFlag);
+        }
+        phaseChangeFlag = true;
     }
-
+    /*
     IEnumerator RenderTestCoroutine()
     {
         int cnt = GlobalInfo.numberOfPlayers;
         while(cnt-->0)
         {
-            foreach (var item in cards) item.cardObject.transform.position = GlobalInfo.hiddenCardPosition;
             RenderCards(players[cnt].cards.OrderBy(x => x.value).ToList());
             yield return new WaitForSeconds(3.0f);
         }
     }
-
+    */
     void SplitCardsToPlayer(int num)
     {
         int idx = 0;
@@ -117,16 +133,16 @@ public class GameManager : MonoBehaviour
     {
         Vector3 initialPosition = GlobalInfo.hiddenCardPosition;
         Quaternion initialRotation = Quaternion.identity;
-        GameObject cardParent = GameObject.Find("Cards");
 
         foreach (var item in cards)
         {
             item.cardObject = Instantiate(Resources.Load(GlobalInfo.prefabPath + item.cardName),
                                           initialPosition,
                                           initialRotation,
-                                          cardParent.transform) as GameObject;
+                                          cardsParent.transform) as GameObject;
 
-            //Debug.Log("이름: " + item.cardName + " 타입: " + item.type + " 값: " + item.value);
+            item.cardObject.transform.rotation   = GlobalInfo.initialCardRotation;
+            item.cardObject.transform.localScale = GlobalInfo.initialScale;
         }
     }
 
@@ -141,38 +157,46 @@ public class GameManager : MonoBehaviour
         };
     }
 
+    void InitializeVariables()
+    {
+        cardsParent = GameObject.Find(GlobalInfo.cardsParentObjectName);
+        uiParent    = GameObject.Find(GlobalInfo.uiParentObjectName);
+    }
+
     void ShuffleCards(ref List<Card> cardList)
     {
         RNGCryptoServiceProvider random = new RNGCryptoServiceProvider();
         cardList = cardList.OrderBy(x => Next(random)).ToList();
     }
-
-    void RenderCards(List<Card> cardList)
+    
+    public void RenderCards(Vector3 centerPosition, int numberOfCardsForLine, List<Card> cardList) 
     {
-        float initialCardPosition = -1.6f;
-        float heightFactor = -0.001f;
-        float summonPositionX = initialCardPosition;
-        float summonPositionY = -2.9f; //-2.9가 적당.
-        float summonPositionZ = -1f;
-        int idx = 0;
-        float cardScaleFactor = 0.2f;
-        Vector3 initialCardScale = new Vector3(cardScaleFactor, cardScaleFactor, cardScaleFactor);
-        Quaternion initialCardRotation = Quaternion.Euler(270f, 180f, 180f);
+        foreach (var item in cards) item.cardObject.transform.position = GlobalInfo.hiddenCardPosition;
 
-        foreach (var item in cardList)
+        float offsetX = GlobalInfo.width / (numberOfCardsForLine - 1);
+        float offsetY = GlobalInfo.offsetY;
+        float offsetZ = GlobalInfo.offsetZ;
+
+        Vector3 initialPosition = centerPosition + new Vector3(-offsetX * ((float)(numberOfCardsForLine - 1) / 2f), offsetY*((cardList.Count-1)/numberOfCardsForLine), 0);
+
+        Vector3 pos = Vector3.zero;
+
+        int cnt = 0;
+        foreach(var item in cardList)
         {
-            if ((idx - 1) / 7 != idx / 7)
+            if(cnt==numberOfCardsForLine)
             {
-                summonPositionY -= 0.9f;
-                summonPositionX = initialCardPosition;
+                pos.x = 0;
+                pos.y -= offsetY;
+                cnt = 0;
             }
-            ++idx;
-            item.cardObject.transform.position = new Vector3(summonPositionX, summonPositionY, summonPositionZ);
-            item.cardObject.transform.rotation = initialCardRotation;
-            item.cardObject.transform.localScale = initialCardScale;
-            summonPositionZ += heightFactor;
-            summonPositionX += 0.52f;
+
+            item.cardObject.transform.position = initialPosition + pos;
+            pos.x += offsetX;
+            pos.z -= offsetZ;
+            ++cnt;
         }
+
     }
 
     static int Next(RNGCryptoServiceProvider random)

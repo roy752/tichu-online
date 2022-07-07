@@ -6,7 +6,7 @@ public static class GlobalInfo
 {
     public static int numberOfCardsGeneral = 13;
     public static int numberOfCardsSpecial = 4;
-    public static int numberOfCardsGrandTichuPhase = 8;
+    public static int numberOfCardsLargeTichuPhase = 8;
     public static int numberOfCardsSmallTichuPhase = 6;
     public static int numberOfCardsPlay = 14;
 
@@ -20,6 +20,34 @@ public static class GlobalInfo
     public static Vector3 hiddenCardPosition = new Vector3(-100f, -100f, -100f);
 
     public static int numberOfPlayers = 4;
+
+    public static float largeTichuDuration = 5f;
+
+    public static float tick = 0.1f;
+
+    public static string uiParentObjectName = "GameUI";
+    public static string cardsParentObjectName = "Cards";
+
+    public static float width = 3.5f;
+    public static float offsetY = 0.9f;
+    public static float offsetZ = 0.001f;
+
+
+    public static Quaternion initialCardRotation = Quaternion.Euler(270f, 180f, 180f);
+    public static Vector3 initialPosition = new Vector3(0f, -3.9f, -1f);
+    public static Vector3 initialScale = new Vector3(0.2f,0.2f, 0.2f);
+
+    public struct ButtonNames
+    {
+        public string ltYesButtonName;
+        public string ltNoButtonName;
+    }
+
+    public static ButtonNames buttons = new ButtonNames
+                                     {                                     
+                                       ltYesButtonName = "LargeTichuDeclareButton",
+                                       ltNoButtonName  = "LargeTichuSkipButton"
+                                     };
 
     public enum GeneralCardName
     {
