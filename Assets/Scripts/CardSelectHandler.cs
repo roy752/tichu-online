@@ -20,7 +20,7 @@ public class CardSelectHandler : SelectionHandler
                 SlotSelectHandler tmpSlot = GameManager.instance.currentSlot;
                 GameManager.instance.currentSlot.ToggleSelection();
                 tmpSlot.card = GameManager.instance.currentCard;
-                gameObject.transform.position = tmpSlot.gameObject.transform.position;
+                gameObject.transform.position = tmpSlot.gameObject.transform.position + GlobalInfo.frontEpsilon;
                 GameManager.instance.SetCurrentCard(gameObject);
                 GameManager.instance.currentPlayer.RemoveCard(GameManager.instance.currentCard);
                 GameManager.instance.currentCard = null;

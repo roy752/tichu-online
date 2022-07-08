@@ -18,7 +18,7 @@ public class SlotSelectHandler : SelectionHandler
         if(GameManager.instance.currentCard != null) //카드가 선택되어 있다면 currentSlot 은 언제나 null 임이 보장.
         {
             GameManager.instance.currentPlayer.RemoveCard(GameManager.instance.currentCard);
-            GameManager.instance.currentCard.cardObject.transform.position = gameObject.transform.position;
+            GameManager.instance.currentCard.cardObject.transform.position = gameObject.transform.position + GlobalInfo.frontEpsilon;
 
             if (card != null)
             {

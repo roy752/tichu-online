@@ -30,19 +30,21 @@ public static class GlobalInfo
     public static string cardsParentObjectName = "Cards";
     public static string infoBarObjectName = "InfoBar";
     public static string exchangeCardObjectName = "CardExchangePopup";
+    public static string exchangeCardButtonObjectName = "CardExchangeButton";
     public static string exchangeCardSlotObjectName = "CardExchangeSlot";
     public static string exchangeplayerObjectName = "ExchangePlayerName";
     public static string edgeObjectName = "EdgePanel";
 
     public static float width = 3.5f;
-    public static float offsetY = 0.9f;
-    public static float offsetZ = 0.001f;
+    public static float offsetY = 0.75f;
+    public static float offsetZ = 0.002f;
 
     public static float cameraPosition = -10f;
 
     public static Quaternion initialCardRotation = Quaternion.Euler(270f, 180f, 180f);
     public static Vector3 initialPosition = new Vector3(0f, -3.9f, -1f);
     public static Vector3 initialScale = new Vector3(0.2f,0.2f, 0.2f);
+    public static Vector3 frontEpsilon = new Vector3(0, 0, -0.001f);
 
     public struct ButtonNames
     {

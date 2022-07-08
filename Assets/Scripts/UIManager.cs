@@ -44,11 +44,13 @@ public class UIManager : MonoBehaviour
     {
         public TMP_Text playerText;
         public SlotSelectHandler slot;
+        public GamePlayer player;
     }
 
     private struct ExchangeCardPopup
     {
         public GameObject exchangeCardPopupObject;
+        public Button exchangeCardButton;
         public ExchangeCardSlot[] slots; 
     }
 
@@ -81,6 +83,7 @@ public class UIManager : MonoBehaviour
 
         //카드 교환 팝업 오브젝트
         exchangeCardObject.exchangeCardPopupObject = uiParent.transform.Find(GlobalInfo.exchangeCardObjectName).gameObject;
+        exchangeCardObject.exchangeCardButton = exchangeCardObject.exchangeCardPopupObject.transform.Find(GlobalInfo.exchangeCardButtonObjectName).GetComponent<Button>();
         exchangeCardObject.slots = new ExchangeCardSlot[3];
         for (int i = 0; i < 3; ++i)
         {
@@ -140,17 +143,44 @@ public class UIManager : MonoBehaviour
         timer.timerObject.SetActive(false);
     }
 
-    public void ActivateExchangeCardsPopup()
+    public void ActivateExchangeCardsPopup(UnityAction exchangeCall)
     {
         ShowInfo(GlobalInfo.exchangeCardInfo);
         exchangeCardObject.exchangeCardPopupObject.SetActive(true);
-
+        WritePlayerName();
+        exchangeCardObject.exchangeCardButton.onClick.AddListener(exchangeCall);
         //버튼에 보내기 call 할당
     }
+
+
     public void DeactivateExchangeCardsPopup()
     {
         //버튼에 call 삭제
+        exchangeCardObject.exchangeCardButton.onClick.RemoveAllListeners();
+        FlushCard();
         exchangeCardObject.exchangeCardPopupObject.SetActive(false);
         HideInfo();
     }
+
+    public void WritePlayerName()
+    {
+        int cnt = 0;
+        for(int i = GameManager.instance.currentPlayer.playerNumber + 1; cnt<3; ++i)
+        {
+            exchangeCardObject.slots[cnt].player = GameManager.instance.players[i % 4];
+            exchangeCardObject.slots[cnt].playerText.text = exchangeCardObject.slots[cnt].player.playerName;
+            ++cnt;
+        }
+    }
+
+    public void FlushCard()
+    {
+        for(int i=0; i<3; ++i)
+        {
+            exchangeCardObject.slots[i].player.AddCardToBuffer(exchangeCardObject.slots[i].slot.card);
+            exchangeCardObject.slots[i].slot.card.cardObject.transform.position = GlobalInfo.hiddenCardPosition;
+        }
+    }
+
+
 }

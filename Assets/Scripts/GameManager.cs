@@ -80,9 +80,9 @@ public class GameManager : MonoBehaviour
         phaseChangeFlag = false;
 
         SplitCardsToPlayer(GlobalInfo.numberOfCardsSmallTichuPhase);
-        //StartCoroutine(StartExchangeCardPhaseCoroutine());
-        //yield return new WaitUntil(() => phaseChangeFlag);
-        //phaseChangeFlag = false;
+        StartCoroutine(StartExchangeCardPhaseCoroutine());
+        yield return new WaitUntil(() => phaseChangeFlag);
+        phaseChangeFlag = false;
     }
 
     IEnumerator StartLargeTichuPhaseCoroutine()
@@ -167,9 +167,6 @@ public class GameManager : MonoBehaviour
             item.cardObject.name = item.cardName;
             item.cardObject.transform.rotation   = GlobalInfo.initialCardRotation;
             item.cardObject.transform.localScale = GlobalInfo.initialScale;
-
-            GameObject edgeObject = Instantiate(Resources.Load("Prefab/etc/EdgePanel"),item.cardObject.transform) as GameObject;
-            edgeObject.name = GlobalInfo.edgeObjectName;
         }
     }
 
@@ -188,6 +185,7 @@ public class GameManager : MonoBehaviour
             
             player.playerNumber = num;
             player.playerName = "Player" + num.ToString();
+            num++;
         }
     }
 
@@ -251,14 +249,18 @@ public class GameManager : MonoBehaviour
     }
     private void HandleSelection()
     {
-        //if(Input.GetMouseButtonDown(0))
-        //{
-            //Camera.main.ScreenToWorldPoint(Input.mousePosition);
-
-        if (Input.touchCount > 0 && isSelectionEnabled)
+        if (Input.GetMouseButtonDown(0) && isSelectionEnabled)
         {
-            GameObject hitObject = GetHitObject(Input.GetTouch(0).position);
-            if (hitObject != null) hitObject.GetComponent<SelectionHandler>().ToggleSelection();
+            GameObject hitObject = GetHitObject(Camera.main.ScreenToWorldPoint(Input.mousePosition));
+
+            //if (Input.touchCount > 0 && isSelectionEnabled)
+            //{
+            //    GameObject hitObject = GetHitObject(Input.GetTouch(0).position);
+            if (hitObject != null)
+            {
+                Debug.Log(hitObject.name);
+                hitObject.GetComponent<SelectionHandler>().ToggleSelection();
+            }
         }
     }
 

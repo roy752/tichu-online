@@ -21,6 +21,11 @@ public class GamePlayer : MonoBehaviour
         cards.AddRange(cardList);
     }
 
+    public void AddCardToBuffer(GameManager.Card card)
+    {
+        cardBuffer.Add(card);
+    }
+
     public void RemoveCard(GameManager.Card card)
     {
         cards.Remove(card);
@@ -47,6 +52,11 @@ public class GamePlayer : MonoBehaviour
     {
         chooseFlag = true;
         largeTichuFlag = false;
+    }
+
+    public void ChooseExchangeCard()
+    {
+        chooseFlag = true;
     }
 
     public void ChooseLargeTichu()
@@ -89,12 +99,14 @@ public class GamePlayer : MonoBehaviour
         IEnumerator t = TimerCoroutine(GlobalInfo.exchangeCardsDuration);
 
         coroutineFinishFlag = false;
-        GameManager.instance.RenderCards(GlobalInfo.initialPosition, 7, cards);
+
+        chooseFlag = false;
+        GameManager.instance.RenderCards(GlobalInfo.initialPosition, 5, cards);
 
         UIManager.instance.ActivateTimer();
         StartCoroutine(t);
 
-        UIManager.instance.ActivateExchangeCardsPopup();
+        UIManager.instance.ActivateExchangeCardsPopup(ChooseExchangeCard);
         yield return new WaitUntil(() => chooseFlag == true || duration < 0);
         UIManager.instance.DeactivateExchangeCardsPopup();
 
