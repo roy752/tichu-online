@@ -56,6 +56,8 @@ public class UIManager : MonoBehaviour
 
     private ExchangeCardPopup exchangeCardObject = new ExchangeCardPopup();
 
+    private bool isMassaging = false;
+
     private void Start()
     {
         InitializeVariables();
@@ -202,11 +204,12 @@ public class UIManager : MonoBehaviour
 
     public void Massage(string msg)
     {
-        StartCoroutine(MassageCoroutine(msg));
+        if(isMassaging==false) StartCoroutine(MassageCoroutine(msg));
     }
 
     private IEnumerator MassageCoroutine(string msg)
     {
+        isMassaging = true;
         string originalMsg = infoBar.infoBarText.text;
         Color originalColor = infoBar.infoBarText.color;
         ShowInfo(msg);
@@ -214,6 +217,7 @@ public class UIManager : MonoBehaviour
         yield return new WaitForSeconds(GlobalInfo.massageDuration);
         ShowInfo(originalMsg);
         infoBar.infoBarText.color = originalColor;
+        isMassaging = false;
     }
 
     public bool IsAllSlotSelected()

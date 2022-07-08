@@ -250,18 +250,17 @@ public class GameManager : MonoBehaviour
     }
     private void HandleSelection()
     {
+        
+        //if (Input.touchCount == 1 && Input.GetTouch(0).phase == TouchPhase.Began && isSelectionEnabled)
+        //{
+           //GameObject hitObject = GetHitObject(Camera.main.ScreenToWorldPoint(Input.GetTouch(0).position));
+       
         if (Input.GetMouseButtonDown(0) && isSelectionEnabled)
         {
-            GameObject hitObject = GetHitObject(Camera.main.ScreenToWorldPoint(Input.mousePosition));
+            GameObject hitObject = GetHitObject( Camera.main.ScreenToWorldPoint(Input.mousePosition));
 
-            //if (Input.touchCount > 0 && isSelectionEnabled)
-            //{
-            //    GameObject hitObject = GetHitObject(Input.GetTouch(0).position);
-            if (hitObject != null)
-            {
-                //Debug.Log(hitObject.name);
-                hitObject.GetComponent<SelectionHandler>().ToggleSelection();
-            }
+
+            if (hitObject != null) hitObject.GetComponent<SelectionHandler>().ToggleSelection();
         }
     }
 
