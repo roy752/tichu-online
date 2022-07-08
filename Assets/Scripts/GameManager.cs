@@ -32,6 +32,8 @@ public class GameManager : MonoBehaviour
     public GamePlayer currentPlayer;
     [HideInInspector]
     public Card currentCard;
+    [HideInInspector]
+    public SlotSelectHandler currentSlot;
 
     public static GameManager instance;
 
@@ -43,6 +45,9 @@ public class GameManager : MonoBehaviour
 
     [HideInInspector]
     public bool isMultipleSelectionAllowed;
+
+    [HideInInspector]
+    public bool isSelectionEnabled;
 
     private int splitCardIdx = 0;
 
@@ -64,41 +69,7 @@ public class GameManager : MonoBehaviour
 
     private void Update()
     {
-        if (Input.touchCount > 0 || Input.GetMouseButtonDown(0))
-        {
-            Vector3 touchPos = Input.GetTouch(0).position;//Camera.main.ScreenToWorldPoint(Input.mousePosition); //Input.GetTouch(0);
-            Ray ray = new Ray(new Vector3(touchPos.x, touchPos.y, -10f), Vector3.forward);
-            RaycastHit hitInformation;
-            Physics.Raycast(ray,out hitInformation);
-            if (hitInformation.collider != null)
-            {
-                GameObject touchedObject = hitInformation.transform.gameObject;
-
-                CardSelectHandler selectHandler = touchedObject.GetComponent<CardSelectHandler>();
-                if (selectHandler != null)
-                {
-                    if (isMultipleSelectionAllowed)
-                    {
-
-                    }
-                    else
-                    {
-                        selectHandler.ToggleSelection();
-                        if (currentCard != null)
-                        {
-                            if (currentCard.cardObject == touchedObject) currentCard = null;
-                            else
-                            {
-                                currentCard.cardObject.GetComponent<CardSelectHandler>().ToggleSelection();
-                                SetCurrentCard(touchedObject);
-                            }
-                        }
-                        else SetCurrentCard(touchedObject);
-                    }
-                }
-            }
-            else Debug.Log("what");
-        }
+        HandleSelection();
     }
 
     IEnumerator StartPlay()
@@ -126,6 +97,7 @@ public class GameManager : MonoBehaviour
     
     IEnumerator StartExchangeCardPhaseCoroutine()
     {
+        isSelectionEnabled = true;
         foreach(var player in players)
         {
             currentPlayer = player;
@@ -197,7 +169,7 @@ public class GameManager : MonoBehaviour
             item.cardObject.transform.localScale = GlobalInfo.initialScale;
 
             GameObject edgeObject = Instantiate(Resources.Load("Prefab/etc/EdgePanel"),item.cardObject.transform) as GameObject;
-            edgeObject.name = GlobalInfo.cardEdgeObjectName;
+            edgeObject.name = GlobalInfo.edgeObjectName;
         }
     }
 
@@ -276,5 +248,26 @@ public class GameManager : MonoBehaviour
                 break;
             }
         }
+    }
+    private void HandleSelection()
+    {
+        //if(Input.GetMouseButtonDown(0))
+        //{
+            //Camera.main.ScreenToWorldPoint(Input.mousePosition);
+
+        if (Input.touchCount > 0 && isSelectionEnabled)
+        {
+            GameObject hitObject = GetHitObject(Input.GetTouch(0).position);
+            if (hitObject != null) hitObject.GetComponent<SelectionHandler>().ToggleSelection();
+        }
+    }
+
+    private GameObject GetHitObject(Vector3 inputPosition)
+    {
+        Ray ray = new Ray(new Vector3(inputPosition.x, inputPosition.y, GlobalInfo.cameraPosition), Vector3.forward);
+        RaycastHit hitInformation;
+        Physics.Raycast(ray, out hitInformation);
+        if (hitInformation.collider != null) return hitInformation.transform.gameObject;
+        else return null;
     }
 }

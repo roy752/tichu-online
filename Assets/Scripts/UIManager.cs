@@ -40,7 +40,19 @@ public class UIManager : MonoBehaviour
 
     private Timer timer = new Timer();
 
-    private GameObject exchangeCardObject;
+    private struct ExchangeCardSlot
+    {
+        public TMP_Text playerText;
+        public SlotSelectHandler slot;
+    }
+
+    private struct ExchangeCardPopup
+    {
+        public GameObject exchangeCardPopupObject;
+        public ExchangeCardSlot[] slots; 
+    }
+
+    private ExchangeCardPopup exchangeCardObject = new ExchangeCardPopup();
 
     private void Start()
     {
@@ -54,9 +66,9 @@ public class UIManager : MonoBehaviour
 
         //라지티츄 오브젝트, 버튼
         largeTichu.declareObject = uiParent.transform.Find(GlobalInfo.buttons.ltYesButtonName).gameObject;
-        largeTichu.skipObject    = uiParent.transform.Find(GlobalInfo.buttons.ltNoButtonName).gameObject;
+        largeTichu.skipObject = uiParent.transform.Find(GlobalInfo.buttons.ltNoButtonName).gameObject;
         largeTichu.declareButton = largeTichu.declareObject.GetComponent<Button>();
-        largeTichu.skipButton    = largeTichu.skipObject.GetComponent<Button>();
+        largeTichu.skipButton = largeTichu.skipObject.GetComponent<Button>();
         ///////////////////////////////////
 
         //인포 창 오브젝트, 텍스트
@@ -68,7 +80,14 @@ public class UIManager : MonoBehaviour
         timer.timerText = timer.timerObject.GetComponent<TMP_Text>();
 
         //카드 교환 팝업 오브젝트
-        exchangeCardObject = uiParent.transform.Find(GlobalInfo.exchangeCardObjectName).gameObject;
+        exchangeCardObject.exchangeCardPopupObject = uiParent.transform.Find(GlobalInfo.exchangeCardObjectName).gameObject;
+        exchangeCardObject.slots = new ExchangeCardSlot[3];
+        for (int i = 0; i < 3; ++i)
+        {
+            var nowSlot = exchangeCardObject.exchangeCardPopupObject.transform.Find(GlobalInfo.exchangeCardSlotObjectName + i.ToString());
+            exchangeCardObject.slots[i].slot = nowSlot.GetComponent<SlotSelectHandler>();
+            exchangeCardObject.slots[i].playerText = nowSlot.Find(GlobalInfo.exchangeplayerObjectName).GetComponent<TMP_Text>();
+        }
     }
 
     public void ShowInfo(string text)
@@ -124,14 +143,14 @@ public class UIManager : MonoBehaviour
     public void ActivateExchangeCardsPopup()
     {
         ShowInfo(GlobalInfo.exchangeCardInfo);
-        exchangeCardObject.SetActive(true);
+        exchangeCardObject.exchangeCardPopupObject.SetActive(true);
 
         //버튼에 보내기 call 할당
     }
     public void DeactivateExchangeCardsPopup()
     {
         //버튼에 call 삭제
-        exchangeCardObject.SetActive(false);
+        exchangeCardObject.exchangeCardPopupObject.SetActive(false);
         HideInfo();
     }
 }
