@@ -21,5 +21,6 @@ public class SelectionHandler : MonoBehaviour
     {
         isSelected = !isSelected;
         edgeObject.SetActive(isSelected);
+        Debug.Log("½½·Ô »ªÀº " + isSelected);
     }
 }
