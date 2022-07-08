@@ -19,8 +19,11 @@ public class SelectionHandler : MonoBehaviour
 
     public virtual void ToggleSelection()
     {
+    }
+
+    public void ToggleBase()
+    {
         isSelected = !isSelected;
         edgeObject.SetActive(isSelected);
-        Debug.Log("½½·Ô »ªÀº " + isSelected);
     }
 }

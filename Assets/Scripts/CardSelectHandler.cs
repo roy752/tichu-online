@@ -8,22 +8,19 @@ public class CardSelectHandler : SelectionHandler
 {
     public override void ToggleSelection()
     {
-        base.ToggleSelection();
         if (GameManager.instance.isMultipleSelectionAllowed)
         {
 
         }
         else
         {
-            if (GameManager.instance.currentSlot != null)
+            ToggleBase();
+            if (GameManager.instance.currentSlot != null) //선택된 슬롯이 있는 경우
             {
-                SlotSelectHandler tmpSlot = GameManager.instance.currentSlot;
-                GameManager.instance.currentSlot.ToggleSelection();
-                tmpSlot.card = GameManager.instance.currentCard;
-                gameObject.transform.position = tmpSlot.gameObject.transform.position + GlobalInfo.frontEpsilon;
                 GameManager.instance.SetCurrentCard(gameObject);
-                GameManager.instance.currentPlayer.RemoveCard(GameManager.instance.currentCard);
-                GameManager.instance.currentCard = null;
+                GameManager.instance.currentSlot.PushCardToSlot(GameManager.instance.currentCard);
+                GameManager.instance.currentSlot.ToggleBase();
+                GameManager.instance.currentSlot = null;
             }
             else
             {
@@ -32,12 +29,13 @@ public class CardSelectHandler : SelectionHandler
                     if (GameManager.instance.currentCard.cardObject == gameObject) GameManager.instance.currentCard = null;
                     else
                     {
-                        GameManager.instance.currentCard.cardObject.GetComponent<CardSelectHandler>().ToggleSelection();
+                        GameManager.instance.currentCard.cardObject.GetComponent<CardSelectHandler>().ToggleBase();
                         GameManager.instance.SetCurrentCard(gameObject);
                     }
                 }
                 else GameManager.instance.SetCurrentCard(gameObject);
             }
         }
+        GameManager.instance.RenderCards(GlobalInfo.initialPosition, 5, GameManager.instance.currentPlayer.cards);
     }
 }

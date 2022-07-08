@@ -23,6 +23,7 @@ public class GameManager : MonoBehaviour
         public int value;
         public int type;
         public int id;
+        public bool isFixed;
     }
 
     [HideInInspector]
@@ -202,7 +203,7 @@ public class GameManager : MonoBehaviour
     
     public void RenderCards(Vector3 centerPosition, int numberOfCardsForLine, List<Card> cardList) 
     {
-        foreach (var item in cards) item.cardObject.transform.position = GlobalInfo.hiddenCardPosition;
+        foreach (var item in cards) if(item.isFixed==false) item.cardObject.transform.position = GlobalInfo.hiddenCardPosition;
 
         float offsetX = GlobalInfo.width / (numberOfCardsForLine - 1);
         float offsetY = GlobalInfo.offsetY;
