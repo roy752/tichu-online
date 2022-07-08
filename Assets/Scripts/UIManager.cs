@@ -209,6 +209,7 @@ public class UIManager : MonoBehaviour
 
     private IEnumerator MassageCoroutine(string msg)
     {
+        StartCoroutine(ShakeCoroutine(infoBar.infoBarText.gameObject, GlobalInfo.shakeDuration));
         isMassaging = true;
         string originalMsg = infoBar.infoBarText.text;
         Color originalColor = infoBar.infoBarText.color;
@@ -224,5 +225,21 @@ public class UIManager : MonoBehaviour
     {
         foreach (var slot in exchangeCardObject.slots) if (slot.slot.card == null) return false;
         return true;
+    }
+
+    private IEnumerator ShakeCoroutine(GameObject shakeObject, float duration)
+    {
+        float startPosX = shakeObject.transform.position.x;
+        float startPosY = shakeObject.transform.position.y;
+        while(duration>0)
+        {
+            duration -= GlobalInfo.shakeTick;
+            shakeObject.transform.position = new Vector3(
+                                                        startPosX + Mathf.Sin(Time.time * GlobalInfo.shakeSpeedX) * GlobalInfo.shakeAmountX,
+                                                        startPosY + Mathf.Sin(Time.time * GlobalInfo.shakeSpeedY) * GlobalInfo.shakeAmountY,
+                                                        shakeObject.transform.position.z);
+            yield return new WaitForSeconds(GlobalInfo.shakeTick);
+        }
+        shakeObject.transform.position = new Vector3(startPosX, startPosY, shakeObject.transform.position.z);
     }
 }

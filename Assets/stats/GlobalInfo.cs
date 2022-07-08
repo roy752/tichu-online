@@ -63,6 +63,12 @@ public static class GlobalInfo
     public static string SlotSelectErrorMsg = "카드를 모두 나눠주지 않았습니다.";
 
     public static float massageDuration = 1.5f;
+    public static float shakeTick = 1 / 60f;
+    public static float shakeSpeedX = 400f;
+    public static float shakeSpeedY = 257f;
+    public static float shakeAmountX = 0.03f;
+    public static float shakeAmountY = 0.01f;
+    public static float shakeDuration = 0.3f;
     public static Color massageColor = new Color(1f, 0, 0, 1f);
 
     public enum GeneralCardName
