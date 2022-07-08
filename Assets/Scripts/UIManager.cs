@@ -157,6 +157,16 @@ public class UIManager : MonoBehaviour
     {
         //버튼에 call 삭제
         exchangeCardObject.exchangeCardButton.onClick.RemoveAllListeners();
+        if(GameManager.instance.currentCard != null)
+        {
+            GameManager.instance.currentCard.cardObject.GetComponent<SelectionHandler>().ToggleBase();
+            GameManager.instance.currentCard = null;
+        }
+        if(GameManager.instance.currentSlot != null)
+        {
+            GameManager.instance.currentSlot.ToggleBase();
+            GameManager.instance.currentSlot = null;
+        }
         FlushCard();
         exchangeCardObject.exchangeCardPopupObject.SetActive(false);
         HideInfo();
@@ -177,10 +187,38 @@ public class UIManager : MonoBehaviour
     {
         for(int i=0; i<3; ++i)
         {
+            if(exchangeCardObject.slots[i].slot.card == null)
+            {
+                int idx = Random.Range(0, GameManager.instance.currentPlayer.cards.Count);
+                exchangeCardObject.slots[i].slot.card = GameManager.instance.currentPlayer.cards[idx];
+                GameManager.instance.currentPlayer.RemoveCard(exchangeCardObject.slots[i].slot.card);
+            }
+            exchangeCardObject.slots[i].slot.card.isFixed = false;
+
             exchangeCardObject.slots[i].player.AddCardToBuffer(exchangeCardObject.slots[i].slot.card);
             exchangeCardObject.slots[i].slot.card.cardObject.transform.position = GlobalInfo.hiddenCardPosition;
         }
     }
 
+    public void Massage(string msg)
+    {
+        StartCoroutine(MassageCoroutine(msg));
+    }
 
+    private IEnumerator MassageCoroutine(string msg)
+    {
+        string originalMsg = infoBar.infoBarText.text;
+        Color originalColor = infoBar.infoBarText.color;
+        ShowInfo(msg);
+        infoBar.infoBarText.color = GlobalInfo.massageColor;
+        yield return new WaitForSeconds(GlobalInfo.massageDuration);
+        ShowInfo(originalMsg);
+        infoBar.infoBarText.color = originalColor;
+    }
+
+    public bool IsAllSlotSelected()
+    {
+        foreach (var slot in exchangeCardObject.slots) if (slot.slot.card == null) return false;
+        return true;
+    }
 }

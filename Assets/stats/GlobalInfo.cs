@@ -60,6 +60,10 @@ public static class GlobalInfo
 
     public static string largeTichuInfo = "라지 티츄 여부를 결정하세요.";
     public static string exchangeCardInfo = "카드를 한장씩 나눠주세요.";
+    public static string SlotSelectErrorMsg = "카드를 모두 나눠주지 않았습니다.";
+
+    public static float massageDuration = 1.5f;
+    public static Color massageColor = new Color(1f, 0, 0, 1f);
 
     public enum GeneralCardName
     {

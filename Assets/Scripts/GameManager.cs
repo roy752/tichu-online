@@ -259,7 +259,7 @@ public class GameManager : MonoBehaviour
             //    GameObject hitObject = GetHitObject(Input.GetTouch(0).position);
             if (hitObject != null)
             {
-                Debug.Log(hitObject.name);
+                //Debug.Log(hitObject.name);
                 hitObject.GetComponent<SelectionHandler>().ToggleSelection();
             }
         }

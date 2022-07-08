@@ -56,7 +56,12 @@ public class GamePlayer : MonoBehaviour
 
     public void ChooseExchangeCard()
     {
-        chooseFlag = true;
+        if (UIManager.instance.IsAllSlotSelected()) chooseFlag = true;
+        else
+        {
+            UIManager.instance.Massage(GlobalInfo.SlotSelectErrorMsg);
+            return;
+        }
     }
 
     public void ChooseLargeTichu()

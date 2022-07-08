@@ -19,6 +19,7 @@ public class SelectionHandler : MonoBehaviour
 
     public virtual void ToggleSelection()
     {
+
     }
 
     public void ToggleBase()
