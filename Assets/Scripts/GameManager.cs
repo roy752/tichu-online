@@ -5,6 +5,7 @@ using UnityEngine;
 using System.Linq;
 using UnityEngine.UI;
 using System.Security.Cryptography;
+using UnityEngine.EventSystems;
 
 public class GameManager : MonoBehaviour
 {
@@ -22,10 +23,18 @@ public class GameManager : MonoBehaviour
         public int value;
         public int type;
         public int id;
+        public bool isFixed;
     }
 
     [HideInInspector]
     public GamePlayer[] players;
+
+    [HideInInspector]
+    public GamePlayer currentPlayer;
+    [HideInInspector]
+    public Card currentCard;
+    [HideInInspector]
+    public SlotSelectHandler currentSlot;
 
     public static GameManager instance;
 
@@ -35,22 +44,33 @@ public class GameManager : MonoBehaviour
     [HideInInspector]
     public bool phaseChangeFlag;
 
+    [HideInInspector]
+    public bool isMultipleSelectionAllowed;
+
+    [HideInInspector]
+    public bool isSelectionEnabled;
+
+    private int splitCardIdx = 0;
+
     private void Awake()
     {
         MakeCardNameList();
+        InitializeVariables();
+        InstantiateCards();
+        InitializePlayers();
+        ShuffleCards(ref cards);
+
+        instance = this;
     }
 
     void Start()
     {
-        InitializeVariables();
-        InstantiateCards();
-        InitializePlayers();
-
-        ShuffleCards(ref cards);
-
-        instance = this;
-
         StartCoroutine(StartPlay());
+    }
+
+    private void Update()
+    {
+        HandleSelection();
     }
 
     IEnumerator StartPlay()
@@ -60,7 +80,10 @@ public class GameManager : MonoBehaviour
         yield return new WaitUntil(()=>phaseChangeFlag);
         phaseChangeFlag = false;
 
-        //SplitCardsToPlayer(GlobalInfo.numberOfCardsSmallTichuPhase);
+        SplitCardsToPlayer(GlobalInfo.numberOfCardsSmallTichuPhase);
+        StartCoroutine(StartExchangeCardPhaseCoroutine());
+        yield return new WaitUntil(() => phaseChangeFlag);
+        phaseChangeFlag = false;
     }
 
     IEnumerator StartLargeTichuPhaseCoroutine()
@@ -73,13 +96,23 @@ public class GameManager : MonoBehaviour
         phaseChangeFlag = true;
     }
     
-    void SplitCardsToPlayer(int num)
+    IEnumerator StartExchangeCardPhaseCoroutine()
     {
-        int idx = 0;
+        isSelectionEnabled = true;
         foreach(var player in players)
         {
-            player.AddCards(cards.GetRange(idx, num));
-            idx += num;
+            currentPlayer = player;
+            player.ExchangeCards();
+            yield return new WaitUntil(() => player.coroutineFinishFlag);
+        }
+    }
+
+    void SplitCardsToPlayer(int num)
+    {
+        foreach(var player in players)
+        {
+            player.AddCards(cards.GetRange(splitCardIdx, num));
+            splitCardIdx += num;
         }
     }
 
@@ -88,7 +121,7 @@ public class GameManager : MonoBehaviour
         int type = 0;
         int id = 0;
 
-        foreach (string cardName in System.Enum.GetNames(typeof(GlobalInfo.GeneralCardName)))
+        foreach (string cardName in Enum.GetNames(typeof(GlobalInfo.GeneralCardName)))
         {
             for (int i = 1; i <= GlobalInfo.numberOfCardsGeneral; ++i)
             {
@@ -105,7 +138,7 @@ public class GameManager : MonoBehaviour
             type++;
         }
         int idx = 0;
-        foreach (string cardName in System.Enum.GetNames(typeof(GlobalInfo.SpecialCardName)))
+        foreach (string cardName in Enum.GetNames(typeof(GlobalInfo.SpecialCardName)))
         {
             Card cardInstance = new Card();
 
@@ -132,7 +165,7 @@ public class GameManager : MonoBehaviour
                                           initialPosition,
                                           initialRotation,
                                           cardsParent.transform) as GameObject;
-
+            item.cardObject.name = item.cardName;
             item.cardObject.transform.rotation   = GlobalInfo.initialCardRotation;
             item.cardObject.transform.localScale = GlobalInfo.initialScale;
         }
@@ -147,6 +180,14 @@ public class GameManager : MonoBehaviour
             GameObject.Find(GlobalInfo.playerObjectNames[2]).GetComponent<GamePlayer>(),
             GameObject.Find(GlobalInfo.playerObjectNames[3]).GetComponent<GamePlayer>()
         };
+        int num = 0;
+        foreach (var player in players)
+        {
+            
+            player.playerNumber = num;
+            player.playerName = "Player" + num.ToString();
+            num++;
+        }
     }
 
     void InitializeVariables()
@@ -162,7 +203,7 @@ public class GameManager : MonoBehaviour
     
     public void RenderCards(Vector3 centerPosition, int numberOfCardsForLine, List<Card> cardList) 
     {
-        foreach (var item in cards) item.cardObject.transform.position = GlobalInfo.hiddenCardPosition;
+        foreach (var item in cards) if(item.isFixed==false) item.cardObject.transform.position = GlobalInfo.hiddenCardPosition;
 
         float offsetX = GlobalInfo.width / (numberOfCardsForLine - 1);
         float offsetY = GlobalInfo.offsetY;
@@ -196,5 +237,40 @@ public class GameManager : MonoBehaviour
         return Convert.ToInt32(randomInt[0]);
     }
 
-    
+    public void SetCurrentCard(GameObject inputObject)
+    {
+        foreach(var item in cards)
+        {
+            if(item.cardObject==inputObject)
+            {
+                currentCard = item;
+                break;
+            }
+        }
+    }
+    private void HandleSelection()
+    {
+        if (Input.GetMouseButtonDown(0) && isSelectionEnabled)
+        {
+            GameObject hitObject = GetHitObject(Camera.main.ScreenToWorldPoint(Input.mousePosition));
+
+            //if (Input.touchCount > 0 && isSelectionEnabled)
+            //{
+            //    GameObject hitObject = GetHitObject(Input.GetTouch(0).position);
+            if (hitObject != null)
+            {
+                //Debug.Log(hitObject.name);
+                hitObject.GetComponent<SelectionHandler>().ToggleSelection();
+            }
+        }
+    }
+
+    private GameObject GetHitObject(Vector3 inputPosition)
+    {
+        Ray ray = new Ray(new Vector3(inputPosition.x, inputPosition.y, GlobalInfo.cameraPosition), Vector3.forward);
+        RaycastHit hitInformation;
+        Physics.Raycast(ray, out hitInformation);
+        if (hitInformation.collider != null) return hitInformation.transform.gameObject;
+        else return null;
+    }
 }

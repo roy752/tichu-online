@@ -15,28 +15,36 @@ public static class GlobalInfo
 
     public static string prefabPath = "Prefab/Cards/";
 
-    public static string[] playerObjectNames = new string[] { "Player1", "Player2", "Player3", "Player4" };
+    public static string[] playerObjectNames = new string[] { "Player0", "Player1", "Player2", "Player3" };
 
     public static Vector3 hiddenCardPosition = new Vector3(-100f, -100f, -100f);
 
     public static int numberOfPlayers = 4;
 
     public static float largeTichuDuration = 20.5f;
+    public static float exchangeCardsDuration = 30.5f;
 
     public static float tick = 0.1f;
 
     public static string uiParentObjectName = "GameUI";
     public static string cardsParentObjectName = "Cards";
     public static string infoBarObjectName = "InfoBar";
+    public static string exchangeCardObjectName = "CardExchangePopup";
+    public static string exchangeCardButtonObjectName = "CardExchangeButton";
+    public static string exchangeCardSlotObjectName = "CardExchangeSlot";
+    public static string exchangeplayerObjectName = "ExchangePlayerName";
+    public static string edgeObjectName = "EdgePanel";
 
     public static float width = 3.5f;
-    public static float offsetY = 0.9f;
-    public static float offsetZ = 0.001f;
+    public static float offsetY = 0.75f;
+    public static float offsetZ = 0.002f;
 
+    public static float cameraPosition = -10f;
 
     public static Quaternion initialCardRotation = Quaternion.Euler(270f, 180f, 180f);
     public static Vector3 initialPosition = new Vector3(0f, -3.9f, -1f);
     public static Vector3 initialScale = new Vector3(0.2f,0.2f, 0.2f);
+    public static Vector3 frontEpsilon = new Vector3(0, 0, -0.001f);
 
     public struct ButtonNames
     {
@@ -51,6 +59,11 @@ public static class GlobalInfo
                                      };
 
     public static string largeTichuInfo = "라지 티츄 여부를 결정하세요.";
+    public static string exchangeCardInfo = "카드를 한장씩 나눠주세요.";
+    public static string SlotSelectErrorMsg = "카드를 모두 나눠주지 않았습니다.";
+
+    public static float massageDuration = 1.5f;
+    public static Color massageColor = new Color(1f, 0, 0, 1f);
 
     public enum GeneralCardName
     {
