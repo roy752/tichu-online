@@ -237,7 +237,8 @@ public class UIManager : MonoBehaviour
             shakeObject.transform.position = new Vector3(
                                                         startPosX + Mathf.Sin(Time.time * GlobalInfo.shakeSpeedX) * GlobalInfo.shakeAmountX,
                                                         startPosY + Mathf.Sin(Time.time * GlobalInfo.shakeSpeedY) * GlobalInfo.shakeAmountY,
-                                                        shakeObject.transform.position.z);
+                                                        shakeObject.transform.position.z
+                                                        );
             yield return new WaitForSeconds(GlobalInfo.shakeTick);
         }
         shakeObject.transform.position = new Vector3(startPosX, startPosY, shakeObject.transform.position.z);
