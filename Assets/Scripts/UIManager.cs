@@ -75,12 +75,12 @@ public class UIManager : MonoBehaviour
 
         //인포 창 오브젝트, 텍스트
         infoBar.infoBarObject = uiParent.transform.Find(GlobalInfo.infoBarObjectName).gameObject;
-        infoBar.infoBarText = infoBar.infoBarObject.transform.Find("Text").GetComponent<TMP_Text>();
+        infoBar.infoBarText = infoBar.infoBarObject.transform.Find(GlobalInfo.infoBarTextObjectName).GetComponent<TMP_Text>();
         //////////////////////////////////
         
 
         //타이머 오브젝트
-        timer.timerObject = uiParent.transform.Find("Timer").gameObject;
+        timer.timerObject = uiParent.transform.Find(GlobalInfo.timerObjectName).gameObject;
         timer.timerText = timer.timerObject.GetComponent<TMP_Text>();
         /////////////////////////////////
         

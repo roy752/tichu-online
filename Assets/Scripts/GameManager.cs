@@ -189,7 +189,7 @@ public class GameManager : MonoBehaviour
         {
             
             player.playerNumber = num;
-            player.playerName = "Player" + num.ToString();
+            player.playerName = GlobalInfo.playerObjectNames[num];
             num++;
         }
     }

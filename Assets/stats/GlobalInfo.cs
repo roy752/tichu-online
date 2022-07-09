@@ -34,6 +34,8 @@ public static class GlobalInfo
     public static string exchangeCardSlotObjectName = "CardExchangeSlot";
     public static string exchangeplayerObjectName = "ExchangePlayerName";
     public static string edgeObjectName = "EdgePanel";
+    public static string timerObjectName = "Timer";
+    public static string infoBarTextObjectName = "InfoContent";
 
     public static float width = 3.5f;
     public static float offsetY = 0.75f;
