@@ -31,17 +31,6 @@ public class GamePlayer : MonoBehaviour
         cards.Remove(card);
     }
 
-    public IEnumerator TimerCoroutine(float inputDuration)
-    {
-        duration = inputDuration;
-        while(duration>=0)
-        {
-            UIManager.instance.ShowTimer(((int)(duration)).ToString());
-            duration -= GlobalInfo.tick;
-            yield return new WaitForSeconds(GlobalInfo.tick);
-        }
-    }
-
     public void DeclareLargeTichu()
     {
         chooseFlag = true;
@@ -71,26 +60,17 @@ public class GamePlayer : MonoBehaviour
 
     public IEnumerator ChooseLargeTichuCoroutine()
     {
-        IEnumerator t = TimerCoroutine(GlobalInfo.largeTichuDuration);
-
         coroutineFinishFlag = false;
         
         chooseFlag = false;
         GameManager.instance.RenderCards(GlobalInfo.initialPosition, 4, cards);
         
 
-        UIManager.instance.ActivateTimer();
-        StartCoroutine(t);
-
-
+        UIManager.instance.ActivateTimer(GlobalInfo.largeTichuDuration);
         UIManager.instance.ActivateLargeTichu(DeclareLargeTichu, SkipLargeTichu);
         yield return new WaitUntil(()=>chooseFlag == true || duration<0);
         UIManager.instance.DeactivateLargeTichu();
-        
-        
-        StopCoroutine(t);
         UIManager.instance.DeactivateTimer();
-
 
         coroutineFinishFlag = true;
     }
@@ -101,21 +81,15 @@ public class GamePlayer : MonoBehaviour
     }
     public IEnumerator ExchangeCardsCoroutine()
     {
-        IEnumerator t = TimerCoroutine(GlobalInfo.exchangeCardsDuration);
-
         coroutineFinishFlag = false;
 
         chooseFlag = false;
         GameManager.instance.RenderCards(GlobalInfo.initialPosition, 5, cards);
 
-        UIManager.instance.ActivateTimer();
-        StartCoroutine(t);
-
+        UIManager.instance.ActivateTimer(GlobalInfo.exchangeCardsDuration);
         UIManager.instance.ActivateExchangeCardsPopup(ChooseExchangeCard);
         yield return new WaitUntil(() => chooseFlag == true || duration < 0);
         UIManager.instance.DeactivateExchangeCardsPopup();
-
-        StopCoroutine(t);
         UIManager.instance.DeactivateTimer();
 
         coroutineFinishFlag = true;

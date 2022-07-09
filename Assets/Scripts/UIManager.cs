@@ -129,9 +129,22 @@ public class UIManager : MonoBehaviour
         HideInfo();
     }
 
-    public void ActivateTimer()
+    IEnumerator timerCoroutineVariable;
+
+    public void ActivateTimer(float duration)
     {
-        timer.timerObject.SetActive(true);
+        timerCoroutineVariable = TimerCoroutine(duration);
+        StartCoroutine(timerCoroutineVariable);
+    }
+
+    public IEnumerator TimerCoroutine(float inputDuration)
+    {
+        while (inputDuration >= 0)
+        {
+            UIManager.instance.ShowTimer(((int)(inputDuration)).ToString());
+            inputDuration -= GlobalInfo.tick;
+            yield return new WaitForSeconds(GlobalInfo.tick);
+        }
     }
 
     public void ShowTimer(string text)
@@ -141,8 +154,8 @@ public class UIManager : MonoBehaviour
 
     public void DeactivateTimer()
     {
+        StopCoroutine(timerCoroutineVariable);
         timer.timerText.text = null;
-        timer.timerObject.SetActive(false);
     }
 
     public void ActivateExchangeCardsPopup(UnityAction exchangeCall)

@@ -19,11 +19,11 @@ public class GameManager : MonoBehaviour
     public class Card
     {
         public GameObject cardObject;
-        public string cardName;
-        public int value;
-        public int type;
-        public int id;
-        public bool isFixed;
+        public string     cardName;
+        public int        value;
+        public int        type;
+        public int        id;
+        public bool       isFixed;
     }
 
     [HideInInspector]
@@ -78,18 +78,19 @@ public class GameManager : MonoBehaviour
         SplitCardsToPlayer(GlobalInfo.numberOfCardsLargeTichuPhase);
         StartCoroutine(StartLargeTichuPhaseCoroutine());
         yield return new WaitUntil(()=>phaseChangeFlag);
-        phaseChangeFlag = false;
 
         SplitCardsToPlayer(GlobalInfo.numberOfCardsSmallTichuPhase);
         StartCoroutine(StartExchangeCardPhaseCoroutine());
         yield return new WaitUntil(() => phaseChangeFlag);
-        phaseChangeFlag = false;
     }
 
     IEnumerator StartLargeTichuPhaseCoroutine()
     {
+        phaseChangeFlag = false;
+
         foreach (var player in players)
         {
+            currentPlayer = player;
             player.ChooseLargeTichu();
             yield return new WaitUntil(() => player.coroutineFinishFlag);
         }
@@ -98,6 +99,8 @@ public class GameManager : MonoBehaviour
     
     IEnumerator StartExchangeCardPhaseCoroutine()
     {
+        phaseChangeFlag = false;
+
         isSelectionEnabled = true;
         foreach(var player in players)
         {
@@ -105,6 +108,7 @@ public class GameManager : MonoBehaviour
             player.ExchangeCards();
             yield return new WaitUntil(() => player.coroutineFinishFlag);
         }
+        phaseChangeFlag = true;
     }
 
     void SplitCardsToPlayer(int num)
