@@ -15,8 +15,12 @@ public static class Global
     public static int numberOfPlayers               = 4;
     public static int numberOfSlots                 = 3;
 
+    public static int numberOfCardsForLineInLargeTichuPhase = 4;
+    public static int numberOfCardsForLineInSmallTichuPhase = 5;
+    public static int numberOfCardsForLineInPlayPhase       = 14;
+
     public static int[] generalCardsValue           = new int[] { 0, 14, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13 };
-    public static int[] specialCardsValue           = new int[]{ 1, 15, 15, 16 }; //새 개 봉 용 순서로
+    public static int[] specialCardsValue           = new int[]{ 1, 15, 16, 17 }; //새 개 봉 용 순서로
     public static int   aceCardsValue               = 14;
 
 
@@ -80,8 +84,8 @@ public static class Global
     public static float tick      = 0.1f;
     public static float shakeTick = 1 / 60f;
     
-    public static float shakeSpeedX   = 600f;
-    public static float shakeSpeedY   = 457f;
+    public static float shakeSpeedX   = 47f;
+    public static float shakeSpeedY   = 26f;
     public static float shakeAmountX  = 0.05f;
     public static float shakeAmountY  = 0.01f;
 

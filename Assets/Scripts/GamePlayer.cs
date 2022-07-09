@@ -63,10 +63,11 @@ public class GamePlayer : MonoBehaviour
     public IEnumerator ChooseLargeTichuCoroutine()
     {
         UIManager.instance.RenderPlayerInfo();
+        SortCards();
         coroutineFinishFlag = false;
         
         chooseFlag = false;
-        UIManager.instance.RenderCards(Global.initialPosition, 4, cards);
+        UIManager.instance.RenderCards(Global.initialPosition, Global.numberOfCardsForLineInLargeTichuPhase, cards);
         
 
         UIManager.instance.ActivateTimer(Global.largeTichuDuration);
@@ -85,10 +86,11 @@ public class GamePlayer : MonoBehaviour
     public IEnumerator ExchangeCardsCoroutine()
     {
         UIManager.instance.RenderPlayerInfo();
+        SortCards();
         coroutineFinishFlag = false;
 
         chooseFlag = false;
-        UIManager.instance.RenderCards(Global.initialPosition, 5, cards);
+        UIManager.instance.RenderCards(Global.initialPosition, Global.numberOfCardsForLineInSmallTichuPhase, cards);
 
         UIManager.instance.ActivateTimer(Global.exchangeCardsDuration);
         UIManager.instance.ActivateExchangeCardsPopup(ChooseExchangeCard);
@@ -97,5 +99,10 @@ public class GamePlayer : MonoBehaviour
         UIManager.instance.DeactivateTimer();
 
         coroutineFinishFlag = true;
+    }
+
+    public void SortCards()
+    {
+        cards = cards.OrderBy(x => x.value).ToList();
     }
 }
