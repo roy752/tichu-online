@@ -68,7 +68,7 @@ public class GamePlayer : MonoBehaviour
 
         UIManager.instance.ActivateTimer(GlobalInfo.largeTichuDuration);
         UIManager.instance.ActivateLargeTichu(DeclareLargeTichu, SkipLargeTichu);
-        yield return new WaitUntil(()=>chooseFlag == true || duration<0);
+        yield return new WaitUntil(()=>chooseFlag == true || UIManager.instance.IsTimeOut());
         UIManager.instance.DeactivateLargeTichu();
         UIManager.instance.DeactivateTimer();
 
@@ -88,7 +88,7 @@ public class GamePlayer : MonoBehaviour
 
         UIManager.instance.ActivateTimer(GlobalInfo.exchangeCardsDuration);
         UIManager.instance.ActivateExchangeCardsPopup(ChooseExchangeCard);
-        yield return new WaitUntil(() => chooseFlag == true || duration < 0);
+        yield return new WaitUntil(() => chooseFlag == true || UIManager.instance.IsTimeOut());
         UIManager.instance.DeactivateExchangeCardsPopup();
         UIManager.instance.DeactivateTimer();
 

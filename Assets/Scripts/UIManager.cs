@@ -57,6 +57,8 @@ public class UIManager : MonoBehaviour
 
     private bool isMassaging = false;
 
+    private float timerDuration;
+
     private void Start()
     {
         InitializeVariables();
@@ -141,10 +143,11 @@ public class UIManager : MonoBehaviour
 
     public IEnumerator TimerCoroutine(float inputDuration)
     {
-        while (inputDuration >= 0)
+        timerDuration = inputDuration;
+        while (timerDuration >= 0)
         {
-            ShowTimer(((int)(inputDuration)).ToString());
-            inputDuration -= GlobalInfo.tick;
+            ShowTimer(((int)(timerDuration)).ToString());
+            timerDuration -= GlobalInfo.tick;
             yield return new WaitForSeconds(GlobalInfo.tick);
         }
     }
@@ -257,5 +260,10 @@ public class UIManager : MonoBehaviour
             yield return new WaitForSeconds(GlobalInfo.shakeTick);
         }
         shakeObject.transform.position = new Vector3(startPosX, startPosY, shakeObject.transform.position.z);
+    }
+
+    public bool IsTimeOut()
+    {
+        return timerDuration < 0;
     }
 }
