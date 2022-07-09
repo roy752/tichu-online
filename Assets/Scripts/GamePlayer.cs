@@ -6,40 +6,31 @@ using System.Linq;
 
 public class GamePlayer : MonoBehaviour
 {
-    public List<GameManager.Card> cards = new List<GameManager.Card>();
-    public List<GameManager.Card> cardBuffer = new List<GameManager.Card>();
+    public List<Global.Card> cards      = new List<Global.Card>();
+    public List<Global.Card> cardBuffer = new List<Global.Card>();
     public string playerName;
-    public int playerNumber;
+    public int    playerNumber;
+    public int roundScore;
+    public int totalScore;
 
-    public bool chooseFlag = false;
+    public bool chooseFlag          = false;
     public bool coroutineFinishFlag = false;
-    public bool largeTichuFlag = false;
-    float       duration;
-
-    public void AddCards(List<GameManager.Card> cardList)
+    public bool largeTichuFlag      = false;
+    public bool smallTichuFlag      = false;
+      
+    public void AddCards(List<Global.Card> cardList)
     {
         cards.AddRange(cardList);
     }
 
-    public void AddCardToBuffer(GameManager.Card card)
+    public void AddCardToBuffer(Global.Card card)
     {
         cardBuffer.Add(card);
     }
 
-    public void RemoveCard(GameManager.Card card)
+    public void RemoveCard(Global.Card card)
     {
         cards.Remove(card);
-    }
-
-    public IEnumerator TimerCoroutine(float inputDuration)
-    {
-        duration = inputDuration;
-        while(duration>=0)
-        {
-            UIManager.instance.ShowTimer(((int)(duration)).ToString());
-            duration -= GlobalInfo.tick;
-            yield return new WaitForSeconds(GlobalInfo.tick);
-        }
     }
 
     public void DeclareLargeTichu()
@@ -59,7 +50,7 @@ public class GamePlayer : MonoBehaviour
         if (UIManager.instance.IsAllSlotSelected()) chooseFlag = true;
         else
         {
-            UIManager.instance.Massage(GlobalInfo.SlotSelectErrorMsg);
+            UIManager.instance.Massage(Global.SlotSelectErrorMsg);
             return;
         }
     }
@@ -71,26 +62,18 @@ public class GamePlayer : MonoBehaviour
 
     public IEnumerator ChooseLargeTichuCoroutine()
     {
-        IEnumerator t = TimerCoroutine(GlobalInfo.largeTichuDuration);
-
+        UIManager.instance.RenderPlayerInfo();
         coroutineFinishFlag = false;
         
         chooseFlag = false;
-        GameManager.instance.RenderCards(GlobalInfo.initialPosition, 4, cards);
+        UIManager.instance.RenderCards(Global.initialPosition, 4, cards);
         
 
-        UIManager.instance.ActivateTimer();
-        StartCoroutine(t);
-
-
+        UIManager.instance.ActivateTimer(Global.largeTichuDuration);
         UIManager.instance.ActivateLargeTichu(DeclareLargeTichu, SkipLargeTichu);
-        yield return new WaitUntil(()=>chooseFlag == true || duration<0);
+        yield return new WaitUntil(()=>chooseFlag == true || UIManager.instance.IsTimeOut());
         UIManager.instance.DeactivateLargeTichu();
-        
-        
-        StopCoroutine(t);
         UIManager.instance.DeactivateTimer();
-
 
         coroutineFinishFlag = true;
     }
@@ -101,21 +84,16 @@ public class GamePlayer : MonoBehaviour
     }
     public IEnumerator ExchangeCardsCoroutine()
     {
-        IEnumerator t = TimerCoroutine(GlobalInfo.exchangeCardsDuration);
-
+        UIManager.instance.RenderPlayerInfo();
         coroutineFinishFlag = false;
 
         chooseFlag = false;
-        GameManager.instance.RenderCards(GlobalInfo.initialPosition, 5, cards);
+        UIManager.instance.RenderCards(Global.initialPosition, 5, cards);
 
-        UIManager.instance.ActivateTimer();
-        StartCoroutine(t);
-
+        UIManager.instance.ActivateTimer(Global.exchangeCardsDuration);
         UIManager.instance.ActivateExchangeCardsPopup(ChooseExchangeCard);
-        yield return new WaitUntil(() => chooseFlag == true || duration < 0);
+        yield return new WaitUntil(() => chooseFlag == true || UIManager.instance.IsTimeOut());
         UIManager.instance.DeactivateExchangeCardsPopup();
-
-        StopCoroutine(t);
         UIManager.instance.DeactivateTimer();
 
         coroutineFinishFlag = true;

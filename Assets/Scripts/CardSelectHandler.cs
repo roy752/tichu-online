@@ -36,6 +36,6 @@ public class CardSelectHandler : SelectionHandler
                 else GameManager.instance.SetCurrentCard(gameObject);
             }
         }
-        GameManager.instance.RenderCards(GlobalInfo.initialPosition, 5, GameManager.instance.currentPlayer.cards);
+        UIManager.instance.RenderCards(Global.initialPosition, 5, GameManager.instance.currentPlayer.cards);
     }
 }
