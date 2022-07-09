@@ -2,18 +2,14 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using System.Linq;
-using UnityEngine.UI;
-using System.Security.Cryptography;
-using UnityEngine.EventSystems;
 
 public class GameManager : MonoBehaviour
 {
     [HideInInspector]
-    public List<GlobalInfo.Card> cards = new List<GlobalInfo.Card>();
+    public List<Global.Card> cards = new List<Global.Card>();
 
     [HideInInspector]
-    public List<GlobalInfo.Card> cardsObjectPool = new List<GlobalInfo.Card>();
+    public List<Global.Card> cardsObjectPool = new List<Global.Card>();
 
     [HideInInspector]
     public GamePlayer[] players;
@@ -22,7 +18,7 @@ public class GameManager : MonoBehaviour
     public GamePlayer currentPlayer;
 
     [HideInInspector]
-    public GlobalInfo.Card currentCard;
+    public Global.Card currentCard;
 
     [HideInInspector]
     public SlotSelectHandler currentSlot;
@@ -47,11 +43,10 @@ public class GameManager : MonoBehaviour
 
     private void Awake()
     {
-        MakeCardNameList();
         InitializeVariables();
-        InstantiateCards();
         InitializePlayers();
-        ShuffleCards(ref cards);
+        MakeCards();
+        Global.ShuffleCards(ref cards);
 
         instance = this;
     }
@@ -68,11 +63,11 @@ public class GameManager : MonoBehaviour
 
     IEnumerator StartPlay()
     {
-        SplitCardsToPlayer(GlobalInfo.numberOfCardsLargeTichuPhase);
+        SplitCardsToPlayer(Global.numberOfCardsLargeTichuPhase);
         StartCoroutine(StartLargeTichuPhaseCoroutine());
         yield return new WaitUntil(()=>phaseChangeFlag);
 
-        SplitCardsToPlayer(GlobalInfo.numberOfCardsSmallTichuPhase);
+        SplitCardsToPlayer(Global.numberOfCardsSmallTichuPhase);
         StartCoroutine(StartExchangeCardPhaseCoroutine());
         yield return new WaitUntil(() => phaseChangeFlag);
     }
@@ -113,20 +108,20 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    void MakeCardNameList()
+    void MakeCards()
     {
         int type = 0;
         int id = 0;
 
-        foreach (string cardName in Enum.GetNames(typeof(GlobalInfo.GeneralCardName)))
+        foreach (string cardName in Enum.GetNames(typeof(Global.GeneralCardName)))
         {
-            for (int i = 1; i <= GlobalInfo.numberOfCardsGeneral; ++i)
+            for (int i = 1; i <= Global.numberOfCardsGeneral; ++i)
             {
-                GlobalInfo.Card cardInstance = new GlobalInfo.Card();
+                Global.Card cardInstance = new Global.Card();
 
-                cardInstance.cardName = cardName + i.ToString("D2");
+                cardInstance.cardName = Global.GetCardName(cardName, i);
                 cardInstance.type     = type;
-                cardInstance.value    = i==1? GlobalInfo.aceCardsValue: i;
+                cardInstance.value    = Global.generalCardsValue[i];
                 cardInstance.id       = id;
 
                 cards.Add(cardInstance);
@@ -135,13 +130,13 @@ public class GameManager : MonoBehaviour
             type++;
         }
         int idx = 0;
-        foreach (string cardName in Enum.GetNames(typeof(GlobalInfo.SpecialCardName)))
+        foreach (string cardName in Enum.GetNames(typeof(Global.SpecialCardName)))
         {
-            GlobalInfo.Card cardInstance = new GlobalInfo.Card();
+            Global.Card cardInstance = new Global.Card();
 
             cardInstance.cardName = cardName;
             cardInstance.type     = type;
-            cardInstance.value    = GlobalInfo.specialCardsValue[idx];
+            cardInstance.value    = Global.specialCardsValue[idx];
             cardInstance.id       = id;
 
             cards.Add(cardInstance);
@@ -149,89 +144,32 @@ public class GameManager : MonoBehaviour
             idx++;
             type++;
         }
-    }
-
-    void InstantiateCards()
-    {
-        Vector3 initialPosition = GlobalInfo.hiddenCardPosition;
-        Quaternion initialRotation = Quaternion.identity;
 
         foreach (var item in cards)
         {
-            item.cardObject = Instantiate(Resources.Load(GlobalInfo.prefabPath + item.cardName),
-                                          initialPosition,
-                                          initialRotation,
+            item.cardObject = Instantiate(Resources.Load(Global.prefabPath + item.cardName),
+                                          Global.hiddenCardPosition,
+                                          Global.initialCardRotation,
                                           cardsParent.transform) as GameObject;
             item.cardObject.name = item.cardName;
-            item.cardObject.transform.rotation   = GlobalInfo.initialCardRotation;
-            item.cardObject.transform.localScale = GlobalInfo.initialScale;
         }
     }
 
     void InitializePlayers()
     {
-        players = new GamePlayer[]
+        players = new GamePlayer[Global.numberOfPlayers];
+
+        for(int idx = 0; idx<Global.numberOfPlayers; ++idx)
         {
-            GameObject.Find(GlobalInfo.playerObjectNames[0]).GetComponent<GamePlayer>(),
-            GameObject.Find(GlobalInfo.playerObjectNames[1]).GetComponent<GamePlayer>(),
-            GameObject.Find(GlobalInfo.playerObjectNames[2]).GetComponent<GamePlayer>(),
-            GameObject.Find(GlobalInfo.playerObjectNames[3]).GetComponent<GamePlayer>()
-        };
-        int num = 0;
-        foreach (var player in players)
-        {
-            
-            player.playerNumber = num;
-            player.playerName = GlobalInfo.playerObjectNames[num];
-            num++;
+            players[idx] = GameObject.Find(Global.playerObjectNames[idx]).GetComponent<GamePlayer>();
+            players[idx].playerNumber = idx;
+            players[idx].playerName   = Global.playerNames[idx];
         }
     }
 
     void InitializeVariables()
     {
-        cardsParent = GameObject.Find(GlobalInfo.cardsParentObjectName);
-    }
-
-    void ShuffleCards(ref List<GlobalInfo.Card> cardList)
-    {
-        RNGCryptoServiceProvider random = new RNGCryptoServiceProvider();
-        cardList = cardList.OrderBy(x => Next(random)).ToList();
-    }
-    
-    public void RenderCards(Vector3 centerPosition, int numberOfCardsForLine, List<GlobalInfo.Card> cardList) 
-    {
-        foreach (var item in cards) if(item.isFixed==false) item.cardObject.transform.position = GlobalInfo.hiddenCardPosition;
-
-        float offsetX = GlobalInfo.width / (numberOfCardsForLine - 1);
-        float offsetY = GlobalInfo.offsetY;
-        float offsetZ = GlobalInfo.offsetZ;
-
-        Vector3 initialPosition = centerPosition + new Vector3(-offsetX * ((float)(numberOfCardsForLine - 1) / 2f), offsetY*((cardList.Count-1)/numberOfCardsForLine), 0);
-
-        Vector3 pos = Vector3.zero;
-
-        int cnt = 0;
-        foreach(var item in cardList)
-        {
-            if(cnt==numberOfCardsForLine)
-            {
-                pos.x = 0;
-                pos.y -= offsetY;
-                cnt = 0;
-            }
-
-            item.cardObject.transform.position = initialPosition + pos;
-            pos.x += offsetX;
-            pos.z -= offsetZ;
-            ++cnt;
-        }
-
-    }
-    static int Next(RNGCryptoServiceProvider random)
-    {
-        byte[] randomInt = new byte[4];
-        random.GetBytes(randomInt);
-        return Convert.ToInt32(randomInt[0]);
+        cardsParent = GameObject.Find(Global.cardsParentObjectName);
     }
 
     public void SetCurrentCard(GameObject inputObject)
@@ -245,22 +183,14 @@ public class GameManager : MonoBehaviour
             }
         }
     }
+
     private void HandleSelection()
     {
         if (Input.GetMouseButtonDown(0) && isSelectionEnabled)
         {
-            GameObject hitObject = GetHitObject( Camera.main.ScreenToWorldPoint(Input.mousePosition));
+            GameObject hitObject = Global.GetHitObject( Camera.main.ScreenToWorldPoint(Input.mousePosition));
 
             if (hitObject != null) hitObject.GetComponent<SelectionHandler>().ToggleSelection();
         }
-    }
-
-    private GameObject GetHitObject(Vector3 inputPosition)
-    {
-        Ray ray = new Ray(new Vector3(inputPosition.x, inputPosition.y, GlobalInfo.cameraPosition), Vector3.forward);
-        RaycastHit hitInformation;
-        Physics.Raycast(ray, out hitInformation);
-        if (hitInformation.collider != null) return hitInformation.transform.gameObject;
-        else return null;
     }
 }

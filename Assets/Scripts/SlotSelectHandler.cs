@@ -6,7 +6,7 @@ using UnityEngine.EventSystems;
 
 public class SlotSelectHandler : SelectionHandler
 {
-    public GlobalInfo.Card card;
+    public Global.Card card;
     public override void OnEnable()
     {
         base.OnEnable();
@@ -42,24 +42,24 @@ public class SlotSelectHandler : SelectionHandler
                 else GameManager.instance.currentSlot = this;
             }
         }
-        GameManager.instance.RenderCards(GlobalInfo.initialPosition, 5, GameManager.instance.currentPlayer.cards);
+        UIManager.instance.RenderCards(Global.initialPosition, 5, GameManager.instance.currentPlayer.cards);
     }
 
-    public void PushCardToSlot(GlobalInfo.Card inputCard)
+    public void PushCardToSlot(Global.Card inputCard)
     {
         GameManager.instance.currentPlayer.RemoveCard(inputCard);
-        inputCard.cardObject.transform.position = gameObject.transform.position + GlobalInfo.frontEpsilon;
+        inputCard.cardObject.transform.position = gameObject.transform.position + Global.frontEpsilon;
         inputCard.isFixed = true;
         card = inputCard;
         card.cardObject.GetComponent<SelectionHandler>().ToggleBase();
         GameManager.instance.currentCard = null;
     }
-    public GlobalInfo.Card PopCardFromSlot()
+    public Global.Card PopCardFromSlot()
     {
-        GameManager.instance.currentPlayer.AddCards(new List<GlobalInfo.Card> { card }); //½½·Ô¿¡¼­ Ä«µå¸¦ »«´Ù.
-        card.cardObject.transform.position = GlobalInfo.hiddenCardPosition;
+        GameManager.instance.currentPlayer.AddCards(new List<Global.Card> { card }); //½½·Ô¿¡¼­ Ä«µå¸¦ »«´Ù.
+        card.cardObject.transform.position = Global.hiddenCardPosition;
         card.isFixed = false;
-        GlobalInfo.Card tmpCard = card;
+        Global.Card tmpCard = card;
         card = null;
         return tmpCard;
     }

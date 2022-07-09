@@ -7,20 +7,17 @@ using TMPro;
 
 public class UIManager : MonoBehaviour
 {
-
-    [HideInInspector]
-    public GameObject uiParent;
-
     [HideInInspector]
     public static UIManager instance;
 
-    private GlobalInfo.LargeTichu largeTichu = new GlobalInfo.LargeTichu();
 
-    private GlobalInfo.InfoBar infoBar = new GlobalInfo.InfoBar();
+    private GameObject               uiParent;
+    private Global.LargeTichu        largeTichu   = new Global.LargeTichu();
+    private Global.InfoBar           infoBar      = new Global.InfoBar();
+    private Global.Timer             timer        = new Global.Timer();
+    private Global.ExchangeCardPopup exchangeCard = new Global.ExchangeCardPopup();
+    private Global.PlayerInfoUI      playerInfo   = new Global.PlayerInfoUI();
 
-    private GlobalInfo.Timer timer = new GlobalInfo.Timer();
-
-    private GlobalInfo.ExchangeCardPopup exchangeCardObject = new GlobalInfo.ExchangeCardPopup();
 
     private bool isMassaging = false;
 
@@ -34,38 +31,56 @@ public class UIManager : MonoBehaviour
 
     private void InitializeVariables()
     {
-        uiParent = GameObject.Find(GlobalInfo.uiParentObjectName);
+        uiParent = GameObject.Find(Global.uiParentObjectName);
 
-        //라지티츄 오브젝트, 버튼
-        largeTichu.largeTichuObject = uiParent.transform.Find(GlobalInfo.largeTichuButtonObjectName).gameObject;
-        largeTichu.declareButton    = largeTichu.largeTichuObject.transform.Find(GlobalInfo.largeTichuDeclareButtonName).GetComponent<Button>();
-        largeTichu.skipButton       = largeTichu.largeTichuObject.transform.Find(GlobalInfo.largeTichuSkipButtonName).GetComponent<Button>();
+        //라지티츄 오브젝트
+        largeTichu.largeTichuObject = uiParent.transform.Find(Global.largeTichuButtonObjectName).gameObject;
+        largeTichu.declareButton    = largeTichu.largeTichuObject.transform.Find(Global.largeTichuDeclareButtonName).GetComponent<Button>();
+        largeTichu.skipButton       = largeTichu.largeTichuObject.transform.Find(Global.largeTichuSkipButtonName).GetComponent<Button>();
         ///////////////////////////////////
 
-        //인포 창 오브젝트, 텍스트
-        infoBar.infoBarObject = uiParent.transform.Find(GlobalInfo.infoBarObjectName).gameObject;
-        infoBar.infoBarText = infoBar.infoBarObject.transform.Find(GlobalInfo.infoBarTextObjectName).GetComponent<TMP_Text>();
+        //인포 창 오브젝트
+        infoBar.infoBarObject = uiParent.transform.Find(Global.infoBarObjectName).gameObject;
+        infoBar.infoBarText   = infoBar.infoBarObject.transform.Find(Global.infoBarTextObjectName).GetComponent<TMP_Text>();
         //////////////////////////////////
         
 
         //타이머 오브젝트
-        timer.timerObject = uiParent.transform.Find(GlobalInfo.timerObjectName).gameObject;
-        timer.timerText = timer.timerObject.GetComponent<TMP_Text>();
+        timer.timerObject = uiParent.transform.Find(Global.timerObjectName).gameObject;
+        timer.timerText   = timer.timerObject.GetComponent<TMP_Text>();
         /////////////////////////////////
         
 
         //카드 교환 팝업 오브젝트
-        exchangeCardObject.exchangeCardPopupObject = uiParent.transform.Find(GlobalInfo.exchangeCardObjectName).gameObject;
-        exchangeCardObject.exchangeCardButton = exchangeCardObject.exchangeCardPopupObject.transform.Find(GlobalInfo.exchangeCardButtonObjectName).GetComponent<Button>();
-        exchangeCardObject.slots = new GlobalInfo.ExchangeCardSlot[3];
-        for (int i = 0; i < 3; ++i)
+        exchangeCard.exchangeCardPopupObject = uiParent.transform.Find(Global.exchangeCardObjectName).gameObject;
+        exchangeCard.exchangeCardButton      = exchangeCard.exchangeCardPopupObject.transform.Find(Global.exchangeCardButtonObjectName).GetComponent<Button>();
+        exchangeCard.slots = new Global.ExchangeCardSlot[Global.numberOfSlots];
+        for (int i = 0; i < Global.numberOfSlots; ++i)
         {
-            var nowSlot = exchangeCardObject.exchangeCardPopupObject.transform.Find(GlobalInfo.exchangeCardSlotObjectName + i.ToString());
-            exchangeCardObject.slots[i].slot = nowSlot.GetComponent<SlotSelectHandler>();
-            exchangeCardObject.slots[i].playerText = nowSlot.Find(GlobalInfo.exchangeplayerObjectName).GetComponent<TMP_Text>();
+            var nowSlot = exchangeCard.exchangeCardPopupObject.transform.Find(Global.exchangeCardSlotObjectName[i]);
+            exchangeCard.slots[i].slot       = nowSlot.GetComponent<SlotSelectHandler>();
+            exchangeCard.slots[i].playerText = nowSlot.Find(Global.exchangeplayerObjectName).GetComponent<TMP_Text>();
         }
         /////////////////////////////////
-        
+
+
+        //플레이어 인포 오브젝트
+        playerInfo.playerInfoObject = uiParent.transform.Find(Global.playerInfoObjectName).gameObject;
+        playerInfo.playerInfo = new Global.PlayerInfo[Global.numberOfPlayers];
+
+        for(int idx = 0; idx<playerInfo.playerInfo.Length; ++idx)
+        {
+            playerInfo.playerInfo[idx].playerInfoObject = playerInfo.playerInfoObject.transform.Find(Global.playerInfoObjectNames[idx]).gameObject;
+            GameObject nowPlayerInfoObject = playerInfo.playerInfo[idx].playerInfoObject;
+
+            playerInfo.playerInfo[idx].name                 = nowPlayerInfoObject.transform.Find(Global.playerInfoNameObjectName).GetComponent<TMP_Text>();
+            playerInfo.playerInfo[idx].hand                 = nowPlayerInfoObject.transform.Find(Global.playerInfoHandObjectName).Find(Global.playerInfoHandName).GetComponent<TMP_Text>();
+            playerInfo.playerInfo[idx].smallTichuIconObject = nowPlayerInfoObject.transform.Find(Global.playerInfoTichuObjectName).Find(Global.playerInfoSmallTichuName).gameObject;
+            playerInfo.playerInfo[idx].largeTichuIconObject = nowPlayerInfoObject.transform.Find(Global.playerInfoTichuObjectName).Find(Global.playerInfoLargeTichuName).gameObject;
+            playerInfo.playerInfo[idx].roundScore           = nowPlayerInfoObject.transform.Find(Global.playerInfoScoreObjectName).Find(Global.playerInfoRoundScoreName).GetComponent<TMP_Text>();
+            playerInfo.playerInfo[idx].totalScore           = nowPlayerInfoObject.transform.Find(Global.playerInfoScoreObjectName).Find(Global.playerInfoTotalScoreName).GetComponent<TMP_Text>();
+        }
+
 
     }
 
@@ -82,7 +97,7 @@ public class UIManager : MonoBehaviour
     public void ActivateLargeTichu(UnityAction DeclareCall, UnityAction SkipCall)
     {
 
-        ShowInfo(GlobalInfo.largeTichuInfo);
+        ShowInfo(Global.largeTichuInfo);
 
         largeTichu.largeTichuObject.SetActive(true);
 
@@ -114,8 +129,8 @@ public class UIManager : MonoBehaviour
         while (timerDuration >= 0)
         {
             ShowTimer(((int)(timerDuration)).ToString());
-            timerDuration -= GlobalInfo.tick;
-            yield return new WaitForSeconds(GlobalInfo.tick);
+            timerDuration -= Global.tick;
+            yield return new WaitForSeconds(Global.tick);
         }
     }
 
@@ -132,10 +147,10 @@ public class UIManager : MonoBehaviour
 
     public void ActivateExchangeCardsPopup(UnityAction exchangeCall)
     {
-        ShowInfo(GlobalInfo.exchangeCardInfo);
-        exchangeCardObject.exchangeCardPopupObject.SetActive(true);
+        ShowInfo(Global.exchangeCardInfo);
+        exchangeCard.exchangeCardPopupObject.SetActive(true);
         WritePlayerName();
-        exchangeCardObject.exchangeCardButton.onClick.AddListener(exchangeCall);
+        exchangeCard.exchangeCardButton.onClick.AddListener(exchangeCall);
         //버튼에 보내기 call 할당
     }
 
@@ -143,7 +158,7 @@ public class UIManager : MonoBehaviour
     public void DeactivateExchangeCardsPopup()
     {
         //버튼에 call 삭제
-        exchangeCardObject.exchangeCardButton.onClick.RemoveAllListeners();
+        exchangeCard.exchangeCardButton.onClick.RemoveAllListeners();
         if(GameManager.instance.currentCard != null)
         {
             GameManager.instance.currentCard.cardObject.GetComponent<SelectionHandler>().ToggleBase();
@@ -155,35 +170,35 @@ public class UIManager : MonoBehaviour
             GameManager.instance.currentSlot = null;
         }
         FlushCard();
-        exchangeCardObject.exchangeCardPopupObject.SetActive(false);
+        exchangeCard.exchangeCardPopupObject.SetActive(false);
         HideInfo();
     }
 
     public void WritePlayerName()
     {
-        int cnt = 0;
-        for(int i = GameManager.instance.currentPlayer.playerNumber + 1; cnt<3; ++i)
+        for(int idx = GameManager.instance.currentPlayer.playerNumber + 1; idx < GameManager.instance.currentPlayer.playerNumber + 1 + Global.numberOfSlots; ++idx)
         {
-            exchangeCardObject.slots[cnt].player = GameManager.instance.players[i % 4];
-            exchangeCardObject.slots[cnt].playerText.text = exchangeCardObject.slots[cnt].player.playerName;
-            ++cnt;
+            int nowSlotIdx = idx - (GameManager.instance.currentPlayer.playerNumber + 1);
+            int nowPlayerIdx = idx % Global.numberOfPlayers;
+            exchangeCard.slots[nowSlotIdx].player = GameManager.instance.players[nowPlayerIdx];
+            exchangeCard.slots[nowSlotIdx].playerText.text = exchangeCard.slots[nowSlotIdx].player.playerName;
         }
     }
 
     public void FlushCard()
     {
-        for(int i=0; i<3; ++i)
+        for(int i=0; i<Global.numberOfSlots; ++i)
         {
-            if(exchangeCardObject.slots[i].slot.card == null)
+            if(exchangeCard.slots[i].slot.card == null)
             {
                 int idx = Random.Range(0, GameManager.instance.currentPlayer.cards.Count);
-                exchangeCardObject.slots[i].slot.card = GameManager.instance.currentPlayer.cards[idx];
-                GameManager.instance.currentPlayer.RemoveCard(exchangeCardObject.slots[i].slot.card);
+                exchangeCard.slots[i].slot.card = GameManager.instance.currentPlayer.cards[idx];
+                GameManager.instance.currentPlayer.RemoveCard(exchangeCard.slots[i].slot.card);
             }
-            exchangeCardObject.slots[i].slot.card.isFixed = false;
+            exchangeCard.slots[i].slot.card.isFixed = false;
 
-            exchangeCardObject.slots[i].player.AddCardToBuffer(exchangeCardObject.slots[i].slot.card);
-            exchangeCardObject.slots[i].slot.card.cardObject.transform.position = GlobalInfo.hiddenCardPosition;
+            exchangeCard.slots[i].player.AddCardToBuffer(exchangeCard.slots[i].slot.card);
+            exchangeCard.slots[i].slot.card.cardObject.transform.position = Global.hiddenCardPosition;
         }
     }
 
@@ -194,13 +209,13 @@ public class UIManager : MonoBehaviour
 
     private IEnumerator MassageCoroutine(string msg)
     {
-        StartCoroutine(ShakeCoroutine(infoBar.infoBarText.gameObject, GlobalInfo.shakeDuration));
+        StartCoroutine(ShakeCoroutine(infoBar.infoBarText.gameObject, Global.shakeDuration));
         isMassaging = true;
         string originalMsg = infoBar.infoBarText.text;
         Color originalColor = infoBar.infoBarText.color;
         ShowInfo(msg);
-        infoBar.infoBarText.color = GlobalInfo.massageColor;
-        yield return new WaitForSeconds(GlobalInfo.massageDuration);
+        infoBar.infoBarText.color = Global.massageColor;
+        yield return new WaitForSeconds(Global.massageDuration);
         ShowInfo(originalMsg);
         infoBar.infoBarText.color = originalColor;
         isMassaging = false;
@@ -208,7 +223,7 @@ public class UIManager : MonoBehaviour
 
     public bool IsAllSlotSelected()
     {
-        foreach (var nowSlot in exchangeCardObject.slots) if (nowSlot.slot.card == null) return false;
+        foreach (var nowSlot in exchangeCard.slots) if (nowSlot.slot.card == null) return false;
         return true;
     }
 
@@ -218,13 +233,13 @@ public class UIManager : MonoBehaviour
         float startPosY = shakeObject.transform.position.y;
         while(duration>0)
         {
-            duration -= GlobalInfo.shakeTick;
+            duration -= Global.shakeTick;
             shakeObject.transform.position = new Vector3(
-                                                        startPosX + Mathf.Sin(Time.time * GlobalInfo.shakeSpeedX) * GlobalInfo.shakeAmountX,
-                                                        startPosY + Mathf.Sin(Time.time * GlobalInfo.shakeSpeedY) * GlobalInfo.shakeAmountY,
+                                                        startPosX + Mathf.Sin(Time.time * Global.shakeSpeedX) * Global.shakeAmountX,
+                                                        startPosY + Mathf.Sin(Time.time * Global.shakeSpeedY) * Global.shakeAmountY,
                                                         shakeObject.transform.position.z
                                                         );
-            yield return new WaitForSeconds(GlobalInfo.shakeTick);
+            yield return new WaitForSeconds(Global.shakeTick);
         }
         shakeObject.transform.position = new Vector3(startPosX, startPosY, shakeObject.transform.position.z);
     }
@@ -232,5 +247,51 @@ public class UIManager : MonoBehaviour
     public bool IsTimeOut()
     {
         return timerDuration < 0;
+    }
+
+    public void RenderCards(Vector3 centerPosition, int numberOfCardsForLine, List<Global.Card> cardList)
+    {
+        foreach (var item in GameManager.instance.cards) if (item.isFixed == false) item.cardObject.transform.position = Global.hiddenCardPosition;
+
+        float offsetX = Global.width / (numberOfCardsForLine - 1);
+        float offsetY = Global.offsetY;
+        float offsetZ = Global.offsetZ;
+
+        Vector3 initialPosition = centerPosition + new Vector3(-offsetX * ((float)(numberOfCardsForLine - 1) / 2f), offsetY * ((cardList.Count - 1) / numberOfCardsForLine), 0);
+
+        Vector3 pos = Vector3.zero;
+
+        int cnt = 0;
+        foreach (var item in cardList)
+        {
+            if (cnt == numberOfCardsForLine)
+            {
+                pos.x = 0;
+                pos.y -= offsetY;
+                cnt = 0;
+            }
+
+            item.cardObject.transform.position = initialPosition + pos;
+            pos.x += offsetX;
+            pos.z -= offsetZ;
+            ++cnt;
+        }
+    }
+
+    public void RenderPlayerInfo()
+    {
+        for(int idx = GameManager.instance.currentPlayer.playerNumber; idx <GameManager.instance.currentPlayer.playerNumber + Global.numberOfPlayers; ++idx)
+        {
+            var nowPlayerIdx         = idx % Global.numberOfPlayers;
+            var nowPlayer            = GameManager.instance.players[nowPlayerIdx];
+            var nowPlayerInfo        = playerInfo.playerInfo[idx - GameManager.instance.currentPlayer.playerNumber];
+
+            nowPlayerInfo.name.text       = nowPlayer.playerName;
+            nowPlayerInfo.hand.text       = nowPlayer.cards.Count.ToString();
+            nowPlayerInfo.roundScore.text = nowPlayer.roundScore.ToString();
+            nowPlayerInfo.totalScore.text = nowPlayer.totalScore.ToString();
+            nowPlayerInfo.largeTichuIconObject.SetActive(nowPlayer.largeTichuFlag);
+            nowPlayerInfo.smallTichuIconObject.SetActive(nowPlayer.smallTichuFlag);
+        }
     }
 }

@@ -6,27 +6,29 @@ using System.Linq;
 
 public class GamePlayer : MonoBehaviour
 {
-    public List<GlobalInfo.Card> cards = new List<GlobalInfo.Card>();
-    public List<GlobalInfo.Card> cardBuffer = new List<GlobalInfo.Card>();
+    public List<Global.Card> cards      = new List<Global.Card>();
+    public List<Global.Card> cardBuffer = new List<Global.Card>();
     public string playerName;
     public int    playerNumber;
+    public int roundScore;
+    public int totalScore;
 
-    public bool chooseFlag = false;
+    public bool chooseFlag          = false;
     public bool coroutineFinishFlag = false;
-    public bool largeTichuFlag = false;
-    public bool smallTichuFlag = false;
-
-    public void AddCards(List<GlobalInfo.Card> cardList)
+    public bool largeTichuFlag      = false;
+    public bool smallTichuFlag      = false;
+      
+    public void AddCards(List<Global.Card> cardList)
     {
         cards.AddRange(cardList);
     }
 
-    public void AddCardToBuffer(GlobalInfo.Card card)
+    public void AddCardToBuffer(Global.Card card)
     {
         cardBuffer.Add(card);
     }
 
-    public void RemoveCard(GlobalInfo.Card card)
+    public void RemoveCard(Global.Card card)
     {
         cards.Remove(card);
     }
@@ -48,7 +50,7 @@ public class GamePlayer : MonoBehaviour
         if (UIManager.instance.IsAllSlotSelected()) chooseFlag = true;
         else
         {
-            UIManager.instance.Massage(GlobalInfo.SlotSelectErrorMsg);
+            UIManager.instance.Massage(Global.SlotSelectErrorMsg);
             return;
         }
     }
@@ -60,13 +62,14 @@ public class GamePlayer : MonoBehaviour
 
     public IEnumerator ChooseLargeTichuCoroutine()
     {
+        UIManager.instance.RenderPlayerInfo();
         coroutineFinishFlag = false;
         
         chooseFlag = false;
-        GameManager.instance.RenderCards(GlobalInfo.initialPosition, 4, cards);
+        UIManager.instance.RenderCards(Global.initialPosition, 4, cards);
         
 
-        UIManager.instance.ActivateTimer(GlobalInfo.largeTichuDuration);
+        UIManager.instance.ActivateTimer(Global.largeTichuDuration);
         UIManager.instance.ActivateLargeTichu(DeclareLargeTichu, SkipLargeTichu);
         yield return new WaitUntil(()=>chooseFlag == true || UIManager.instance.IsTimeOut());
         UIManager.instance.DeactivateLargeTichu();
@@ -81,12 +84,13 @@ public class GamePlayer : MonoBehaviour
     }
     public IEnumerator ExchangeCardsCoroutine()
     {
+        UIManager.instance.RenderPlayerInfo();
         coroutineFinishFlag = false;
 
         chooseFlag = false;
-        GameManager.instance.RenderCards(GlobalInfo.initialPosition, 5, cards);
+        UIManager.instance.RenderCards(Global.initialPosition, 5, cards);
 
-        UIManager.instance.ActivateTimer(GlobalInfo.exchangeCardsDuration);
+        UIManager.instance.ActivateTimer(Global.exchangeCardsDuration);
         UIManager.instance.ActivateExchangeCardsPopup(ChooseExchangeCard);
         yield return new WaitUntil(() => chooseFlag == true || UIManager.instance.IsTimeOut());
         UIManager.instance.DeactivateExchangeCardsPopup();
