@@ -46,17 +46,9 @@ public static class GlobalInfo
     public static Vector3 initialScale = new Vector3(0.2f,0.2f, 0.2f);
     public static Vector3 frontEpsilon = new Vector3(0, 0, -0.001f);
 
-    public struct ButtonNames
-    {
-        public string ltYesButtonName;
-        public string ltNoButtonName;
-    }
-
-    public static ButtonNames buttons = new ButtonNames
-                                     {                                     
-                                       ltYesButtonName = "LargeTichuDeclareButton",
-                                       ltNoButtonName  = "LargeTichuSkipButton"
-                                     };
+    public static string largeTichuButtonObjectName = "LargeTichuButton";
+    public static string largeTichuDeclareButtonName = "LargeTichuDeclareButton";
+    public static string largeTichuSkipButtonName = "LargeTichuSkipButton";
 
     public static string largeTichuInfo = "라지 티츄 여부를 결정하세요.";
     public static string exchangeCardInfo = "카드를 한장씩 나눠주세요.";

@@ -16,8 +16,7 @@ public class UIManager : MonoBehaviour
 
     private struct LargeTichu
     {
-        public GameObject declareObject;
-        public GameObject skipObject;
+        public GameObject largeTichuObject;
         public Button declareButton;
         public Button skipButton;
     }
@@ -69,10 +68,9 @@ public class UIManager : MonoBehaviour
         uiParent = GameObject.Find(GlobalInfo.uiParentObjectName);
 
         //라지티츄 오브젝트, 버튼
-        largeTichu.declareObject = uiParent.transform.Find(GlobalInfo.buttons.ltYesButtonName).gameObject;
-        largeTichu.skipObject = uiParent.transform.Find(GlobalInfo.buttons.ltNoButtonName).gameObject;
-        largeTichu.declareButton = largeTichu.declareObject.GetComponent<Button>();
-        largeTichu.skipButton = largeTichu.skipObject.GetComponent<Button>();
+        largeTichu.largeTichuObject = uiParent.transform.Find(GlobalInfo.largeTichuButtonObjectName).gameObject;
+        largeTichu.declareButton    = largeTichu.largeTichuObject.transform.Find(GlobalInfo.largeTichuDeclareButtonName).GetComponent<Button>();
+        largeTichu.skipButton       = largeTichu.largeTichuObject.transform.Find(GlobalInfo.largeTichuSkipButtonName).GetComponent<Button>();
         ///////////////////////////////////
 
         //인포 창 오브젝트, 텍스트
@@ -117,8 +115,7 @@ public class UIManager : MonoBehaviour
 
         ShowInfo(GlobalInfo.largeTichuInfo);
 
-        largeTichu.declareObject.SetActive(true);
-        largeTichu.skipObject.SetActive(true);
+        largeTichu.largeTichuObject.SetActive(true);
 
         largeTichu.declareButton.onClick.AddListener(DeclareCall);
         largeTichu.skipButton.onClick.AddListener(SkipCall);
@@ -130,9 +127,7 @@ public class UIManager : MonoBehaviour
         largeTichu.declareButton.onClick.RemoveAllListeners();
         largeTichu.skipButton.onClick.RemoveAllListeners();
 
-        largeTichu.declareObject.SetActive(false);
-        largeTichu.skipObject.SetActive(false);
-
+        largeTichu.largeTichuObject.SetActive(false);
         HideInfo();
     }
 
