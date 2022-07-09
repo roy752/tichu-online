@@ -254,15 +254,9 @@ public class GameManager : MonoBehaviour
     }
     private void HandleSelection()
     {
-        
-        //if (Input.touchCount == 1 && Input.GetTouch(0).phase == TouchPhase.Began && isSelectionEnabled)
-        //{
-           //GameObject hitObject = GetHitObject(Camera.main.ScreenToWorldPoint(Input.GetTouch(0).position));
-       
         if (Input.GetMouseButtonDown(0) && isSelectionEnabled)
         {
             GameObject hitObject = GetHitObject( Camera.main.ScreenToWorldPoint(Input.mousePosition));
-
 
             if (hitObject != null) hitObject.GetComponent<SelectionHandler>().ToggleSelection();
         }

@@ -78,10 +78,14 @@ public class UIManager : MonoBehaviour
         //인포 창 오브젝트, 텍스트
         infoBar.infoBarObject = uiParent.transform.Find(GlobalInfo.infoBarObjectName).gameObject;
         infoBar.infoBarText = infoBar.infoBarObject.transform.Find("Text").GetComponent<TMP_Text>();
+        //////////////////////////////////
+        
 
         //타이머 오브젝트
         timer.timerObject = uiParent.transform.Find("Timer").gameObject;
         timer.timerText = timer.timerObject.GetComponent<TMP_Text>();
+        /////////////////////////////////
+        
 
         //카드 교환 팝업 오브젝트
         exchangeCardObject.exchangeCardPopupObject = uiParent.transform.Find(GlobalInfo.exchangeCardObjectName).gameObject;
@@ -93,6 +97,9 @@ public class UIManager : MonoBehaviour
             exchangeCardObject.slots[i].slot = nowSlot.GetComponent<SlotSelectHandler>();
             exchangeCardObject.slots[i].playerText = nowSlot.Find(GlobalInfo.exchangeplayerObjectName).GetComponent<TMP_Text>();
         }
+        /////////////////////////////////
+        
+
     }
 
     public void ShowInfo(string text)
@@ -141,7 +148,7 @@ public class UIManager : MonoBehaviour
     {
         while (inputDuration >= 0)
         {
-            UIManager.instance.ShowTimer(((int)(inputDuration)).ToString());
+            ShowTimer(((int)(inputDuration)).ToString());
             inputDuration -= GlobalInfo.tick;
             yield return new WaitForSeconds(GlobalInfo.tick);
         }

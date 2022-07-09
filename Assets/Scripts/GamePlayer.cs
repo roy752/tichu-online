@@ -9,7 +9,7 @@ public class GamePlayer : MonoBehaviour
     public List<GameManager.Card> cards = new List<GameManager.Card>();
     public List<GameManager.Card> cardBuffer = new List<GameManager.Card>();
     public string playerName;
-    public int playerNumber;
+    public int    playerNumber;
 
     public bool chooseFlag = false;
     public bool coroutineFinishFlag = false;
