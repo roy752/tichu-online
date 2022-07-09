@@ -1,7 +1,9 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-
+using UnityEngine.UI;
+using UnityEngine.Events;
+using TMPro;
 public static class GlobalInfo
 {
     public static int numberOfCardsGeneral = 13;
@@ -64,6 +66,54 @@ public static class GlobalInfo
     public static float shakeAmountY = 0.01f;
     public static float shakeDuration = 0.15f;
     public static Color massageColor = new Color(1f, 0, 0, 1f);
+
+
+
+    public class Card
+    {
+        public GameObject cardObject;
+        public string cardName;
+        public int value;
+        public int type;
+        public int id;
+        public bool isFixed;
+    }
+
+
+    public struct LargeTichu
+    {
+        public GameObject largeTichuObject;
+        public Button declareButton;
+        public Button skipButton;
+    }
+
+    public struct InfoBar
+    {
+        public GameObject infoBarObject;
+        public TMP_Text infoBarText;
+    }
+
+    public struct Timer
+    {
+        public GameObject timerObject;
+        public TMP_Text timerText;
+    }
+
+    public struct ExchangeCardSlot
+    {
+        public TMP_Text playerText;
+        public SlotSelectHandler slot;
+        public GamePlayer player;
+    }
+
+    public struct ExchangeCardPopup
+    {
+        public GameObject exchangeCardPopupObject;
+        public Button exchangeCardButton;
+        public ExchangeCardSlot[] slots;
+    }
+
+
 
     public enum GeneralCardName
     {

@@ -6,7 +6,7 @@ using UnityEngine.EventSystems;
 
 public class SlotSelectHandler : SelectionHandler
 {
-    public GameManager.Card card;
+    public GlobalInfo.Card card;
     public override void OnEnable()
     {
         base.OnEnable();
@@ -45,7 +45,7 @@ public class SlotSelectHandler : SelectionHandler
         GameManager.instance.RenderCards(GlobalInfo.initialPosition, 5, GameManager.instance.currentPlayer.cards);
     }
 
-    public void PushCardToSlot(GameManager.Card inputCard)
+    public void PushCardToSlot(GlobalInfo.Card inputCard)
     {
         GameManager.instance.currentPlayer.RemoveCard(inputCard);
         inputCard.cardObject.transform.position = gameObject.transform.position + GlobalInfo.frontEpsilon;
@@ -54,12 +54,12 @@ public class SlotSelectHandler : SelectionHandler
         card.cardObject.GetComponent<SelectionHandler>().ToggleBase();
         GameManager.instance.currentCard = null;
     }
-    public GameManager.Card PopCardFromSlot()
+    public GlobalInfo.Card PopCardFromSlot()
     {
-        GameManager.instance.currentPlayer.AddCards(new List<GameManager.Card> { card }); //½½·Ô¿¡¼­ Ä«µå¸¦ »«´Ù.
+        GameManager.instance.currentPlayer.AddCards(new List<GlobalInfo.Card> { card }); //½½·Ô¿¡¼­ Ä«µå¸¦ »«´Ù.
         card.cardObject.transform.position = GlobalInfo.hiddenCardPosition;
         card.isFixed = false;
-        GameManager.Card tmpCard = card;
+        GlobalInfo.Card tmpCard = card;
         card = null;
         return tmpCard;
     }

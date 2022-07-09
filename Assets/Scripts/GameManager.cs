@@ -10,33 +10,22 @@ using UnityEngine.EventSystems;
 public class GameManager : MonoBehaviour
 {
     [HideInInspector]
-    public List<Card> cards = new List<Card>();
+    public List<GlobalInfo.Card> cards = new List<GlobalInfo.Card>();
 
     [HideInInspector]
-    public List<Card> cardsObjectPool = new List<Card>();
-
-    [HideInInspector]
-    public class Card
-    {
-        public GameObject cardObject;
-        public string     cardName;
-        public int        value;
-        public int        type;
-        public int        id;
-        public bool       isFixed;
-    }
+    public List<GlobalInfo.Card> cardsObjectPool = new List<GlobalInfo.Card>();
 
     [HideInInspector]
     public GamePlayer[] players;
 
     [HideInInspector]
     public GamePlayer currentPlayer;
+
     [HideInInspector]
-    public Card currentCard;
+    public GlobalInfo.Card currentCard;
+
     [HideInInspector]
     public SlotSelectHandler currentSlot;
-
-    public static GameManager instance;
 
     [HideInInspector]
     public GameObject cardsParent;
@@ -49,6 +38,10 @@ public class GameManager : MonoBehaviour
 
     [HideInInspector]
     public bool isSelectionEnabled;
+
+    [HideInInspector]
+    public static GameManager instance;
+
 
     private int splitCardIdx = 0;
 
@@ -129,7 +122,7 @@ public class GameManager : MonoBehaviour
         {
             for (int i = 1; i <= GlobalInfo.numberOfCardsGeneral; ++i)
             {
-                Card cardInstance = new Card();
+                GlobalInfo.Card cardInstance = new GlobalInfo.Card();
 
                 cardInstance.cardName = cardName + i.ToString("D2");
                 cardInstance.type     = type;
@@ -144,7 +137,7 @@ public class GameManager : MonoBehaviour
         int idx = 0;
         foreach (string cardName in Enum.GetNames(typeof(GlobalInfo.SpecialCardName)))
         {
-            Card cardInstance = new Card();
+            GlobalInfo.Card cardInstance = new GlobalInfo.Card();
 
             cardInstance.cardName = cardName;
             cardInstance.type     = type;
@@ -199,13 +192,13 @@ public class GameManager : MonoBehaviour
         cardsParent = GameObject.Find(GlobalInfo.cardsParentObjectName);
     }
 
-    void ShuffleCards(ref List<Card> cardList)
+    void ShuffleCards(ref List<GlobalInfo.Card> cardList)
     {
         RNGCryptoServiceProvider random = new RNGCryptoServiceProvider();
         cardList = cardList.OrderBy(x => Next(random)).ToList();
     }
     
-    public void RenderCards(Vector3 centerPosition, int numberOfCardsForLine, List<Card> cardList) 
+    public void RenderCards(Vector3 centerPosition, int numberOfCardsForLine, List<GlobalInfo.Card> cardList) 
     {
         foreach (var item in cards) if(item.isFixed==false) item.cardObject.transform.position = GlobalInfo.hiddenCardPosition;
 

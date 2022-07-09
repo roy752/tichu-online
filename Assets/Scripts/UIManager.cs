@@ -14,46 +14,13 @@ public class UIManager : MonoBehaviour
     [HideInInspector]
     public static UIManager instance;
 
-    private struct LargeTichu
-    {
-        public GameObject largeTichuObject;
-        public Button declareButton;
-        public Button skipButton;
-    }
+    private GlobalInfo.LargeTichu largeTichu = new GlobalInfo.LargeTichu();
 
-    private LargeTichu largeTichu = new LargeTichu();
+    private GlobalInfo.InfoBar infoBar = new GlobalInfo.InfoBar();
 
-    private struct InfoBar
-    {
-        public GameObject infoBarObject;
-        public TMP_Text infoBarText;
-    }
+    private GlobalInfo.Timer timer = new GlobalInfo.Timer();
 
-    private InfoBar infoBar = new InfoBar();
-
-    private struct Timer
-    {
-        public GameObject timerObject;
-        public TMP_Text timerText;
-    }
-
-    private Timer timer = new Timer();
-
-    private struct ExchangeCardSlot
-    {
-        public TMP_Text playerText;
-        public SlotSelectHandler slot;
-        public GamePlayer player;
-    }
-
-    private struct ExchangeCardPopup
-    {
-        public GameObject exchangeCardPopupObject;
-        public Button exchangeCardButton;
-        public ExchangeCardSlot[] slots; 
-    }
-
-    private ExchangeCardPopup exchangeCardObject = new ExchangeCardPopup();
+    private GlobalInfo.ExchangeCardPopup exchangeCardObject = new GlobalInfo.ExchangeCardPopup();
 
     private bool isMassaging = false;
 
@@ -90,7 +57,7 @@ public class UIManager : MonoBehaviour
         //카드 교환 팝업 오브젝트
         exchangeCardObject.exchangeCardPopupObject = uiParent.transform.Find(GlobalInfo.exchangeCardObjectName).gameObject;
         exchangeCardObject.exchangeCardButton = exchangeCardObject.exchangeCardPopupObject.transform.Find(GlobalInfo.exchangeCardButtonObjectName).GetComponent<Button>();
-        exchangeCardObject.slots = new ExchangeCardSlot[3];
+        exchangeCardObject.slots = new GlobalInfo.ExchangeCardSlot[3];
         for (int i = 0; i < 3; ++i)
         {
             var nowSlot = exchangeCardObject.exchangeCardPopupObject.transform.Find(GlobalInfo.exchangeCardSlotObjectName + i.ToString());
@@ -241,7 +208,7 @@ public class UIManager : MonoBehaviour
 
     public bool IsAllSlotSelected()
     {
-        foreach (var slot in exchangeCardObject.slots) if (slot.slot.card == null) return false;
+        foreach (var nowSlot in exchangeCardObject.slots) if (nowSlot.slot.card == null) return false;
         return true;
     }
 

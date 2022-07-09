@@ -6,27 +6,27 @@ using System.Linq;
 
 public class GamePlayer : MonoBehaviour
 {
-    public List<GameManager.Card> cards = new List<GameManager.Card>();
-    public List<GameManager.Card> cardBuffer = new List<GameManager.Card>();
+    public List<GlobalInfo.Card> cards = new List<GlobalInfo.Card>();
+    public List<GlobalInfo.Card> cardBuffer = new List<GlobalInfo.Card>();
     public string playerName;
     public int    playerNumber;
 
     public bool chooseFlag = false;
     public bool coroutineFinishFlag = false;
     public bool largeTichuFlag = false;
-    float       duration;
+    public bool smallTichuFlag = false;
 
-    public void AddCards(List<GameManager.Card> cardList)
+    public void AddCards(List<GlobalInfo.Card> cardList)
     {
         cards.AddRange(cardList);
     }
 
-    public void AddCardToBuffer(GameManager.Card card)
+    public void AddCardToBuffer(GlobalInfo.Card card)
     {
         cardBuffer.Add(card);
     }
 
-    public void RemoveCard(GameManager.Card card)
+    public void RemoveCard(GlobalInfo.Card card)
     {
         cards.Remove(card);
     }
