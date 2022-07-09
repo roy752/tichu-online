@@ -47,6 +47,7 @@ public static class Global
     public static string   exchangeCardObjectName       = "CardExchangePopup";
     public static string   exchangeCardButtonObjectName = "CardExchangeButton";
     public static string   exchangeplayerObjectName     = "ExchangePlayerName";
+    public static string   exchangeCardSmallTichuButtonObjectName = "SmallTichuButton";
 
     public static string   playerInfoObjectName      = "PlayerInfo";
     public static string[] playerInfoObjectNames     = new string[] { "PlayerInfo0", "PlayerInfo1", "PlayerInfo2", "PlayerInfo3" };
@@ -133,6 +134,7 @@ public static class Global
     {
         public GameObject exchangeCardPopupObject;
         public Button exchangeCardButton;
+        public Button smallTichuButton;
         public ExchangeCardSlot[] slots;
     }
 

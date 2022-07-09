@@ -54,6 +54,7 @@ public class UIManager : MonoBehaviour
         //카드 교환 팝업 오브젝트
         exchangeCard.exchangeCardPopupObject = uiParent.transform.Find(Global.exchangeCardObjectName).gameObject;
         exchangeCard.exchangeCardButton      = exchangeCard.exchangeCardPopupObject.transform.Find(Global.exchangeCardButtonObjectName).GetComponent<Button>();
+        exchangeCard.smallTichuButton        = exchangeCard.exchangeCardPopupObject.transform.Find(Global.exchangeCardSmallTichuButtonObjectName).GetComponent<Button>();
         exchangeCard.slots = new Global.ExchangeCardSlot[Global.numberOfSlots];
         for (int i = 0; i < Global.numberOfSlots; ++i)
         {
@@ -145,19 +146,23 @@ public class UIManager : MonoBehaviour
         timer.timerText.text = null;
     }
 
-    public void ActivateExchangeCardsPopup(UnityAction exchangeCall)
+    public void ActivateExchangeCardsPopup(UnityAction exchangeCall, UnityAction declareSmallTichuCall)
     {
         ShowInfo(Global.exchangeCardInfo);
         exchangeCard.exchangeCardPopupObject.SetActive(true);
         WritePlayerName();
         exchangeCard.exchangeCardButton.onClick.AddListener(exchangeCall);
-        //버튼에 보내기 call 할당
+        exchangeCard.smallTichuButton.onClick.AddListener(declareSmallTichuCall);
+        exchangeCard.smallTichuButton.gameObject.SetActive(GameManager.instance.currentPlayer.canDeclareSmallTichu); //수정 필요
     }
 
+    public void UpdateExchangeCardsSmallTichuButton()
+    {
+        exchangeCard.smallTichuButton.gameObject.SetActive(GameManager.instance.currentPlayer.canDeclareSmallTichu); //수정 필요
+    }
 
     public void DeactivateExchangeCardsPopup()
     {
-        //버튼에 call 삭제
         exchangeCard.exchangeCardButton.onClick.RemoveAllListeners();
         if(GameManager.instance.currentCard != null)
         {

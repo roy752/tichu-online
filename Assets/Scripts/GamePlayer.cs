@@ -17,6 +17,8 @@ public class GamePlayer : MonoBehaviour
     public bool coroutineFinishFlag = false;
     public bool largeTichuFlag      = false;
     public bool smallTichuFlag      = false;
+
+    public bool canDeclareSmallTichu = true;
       
     public void AddCards(List<Global.Card> cardList)
     {
@@ -36,6 +38,7 @@ public class GamePlayer : MonoBehaviour
     public void DeclareLargeTichu()
     {
         chooseFlag = true;
+        canDeclareSmallTichu = false;
         largeTichuFlag = true;
     }
 
@@ -43,6 +46,14 @@ public class GamePlayer : MonoBehaviour
     {
         chooseFlag = true;
         largeTichuFlag = false;
+    }
+
+    public void DeclareSmallTichu()
+    {
+        smallTichuFlag = true;
+        canDeclareSmallTichu = false;
+        UIManager.instance.UpdateExchangeCardsSmallTichuButton();
+        UIManager.instance.RenderPlayerInfo();
     }
 
     public void ChooseExchangeCard()
@@ -93,7 +104,7 @@ public class GamePlayer : MonoBehaviour
         UIManager.instance.RenderCards(Global.initialPosition, Global.numberOfCardsForLineInSmallTichuPhase, cards);
 
         UIManager.instance.ActivateTimer(Global.exchangeCardsDuration);
-        UIManager.instance.ActivateExchangeCardsPopup(ChooseExchangeCard);
+        UIManager.instance.ActivateExchangeCardsPopup(ChooseExchangeCard, DeclareSmallTichu);
         yield return new WaitUntil(() => chooseFlag == true || UIManager.instance.IsTimeOut());
         UIManager.instance.DeactivateExchangeCardsPopup();
         UIManager.instance.DeactivateTimer();
