@@ -66,6 +66,14 @@ public static class Global
     public static string alertConfirmButtonObjectName = "ConfirmButton";
     public static string alertCancelButtonObjectName  = "CancelButton";
 
+    public static string   cardReceivePopupObjectName            = "CardReceivePopup";
+    public static string[] cardReceiveSlotObjectNames            = new string[] { "CardReceiveSlot0", "CardReceiveSlot1", "CardReceiveSlot2" };
+    public static string   cardReceiveButtonObjectName           = "CardReceiveButton";
+    public static string   cardReceiveSmallTichuButtonObjectName = "SmallTichuButton";
+    public static string   cardReceivePlayerInfoObjectName       = "CardGiverInfo";
+    public static string   cardReceivePlayerNameObjectName       = "PlayerName";
+
+
     public static float width = 3.5f;
     public static float offsetY = 0.75f;
     public static float offsetZ = 0.002f;
@@ -80,6 +88,8 @@ public static class Global
 
     public static string largeTichuInfo     = "라지 티츄 여부를 결정하세요.";
     public static string exchangeCardInfo   = "카드를 한장씩 나눠주세요.";
+    public static string receiveCardInfo    = "카드를 받으세요.";
+    
     public static string SlotSelectErrorMsg = "카드를 모두 나눠주지 않았습니다.";
 
     public static string alertLargeTichuMsg = "정말 라지 티츄를 선언하시겠습니까?";
@@ -89,6 +99,7 @@ public static class Global
     public static float exchangeCardsDuration = 30.5f;
     public static float massageDuration       = 1.5f;
     public static float shakeDuration         = 0.15f;
+    public static float receiveCardDuration   = 15.5f;
     
     public static float tick      = 0.1f;
     public static float shakeTick = 1 / 60f;
@@ -105,70 +116,91 @@ public static class Global
     public class Card
     {
         public GameObject cardObject;
-        public string cardName;
-        public int value;
-        public int type;
-        public int id;
-        public bool isFixed;
+        public string     cardName;
+        public int        value;
+        public int        type;
+        public int        id;
+        public bool       isFixed;
     }
 
     public struct LargeTichu
     {
         public GameObject largeTichuObject;
-        public Button declareButton;
-        public Button skipButton;
+        public Button     declareButton;
+        public Button     skipButton;
     }
 
     public struct InfoBar
     {
         public GameObject infoBarObject;
-        public TMP_Text infoBarText;
+        public TMP_Text   infoBarText;
     }
 
     public struct Timer
     {
         public GameObject timerObject;
-        public TMP_Text timerText;
+        public TMP_Text   timerText;
     }
 
     public struct ExchangeCardSlot
     {
-        public TMP_Text playerText;
+        public TMP_Text          playerText;
         public SlotSelectHandler slot;
-        public GamePlayer player;
+        public GamePlayer        player;
     }
 
     public struct ExchangeCardPopup
     {
-        public GameObject exchangeCardPopupObject;
-        public Button exchangeCardButton;
-        public Button smallTichuButton;
+        public GameObject         exchangeCardPopupObject;
+        public Button             exchangeCardButton;
+        public Button             smallTichuButton;
         public ExchangeCardSlot[] slots;
     }
 
     public struct PlayerInfo
     {
         public GameObject playerInfoObject;
-        public TMP_Text name;
-        public TMP_Text hand;
+        public TMP_Text   name;
+        public TMP_Text   hand;
         public GameObject largeTichuIconObject;
         public GameObject smallTichuIconObject;
-        public TMP_Text roundScore;
-        public TMP_Text totalScore;
+        public TMP_Text   roundScore;
+        public TMP_Text   totalScore;
     }
 
     public struct PlayerInfoUI
     {
-        public GameObject playerInfoObject;
+        public GameObject   playerInfoObject;
         public PlayerInfo[] playerInfo; 
     }
 
     public struct AlertPopup
     {
         public GameObject alertPopupObject;
-        public TMP_Text alertText;
-        public Button alertConfirmButton;
-        public Button alertCancelButton;
+        public TMP_Text   alertText;
+        public Button     alertConfirmButton;
+        public Button     alertCancelButton;
+    }
+
+    public struct CardReceiveSlot
+    {
+        public GameObject slotObject;
+        public GameObject InfoObject;
+        public TMP_Text   playerNameText;
+    }
+
+    public struct CardReceivePopup
+    {
+        public GameObject        cardReceiveObject;
+        public CardReceiveSlot[] cardReceiveSlots;
+        public Button            cardReceiveButton;
+        public Button            smallTichuButton;
+    }
+
+    public struct PlayerReceiveCardSlot
+    {
+        public GamePlayer player;
+        public Card card;
     }
 
     public enum GeneralCardName
@@ -210,5 +242,12 @@ public static class Global
     static public string GetCardName(string cardTypeName, int cardNumber)
     {
         return cardTypeName + cardNumber.ToString("D2");
+    }
+    static public int GetCardGiverIdx(GamePlayer giver, GamePlayer receiver)
+    {
+        int giverIdx = giver.playerNumber;
+        int receiverIdx = receiver.playerNumber;
+        if (giverIdx < receiverIdx) giverIdx += numberOfPlayers;
+        return giverIdx - receiverIdx - 1;
     }
 }

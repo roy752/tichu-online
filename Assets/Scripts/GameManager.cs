@@ -64,14 +64,33 @@ public class GameManager : MonoBehaviour
     IEnumerator StartPlay()
     {
         SplitCardsToPlayer(Global.numberOfCardsLargeTichuPhase);
+
         StartCoroutine(StartLargeTichuPhaseCoroutine());
         yield return new WaitUntil(()=>phaseChangeFlag);
 
         SplitCardsToPlayer(Global.numberOfCardsSmallTichuPhase);
+        
         StartCoroutine(StartExchangeCardPhaseCoroutine());
+        yield return new WaitUntil(() => phaseChangeFlag);
+
+        StartCoroutine(StartReceiveCardPhaseCoroutine());
         yield return new WaitUntil(() => phaseChangeFlag);
     }
 
+    IEnumerator StartReceiveCardPhaseCoroutine()
+    {
+        phaseChangeFlag = false;
+
+        isSelectionEnabled = false;
+        foreach(var player in players)
+        {
+            currentPlayer = player;
+            player.ReceiveCard();
+            yield return new WaitUntil(() => player.coroutineFinishFlag);
+        }
+
+        phaseChangeFlag = true;
+    }
     IEnumerator StartLargeTichuPhaseCoroutine()
     {
         phaseChangeFlag = false;
