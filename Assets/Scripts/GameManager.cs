@@ -39,7 +39,7 @@ public class GameManager : MonoBehaviour
     public static GameManager instance;
 
 
-    private int splitCardIdx = 0;
+    private int splitCardIdx;
 
     private void Awake()
     {

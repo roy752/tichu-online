@@ -15,8 +15,12 @@ public static class Global
     public static int numberOfPlayers               = 4;
     public static int numberOfSlots                 = 3;
 
+    public static int numberOfCardsForLineInLargeTichuPhase = 4;
+    public static int numberOfCardsForLineInSmallTichuPhase = 5;
+    public static int numberOfCardsForLineInPlayPhase       = 14;
+
     public static int[] generalCardsValue           = new int[] { 0, 14, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13 };
-    public static int[] specialCardsValue           = new int[]{ 1, 15, 15, 16 }; //새 개 봉 용 순서로
+    public static int[] specialCardsValue           = new int[]{ 1, 15, 16, 17 }; //새 개 봉 용 순서로
     public static int   aceCardsValue               = 14;
 
 
@@ -43,6 +47,7 @@ public static class Global
     public static string   exchangeCardObjectName       = "CardExchangePopup";
     public static string   exchangeCardButtonObjectName = "CardExchangeButton";
     public static string   exchangeplayerObjectName     = "ExchangePlayerName";
+    public static string   exchangeCardSmallTichuButtonObjectName = "SmallTichuButton";
 
     public static string   playerInfoObjectName      = "PlayerInfo";
     public static string[] playerInfoObjectNames     = new string[] { "PlayerInfo0", "PlayerInfo1", "PlayerInfo2", "PlayerInfo3" };
@@ -55,6 +60,11 @@ public static class Global
     public static string   playerInfoScoreObjectName = "PlayerScore";
     public static string   playerInfoRoundScoreName  = "RoundScore";
     public static string   playerInfoTotalScoreName  = "TotalScore";
+
+    public static string alertPopupObjectName         = "AlertPopup";
+    public static string alertTextObjectName          = "AlertContent";
+    public static string alertConfirmButtonObjectName = "ConfirmButton";
+    public static string alertCancelButtonObjectName  = "CancelButton";
 
     public static float width = 3.5f;
     public static float offsetY = 0.75f;
@@ -72,6 +82,9 @@ public static class Global
     public static string exchangeCardInfo   = "카드를 한장씩 나눠주세요.";
     public static string SlotSelectErrorMsg = "카드를 모두 나눠주지 않았습니다.";
 
+    public static string alertLargeTichuMsg = "정말 라지 티츄를 선언하시겠습니까?";
+    public static string alertSmallTichuMsg = "정말 스몰 티츄를 선언하시겠습니까?";
+
     public static float largeTichuDuration    = 20.5f;
     public static float exchangeCardsDuration = 30.5f;
     public static float massageDuration       = 1.5f;
@@ -80,8 +93,8 @@ public static class Global
     public static float tick      = 0.1f;
     public static float shakeTick = 1 / 60f;
     
-    public static float shakeSpeedX   = 600f;
-    public static float shakeSpeedY   = 457f;
+    public static float shakeSpeedX   = 47f;
+    public static float shakeSpeedY   = 26f;
     public static float shakeAmountX  = 0.05f;
     public static float shakeAmountY  = 0.01f;
 
@@ -129,6 +142,7 @@ public static class Global
     {
         public GameObject exchangeCardPopupObject;
         public Button exchangeCardButton;
+        public Button smallTichuButton;
         public ExchangeCardSlot[] slots;
     }
 
@@ -147,6 +161,14 @@ public static class Global
     {
         public GameObject playerInfoObject;
         public PlayerInfo[] playerInfo; 
+    }
+
+    public struct AlertPopup
+    {
+        public GameObject alertPopupObject;
+        public TMP_Text alertText;
+        public Button alertConfirmButton;
+        public Button alertCancelButton;
     }
 
     public enum GeneralCardName

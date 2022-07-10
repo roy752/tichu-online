@@ -18,6 +18,7 @@ public class SlotSelectHandler : SelectionHandler
         {
             if (card != null) PopCardFromSlot();
             PushCardToSlot(GameManager.instance.currentCard);
+            GameManager.instance.currentPlayer.SortCards();
             GameManager.instance.currentSlot = null;
         }
         else //카드가 선택되어 있지 않다면
@@ -25,6 +26,7 @@ public class SlotSelectHandler : SelectionHandler
             if (card != null)
             {
                 PopCardFromSlot(); //슬롯에 카드가 있을 경우 뺸다.
+                GameManager.instance.currentPlayer.SortCards();
                 if (GameManager.instance.currentSlot != null) GameManager.instance.currentSlot.ToggleSelection();
             }
             else
@@ -42,7 +44,7 @@ public class SlotSelectHandler : SelectionHandler
                 else GameManager.instance.currentSlot = this;
             }
         }
-        UIManager.instance.RenderCards(Global.initialPosition, 5, GameManager.instance.currentPlayer.cards);
+        UIManager.instance.RenderCards(Global.initialPosition, Global.numberOfCardsForLineInSmallTichuPhase, GameManager.instance.currentPlayer.cards);
     }
 
     public void PushCardToSlot(Global.Card inputCard)
