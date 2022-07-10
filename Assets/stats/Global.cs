@@ -61,6 +61,11 @@ public static class Global
     public static string   playerInfoRoundScoreName  = "RoundScore";
     public static string   playerInfoTotalScoreName  = "TotalScore";
 
+    public static string alertPopupObjectName         = "AlertPopup";
+    public static string alertTextObjectName          = "AlertContent";
+    public static string alertConfirmButtonObjectName = "ConfirmButton";
+    public static string alertCancelButtonObjectName  = "CancelButton";
+
     public static float width = 3.5f;
     public static float offsetY = 0.75f;
     public static float offsetZ = 0.002f;
@@ -76,6 +81,9 @@ public static class Global
     public static string largeTichuInfo     = "라지 티츄 여부를 결정하세요.";
     public static string exchangeCardInfo   = "카드를 한장씩 나눠주세요.";
     public static string SlotSelectErrorMsg = "카드를 모두 나눠주지 않았습니다.";
+
+    public static string alertLargeTichuMsg = "정말 라지 티츄를 선언하시겠습니까?";
+    public static string alertSmallTichuMsg = "정말 스몰 티츄를 선언하시겠습니까?";
 
     public static float largeTichuDuration    = 20.5f;
     public static float exchangeCardsDuration = 30.5f;
@@ -153,6 +161,14 @@ public static class Global
     {
         public GameObject playerInfoObject;
         public PlayerInfo[] playerInfo; 
+    }
+
+    public struct AlertPopup
+    {
+        public GameObject alertPopupObject;
+        public TMP_Text alertText;
+        public Button alertConfirmButton;
+        public Button alertCancelButton;
     }
 
     public enum GeneralCardName

@@ -40,6 +40,7 @@ public class GamePlayer : MonoBehaviour
         chooseFlag = true;
         canDeclareSmallTichu = false;
         largeTichuFlag = true;
+        UIManager.instance.DeactivateAlertPopup();
     }
 
     public void SkipLargeTichu()
@@ -50,10 +51,12 @@ public class GamePlayer : MonoBehaviour
 
     public void DeclareSmallTichu()
     {
+        Debug.Log("Ω∫∏Ù∆º√Ú∏¶ º±æ«ﬂ¥Ÿ!");
         smallTichuFlag = true;
         canDeclareSmallTichu = false;
-        UIManager.instance.UpdateExchangeCardsSmallTichuButton();
         UIManager.instance.RenderPlayerInfo();
+        UIManager.instance.DeactivateAlertPopup();
+        UIManager.instance.UpdateExchangeCardsSmallTichuButton();
     }
 
     public void ChooseExchangeCard()

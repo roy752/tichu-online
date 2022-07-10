@@ -17,6 +17,7 @@ public class UIManager : MonoBehaviour
     private Global.Timer             timer        = new Global.Timer();
     private Global.ExchangeCardPopup exchangeCard = new Global.ExchangeCardPopup();
     private Global.PlayerInfoUI      playerInfo   = new Global.PlayerInfoUI();
+    private Global.AlertPopup        alertPopup   = new Global.AlertPopup();
 
 
     private bool isMassaging = false;
@@ -39,6 +40,7 @@ public class UIManager : MonoBehaviour
         largeTichu.skipButton       = largeTichu.largeTichuObject.transform.Find(Global.largeTichuSkipButtonName).GetComponent<Button>();
         ///////////////////////////////////
 
+
         //인포 창 오브젝트
         infoBar.infoBarObject = uiParent.transform.Find(Global.infoBarObjectName).gameObject;
         infoBar.infoBarText   = infoBar.infoBarObject.transform.Find(Global.infoBarTextObjectName).GetComponent<TMP_Text>();
@@ -58,31 +60,42 @@ public class UIManager : MonoBehaviour
         exchangeCard.slots = new Global.ExchangeCardSlot[Global.numberOfSlots];
         for (int i = 0; i < Global.numberOfSlots; ++i)
         {
-            var nowSlot = exchangeCard.exchangeCardPopupObject.transform.Find(Global.exchangeCardSlotObjectName[i]);
-            exchangeCard.slots[i].slot       = nowSlot.GetComponent<SlotSelectHandler>();
-            exchangeCard.slots[i].playerText = nowSlot.Find(Global.exchangeplayerObjectName).GetComponent<TMP_Text>();
+            var nowSlotObject = exchangeCard.exchangeCardPopupObject.transform.Find(Global.exchangeCardSlotObjectName[i]);
+            exchangeCard.slots[i].slot       = nowSlotObject.GetComponent<SlotSelectHandler>();
+            exchangeCard.slots[i].playerText = nowSlotObject.Find(Global.exchangeplayerObjectName).GetComponent<TMP_Text>();
         }
         /////////////////////////////////
 
 
         //플레이어 인포 오브젝트
         playerInfo.playerInfoObject = uiParent.transform.Find(Global.playerInfoObjectName).gameObject;
-        playerInfo.playerInfo = new Global.PlayerInfo[Global.numberOfPlayers];
+        playerInfo.playerInfo       = new Global.PlayerInfo[Global.numberOfPlayers];
 
         for(int idx = 0; idx<playerInfo.playerInfo.Length; ++idx)
         {
             playerInfo.playerInfo[idx].playerInfoObject = playerInfo.playerInfoObject.transform.Find(Global.playerInfoObjectNames[idx]).gameObject;
-            GameObject nowPlayerInfoObject = playerInfo.playerInfo[idx].playerInfoObject;
 
-            playerInfo.playerInfo[idx].name                 = nowPlayerInfoObject.transform.Find(Global.playerInfoNameObjectName).GetComponent<TMP_Text>();
-            playerInfo.playerInfo[idx].hand                 = nowPlayerInfoObject.transform.Find(Global.playerInfoHandObjectName).Find(Global.playerInfoHandName).GetComponent<TMP_Text>();
-            playerInfo.playerInfo[idx].smallTichuIconObject = nowPlayerInfoObject.transform.Find(Global.playerInfoTichuObjectName).Find(Global.playerInfoSmallTichuName).gameObject;
-            playerInfo.playerInfo[idx].largeTichuIconObject = nowPlayerInfoObject.transform.Find(Global.playerInfoTichuObjectName).Find(Global.playerInfoLargeTichuName).gameObject;
-            playerInfo.playerInfo[idx].roundScore           = nowPlayerInfoObject.transform.Find(Global.playerInfoScoreObjectName).Find(Global.playerInfoRoundScoreName).GetComponent<TMP_Text>();
-            playerInfo.playerInfo[idx].totalScore           = nowPlayerInfoObject.transform.Find(Global.playerInfoScoreObjectName).Find(Global.playerInfoTotalScoreName).GetComponent<TMP_Text>();
+            var nowInfoObject = playerInfo.playerInfo[idx].playerInfoObject.transform;
+
+            playerInfo.playerInfo[idx].name                 = nowInfoObject.Find(Global.playerInfoNameObjectName).GetComponent<TMP_Text>();
+            playerInfo.playerInfo[idx].hand                 = nowInfoObject.Find(Global.playerInfoHandObjectName).Find(Global.playerInfoHandName).GetComponent<TMP_Text>();
+            playerInfo.playerInfo[idx].smallTichuIconObject = nowInfoObject.Find(Global.playerInfoTichuObjectName).Find(Global.playerInfoSmallTichuName).gameObject;
+            playerInfo.playerInfo[idx].largeTichuIconObject = nowInfoObject.Find(Global.playerInfoTichuObjectName).Find(Global.playerInfoLargeTichuName).gameObject;
+            playerInfo.playerInfo[idx].roundScore           = nowInfoObject.Find(Global.playerInfoScoreObjectName).Find(Global.playerInfoRoundScoreName).GetComponent<TMP_Text>();
+            playerInfo.playerInfo[idx].totalScore           = nowInfoObject.Find(Global.playerInfoScoreObjectName).Find(Global.playerInfoTotalScoreName).GetComponent<TMP_Text>();
         }
+        ///////////////////////////////
 
 
+        //확인창 팝업(alert popup) 오브젝트
+        alertPopup.alertPopupObject = uiParent.transform.Find(Global.alertPopupObjectName).gameObject;
+
+        var nowAlertObject          = alertPopup.alertPopupObject.transform;
+        
+        alertPopup.alertText          = nowAlertObject.Find(Global.alertTextObjectName).GetComponent<TMP_Text>();
+        alertPopup.alertConfirmButton = nowAlertObject.Find(Global.alertConfirmButtonObjectName).GetComponent<Button>();
+        alertPopup.alertCancelButton  = nowAlertObject.Find(Global.alertCancelButtonObjectName).GetComponent<Button>();
+        //////////////////////
     }
 
     public void ShowInfo(string text)
@@ -102,12 +115,16 @@ public class UIManager : MonoBehaviour
 
         largeTichu.largeTichuObject.SetActive(true);
 
-        largeTichu.declareButton.onClick.AddListener(DeclareCall);
+        largeTichu.declareButton.onClick.AddListener(() => ActivateAlertPopup(Global.alertLargeTichuMsg, DeclareCall)); // 람다식, 델리게이트 알아볼 것.
         largeTichu.skipButton.onClick.AddListener(SkipCall);
+        
+        // btn.onClick.AddListener(() => { Function(param); OtherFunction(param); }); //이런 코드도 동작함.
+        // largeTichu.declareButton.onClick.AddListener(delegate{ ActivateAlertPopup(Global.alertLargeTichuMsg, DeclareCall); }); //이런 코드도 동작함.
     }
 
     public void DeactivateLargeTichu()
     {
+        DeactivateAlertPopup();
 
         largeTichu.declareButton.onClick.RemoveAllListeners();
         largeTichu.skipButton.onClick.RemoveAllListeners();
@@ -152,18 +169,19 @@ public class UIManager : MonoBehaviour
         exchangeCard.exchangeCardPopupObject.SetActive(true);
         WritePlayerName();
         exchangeCard.exchangeCardButton.onClick.AddListener(exchangeCall);
-        exchangeCard.smallTichuButton.onClick.AddListener(declareSmallTichuCall);
-        exchangeCard.smallTichuButton.gameObject.SetActive(GameManager.instance.currentPlayer.canDeclareSmallTichu); //수정 필요
+        exchangeCard.smallTichuButton.onClick.AddListener(()=> ActivateAlertPopup(Global.alertSmallTichuMsg, declareSmallTichuCall));
+        exchangeCard.smallTichuButton.gameObject.SetActive(GameManager.instance.currentPlayer.canDeclareSmallTichu); //수정 필요. 버튼을 enabled = false 로 하고 흐리게 만들어야함.
     }
 
     public void UpdateExchangeCardsSmallTichuButton()
     {
-        exchangeCard.smallTichuButton.gameObject.SetActive(GameManager.instance.currentPlayer.canDeclareSmallTichu); //수정 필요
+        exchangeCard.smallTichuButton.gameObject.SetActive(GameManager.instance.currentPlayer.canDeclareSmallTichu); //수정 필요. 버튼을 enabled = false 로 하고 흐리게 만들어야함.
     }
 
     public void DeactivateExchangeCardsPopup()
     {
         exchangeCard.exchangeCardButton.onClick.RemoveAllListeners();
+        DeactivateAlertPopup();
         if(GameManager.instance.currentCard != null)
         {
             GameManager.instance.currentCard.cardObject.GetComponent<SelectionHandler>().ToggleBase();
@@ -298,5 +316,27 @@ public class UIManager : MonoBehaviour
             nowPlayerInfo.largeTichuIconObject.SetActive(nowPlayer.largeTichuFlag);
             nowPlayerInfo.smallTichuIconObject.SetActive(nowPlayer.smallTichuFlag);
         }
+    }
+
+    public void ActivateAlertPopup(string alertText, UnityAction confirmCall)
+    {
+        GameManager.instance.isSelectionEnabled = false;
+        alertPopup.alertPopupObject.SetActive(true);
+        alertPopup.alertText.text = alertText;
+
+        alertPopup.alertConfirmButton.onClick.RemoveAllListeners();
+        alertPopup.alertCancelButton.onClick.RemoveAllListeners();
+        alertPopup.alertConfirmButton.onClick.AddListener(confirmCall);
+        alertPopup.alertCancelButton.onClick.AddListener(DeactivateAlertPopup);
+    }
+
+    public void DeactivateAlertPopup()
+    {
+        GameManager.instance.isSelectionEnabled = true;
+        alertPopup.alertText.text = null;
+
+        alertPopup.alertConfirmButton.onClick.RemoveAllListeners();
+        alertPopup.alertCancelButton.onClick.RemoveAllListeners();
+        alertPopup.alertPopupObject.SetActive(false);
     }
 }
