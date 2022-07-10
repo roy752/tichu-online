@@ -18,7 +18,7 @@ public class UIManager : MonoBehaviour
     private Global.ExchangeCardPopup exchangeCard = new Global.ExchangeCardPopup();
     private Global.PlayerInfoUI      playerInfo   = new Global.PlayerInfoUI();
     private Global.AlertPopup        alertPopup   = new Global.AlertPopup();
-
+    private Global.CardReceivePopup  cardReceive  = new Global.CardReceivePopup();
 
     private bool isMassaging = false;
 
@@ -96,22 +96,35 @@ public class UIManager : MonoBehaviour
         alertPopup.alertConfirmButton = nowAlertObject.Find(Global.alertConfirmButtonObjectName).GetComponent<Button>();
         alertPopup.alertCancelButton  = nowAlertObject.Find(Global.alertCancelButtonObjectName).GetComponent<Button>();
         //////////////////////
-    }
 
-    public void ShowInfo(string text)
-    {
-        infoBar.infoBarText.text = text;
-    }
 
-    public void HideInfo()
-    {
-        infoBar.infoBarText.text = null;
+        //카드 받는 팝업(card receive popup) 오브젝트
+        cardReceive.cardReceiveObject = uiParent.transform.Find(Global.cardReceivePopupObjectName).gameObject;
+
+        var nowCardReceiveObject = cardReceive.cardReceiveObject.transform;
+        
+        cardReceive.cardReceiveSlots = new Global.CardReceiveSlot[Global.numberOfSlots];
+
+        cardReceive.cardReceiveButton = nowCardReceiveObject.Find(Global.cardReceiveButtonObjectName).GetComponent<Button>();
+        cardReceive.smallTichuButton = nowCardReceiveObject.Find(Global.cardReceiveSmallTichuButtonObjectName).GetComponent<Button>();
+
+        for(int idx = 0; idx<Global.numberOfSlots; ++idx)
+        {
+            cardReceive.cardReceiveSlots[idx].slotObject = nowCardReceiveObject.Find(Global.cardReceiveSlotObjectNames[idx]).gameObject;
+            cardReceive.cardReceiveSlots[idx].InfoObject = cardReceive.cardReceiveSlots[idx].slotObject.transform.Find(Global.cardReceivePlayerInfoObjectName).gameObject;
+            cardReceive.cardReceiveSlots[idx].playerNameText = cardReceive.cardReceiveSlots[idx].InfoObject.transform.Find(Global.cardReceivePlayerNameObjectName).GetComponent<TMP_Text>();
+        }
+        /////////////////////////////////////////////////
+
+
+
     }
 
     public void ActivateLargeTichu(UnityAction DeclareCall, UnityAction SkipCall)
     {
 
         ShowInfo(Global.largeTichuInfo);
+        ActivateTimer(Global.largeTichuDuration);
 
         largeTichu.largeTichuObject.SetActive(true);
 
@@ -125,6 +138,7 @@ public class UIManager : MonoBehaviour
     public void DeactivateLargeTichu()
     {
         DeactivateAlertPopup();
+        DeactivateTimer();
 
         largeTichu.declareButton.onClick.RemoveAllListeners();
         largeTichu.skipButton.onClick.RemoveAllListeners();
@@ -133,12 +147,124 @@ public class UIManager : MonoBehaviour
         HideInfo();
     }
 
+    public void ActivateExchangeCardsPopup(UnityAction exchangeCall, UnityAction declareCall)
+    {
+        ShowInfo(Global.exchangeCardInfo);
+        ActivateTimer(Global.exchangeCardsDuration);
+        exchangeCard.exchangeCardPopupObject.SetActive(true);
+        WritePlayerNameToSlot();
+        exchangeCard.exchangeCardButton.onClick.AddListener(exchangeCall);
+        exchangeCard.smallTichuButton.onClick.AddListener(
+                                                      () => ActivateAlertPopup(
+                                                                                Global.alertSmallTichuMsg,
+                                                                                () => { declareCall(); UpdateSmallTichuButton(exchangeCard.smallTichuButton.gameObject); }
+                                                                              )
+                                                        );
+        exchangeCard.smallTichuButton.gameObject.SetActive(GameManager.instance.currentPlayer.canDeclareSmallTichu); //수정 필요. 버튼을 enabled = false 로 하고 흐리게 만들어야함.
+    }
+
+
+    public void DeactivateExchangeCardsPopup()
+    {
+        exchangeCard.exchangeCardButton.onClick.RemoveAllListeners();
+        exchangeCard.smallTichuButton.onClick.RemoveAllListeners();
+        DeactivateAlertPopup();
+        DeactivateTimer();
+        if (GameManager.instance.currentCard != null)
+        {
+            GameManager.instance.currentCard.cardObject.GetComponent<SelectionHandler>().ToggleBase();
+            GameManager.instance.currentCard = null;
+        }
+        if (GameManager.instance.currentSlot != null)
+        {
+            GameManager.instance.currentSlot.ToggleBase();
+            GameManager.instance.currentSlot = null;
+        }
+        FlushCard();
+        exchangeCard.exchangeCardPopupObject.SetActive(false);
+        HideInfo();
+    }
+
+    public void ActivateReceiveCardPopup(UnityAction receiveCall, UnityAction declareCall)
+    {
+        ShowInfo(Global.receiveCardInfo);
+        ActivateTimer(Global.receiveCardDuration);
+        cardReceive.cardReceiveObject.SetActive(true);
+        cardReceive.cardReceiveButton.onClick.AddListener(receiveCall);
+        cardReceive.smallTichuButton.onClick.AddListener(
+                                                      () => ActivateAlertPopup(
+                                                                                Global.alertSmallTichuMsg, 
+                                                                                ()=> { declareCall(); UpdateSmallTichuButton(cardReceive.smallTichuButton.gameObject); }
+                                                                              )
+                                                        );
+        
+        for(int idx = 0; idx<Global.numberOfSlots; ++idx)
+        {
+            var nowCard = GameManager.instance.currentPlayer.slot[idx].card;
+
+            nowCard.isFixed = true;
+            nowCard.cardObject.transform.position = cardReceive.cardReceiveSlots[idx].slotObject.transform.position + Global.frontEpsilon;
+
+            var nowPlayer = GameManager.instance.currentPlayer.slot[idx].player;
+            cardReceive.cardReceiveSlots[idx].playerNameText.text = nowPlayer.playerName;
+        }
+
+        cardReceive.smallTichuButton.gameObject.SetActive(GameManager.instance.currentPlayer.canDeclareSmallTichu); //수정 필요. 버튼을 enabled = false 로 하고 흐리게 만들어야함.
+    }
+
+    public void DeactivateReceiveCardPopup()
+    {
+        cardReceive.cardReceiveButton.onClick.RemoveAllListeners();
+        cardReceive.smallTichuButton.onClick.RemoveAllListeners();
+        DeactivateAlertPopup();
+        DeactivateTimer();
+
+        cardReceive.cardReceiveObject.SetActive(false);
+        HideInfo();
+    }
+
+    public void ActivateAlertPopup(string alertText, UnityAction confirmCall)
+    {
+        GameManager.instance.isSelectionEnabled = false;
+        alertPopup.alertPopupObject.SetActive(true);
+        alertPopup.alertText.text = alertText;
+
+        alertPopup.alertConfirmButton.onClick.AddListener(confirmCall);
+        alertPopup.alertCancelButton.onClick.AddListener(DeactivateAlertPopup);
+    }
+
+    public void DeactivateAlertPopup()
+    {
+        GameManager.instance.isSelectionEnabled = true;
+        alertPopup.alertText.text = null;
+
+        alertPopup.alertConfirmButton.onClick.RemoveAllListeners();
+        alertPopup.alertCancelButton.onClick.RemoveAllListeners();
+        alertPopup.alertPopupObject.SetActive(false);
+    }
+
     IEnumerator timerCoroutineVariable;
 
     public void ActivateTimer(float duration)
     {
         timerCoroutineVariable = TimerCoroutine(duration);
         StartCoroutine(timerCoroutineVariable);
+    }
+    public void DeactivateTimer()
+    {
+        StopCoroutine(timerCoroutineVariable);
+        timer.timerText.text = null;
+    }
+
+
+    public void ShowInfo(string text)
+    {
+        infoBar.infoBarText.text = text;
+    }
+
+    public void HideInfo()
+    {
+        infoBar.infoBarText.text = null;
     }
 
     public IEnumerator TimerCoroutine(float inputDuration)
@@ -157,47 +283,12 @@ public class UIManager : MonoBehaviour
         timer.timerText.text = text;
     }
 
-    public void DeactivateTimer()
+    public void UpdateSmallTichuButton(GameObject buttonObject)
     {
-        StopCoroutine(timerCoroutineVariable);
-        timer.timerText.text = null;
+        buttonObject.SetActive(GameManager.instance.currentPlayer.canDeclareSmallTichu); //수정 필요. 버튼을 enabled = false 로 하고 흐리게 만들어야함.
     }
 
-    public void ActivateExchangeCardsPopup(UnityAction exchangeCall, UnityAction declareSmallTichuCall)
-    {
-        ShowInfo(Global.exchangeCardInfo);
-        exchangeCard.exchangeCardPopupObject.SetActive(true);
-        WritePlayerName();
-        exchangeCard.exchangeCardButton.onClick.AddListener(exchangeCall);
-        exchangeCard.smallTichuButton.onClick.AddListener(()=> ActivateAlertPopup(Global.alertSmallTichuMsg, declareSmallTichuCall));
-        exchangeCard.smallTichuButton.gameObject.SetActive(GameManager.instance.currentPlayer.canDeclareSmallTichu); //수정 필요. 버튼을 enabled = false 로 하고 흐리게 만들어야함.
-    }
-
-    public void UpdateExchangeCardsSmallTichuButton()
-    {
-        exchangeCard.smallTichuButton.gameObject.SetActive(GameManager.instance.currentPlayer.canDeclareSmallTichu); //수정 필요. 버튼을 enabled = false 로 하고 흐리게 만들어야함.
-    }
-
-    public void DeactivateExchangeCardsPopup()
-    {
-        exchangeCard.exchangeCardButton.onClick.RemoveAllListeners();
-        DeactivateAlertPopup();
-        if(GameManager.instance.currentCard != null)
-        {
-            GameManager.instance.currentCard.cardObject.GetComponent<SelectionHandler>().ToggleBase();
-            GameManager.instance.currentCard = null;
-        }
-        if(GameManager.instance.currentSlot != null)
-        {
-            GameManager.instance.currentSlot.ToggleBase();
-            GameManager.instance.currentSlot = null;
-        }
-        FlushCard();
-        exchangeCard.exchangeCardPopupObject.SetActive(false);
-        HideInfo();
-    }
-
-    public void WritePlayerName()
+    public void WritePlayerNameToSlot()
     {
         for(int idx = GameManager.instance.currentPlayer.playerNumber + 1; idx < GameManager.instance.currentPlayer.playerNumber + 1 + Global.numberOfSlots; ++idx)
         {
@@ -220,7 +311,7 @@ public class UIManager : MonoBehaviour
             }
             exchangeCard.slots[i].slot.card.isFixed = false;
 
-            exchangeCard.slots[i].player.AddCardToBuffer(exchangeCard.slots[i].slot.card);
+            exchangeCard.slots[i].player.AddCardToSlot(exchangeCard.slots[i].slot.card, GameManager.instance.currentPlayer);
             exchangeCard.slots[i].slot.card.cardObject.transform.position = Global.hiddenCardPosition;
         }
     }
@@ -316,27 +407,5 @@ public class UIManager : MonoBehaviour
             nowPlayerInfo.largeTichuIconObject.SetActive(nowPlayer.largeTichuFlag);
             nowPlayerInfo.smallTichuIconObject.SetActive(nowPlayer.smallTichuFlag);
         }
-    }
-
-    public void ActivateAlertPopup(string alertText, UnityAction confirmCall)
-    {
-        GameManager.instance.isSelectionEnabled = false;
-        alertPopup.alertPopupObject.SetActive(true);
-        alertPopup.alertText.text = alertText;
-
-        alertPopup.alertConfirmButton.onClick.RemoveAllListeners();
-        alertPopup.alertCancelButton.onClick.RemoveAllListeners();
-        alertPopup.alertConfirmButton.onClick.AddListener(confirmCall);
-        alertPopup.alertCancelButton.onClick.AddListener(DeactivateAlertPopup);
-    }
-
-    public void DeactivateAlertPopup()
-    {
-        GameManager.instance.isSelectionEnabled = true;
-        alertPopup.alertText.text = null;
-
-        alertPopup.alertConfirmButton.onClick.RemoveAllListeners();
-        alertPopup.alertCancelButton.onClick.RemoveAllListeners();
-        alertPopup.alertPopupObject.SetActive(false);
     }
 }

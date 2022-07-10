@@ -7,7 +7,7 @@ using System.Linq;
 public class GamePlayer : MonoBehaviour
 {
     public List<Global.Card> cards      = new List<Global.Card>();
-    public List<Global.Card> cardBuffer = new List<Global.Card>();
+    public Global.PlayerReceiveCardSlot[] slot = new Global.PlayerReceiveCardSlot[Global.numberOfSlots];
     public string playerName;
     public int    playerNumber;
     public int roundScore;
@@ -24,42 +24,42 @@ public class GamePlayer : MonoBehaviour
     {
         cards.AddRange(cardList);
     }
-
-    public void AddCardToBuffer(Global.Card card)
+    public void AddCardToSlot(Global.Card card, GamePlayer cardGiver)
     {
-        cardBuffer.Add(card);
+        slot[Global.GetCardGiverIdx(cardGiver, this)].player = cardGiver;
+        slot[Global.GetCardGiverIdx(cardGiver, this)].card = card;
     }
-
     public void RemoveCard(Global.Card card)
     {
         cards.Remove(card);
     }
+    public void SortCards()
+    {
+        cards = cards.OrderBy(x => x.value).ToList();
+    }
 
-    public void DeclareLargeTichu()
+
+
+    public void DeclareLargeTichuCall()
     {
         chooseFlag = true;
         canDeclareSmallTichu = false;
         largeTichuFlag = true;
         UIManager.instance.DeactivateAlertPopup();
     }
-
-    public void SkipLargeTichu()
+    public void SkipLargeTichuCall()
     {
         chooseFlag = true;
         largeTichuFlag = false;
     }
-
-    public void DeclareSmallTichu()
+    public void DeclareSmallTichuCall()
     {
-        Debug.Log("스몰티츄를 선언했다!");
         smallTichuFlag = true;
         canDeclareSmallTichu = false;
         UIManager.instance.RenderPlayerInfo();
         UIManager.instance.DeactivateAlertPopup();
-        UIManager.instance.UpdateExchangeCardsSmallTichuButton();
     }
-
-    public void ChooseExchangeCard()
+    public void ExchangeCardCall()
     {
         if (UIManager.instance.IsAllSlotSelected()) chooseFlag = true;
         else
@@ -68,55 +68,86 @@ public class GamePlayer : MonoBehaviour
             return;
         }
     }
+    public void ReceiveCardCall()
+    {
+        chooseFlag = true;
+        foreach(var cardSlot in slot)
+        {
+            AddCards(new List<Global.Card> { cardSlot.card });
+            cardSlot.card.isFixed = false;
+        }
+        SortCards();
+        UIManager.instance.RenderCards(Global.initialPosition, Global.numberOfCardsForLineInSmallTichuPhase, cards);
+        //버퍼에 있는 카드를 AddCard() 하고, isFixed 풀고, 정렬하고, 렌더.
+    }
+
+
 
     public void ChooseLargeTichu()
     {
         StartCoroutine(ChooseLargeTichuCoroutine());
     }
 
-    public IEnumerator ChooseLargeTichuCoroutine()
-    {
-        UIManager.instance.RenderPlayerInfo();
-        SortCards();
-        coroutineFinishFlag = false;
-        
-        chooseFlag = false;
-        UIManager.instance.RenderCards(Global.initialPosition, Global.numberOfCardsForLineInLargeTichuPhase, cards);
-        
-
-        UIManager.instance.ActivateTimer(Global.largeTichuDuration);
-        UIManager.instance.ActivateLargeTichu(DeclareLargeTichu, SkipLargeTichu);
-        yield return new WaitUntil(()=>chooseFlag == true || UIManager.instance.IsTimeOut());
-        UIManager.instance.DeactivateLargeTichu();
-        UIManager.instance.DeactivateTimer();
-
-        coroutineFinishFlag = true;
-    }
-
     public void ExchangeCards()
     {
         StartCoroutine(ExchangeCardsCoroutine());
     }
-    public IEnumerator ExchangeCardsCoroutine()
+
+    public void ReceiveCard()
+    {
+        StartCoroutine(ReceiveCardCoroutine());
+    }
+
+
+
+
+    public IEnumerator ChooseLargeTichuCoroutine()
     {
         UIManager.instance.RenderPlayerInfo();
         SortCards();
-        coroutineFinishFlag = false;
-
+        UIManager.instance.RenderCards(Global.initialPosition, Global.numberOfCardsForLineInLargeTichuPhase, cards);
+        
         chooseFlag = false;
-        UIManager.instance.RenderCards(Global.initialPosition, Global.numberOfCardsForLineInSmallTichuPhase, cards);
-
-        UIManager.instance.ActivateTimer(Global.exchangeCardsDuration);
-        UIManager.instance.ActivateExchangeCardsPopup(ChooseExchangeCard, DeclareSmallTichu);
-        yield return new WaitUntil(() => chooseFlag == true || UIManager.instance.IsTimeOut());
-        UIManager.instance.DeactivateExchangeCardsPopup();
-        UIManager.instance.DeactivateTimer();
+        
+        coroutineFinishFlag = false;
+        
+        UIManager.instance.ActivateLargeTichu(DeclareLargeTichuCall, SkipLargeTichuCall);
+        yield return new WaitUntil(()=>chooseFlag == true || UIManager.instance.IsTimeOut());
+        UIManager.instance.DeactivateLargeTichu();
 
         coroutineFinishFlag = true;
     }
 
-    public void SortCards()
+    public IEnumerator ExchangeCardsCoroutine()
     {
-        cards = cards.OrderBy(x => x.value).ToList();
+        UIManager.instance.RenderPlayerInfo();
+        SortCards();
+        UIManager.instance.RenderCards(Global.initialPosition, Global.numberOfCardsForLineInSmallTichuPhase, cards);
+        
+        chooseFlag = false;
+        
+        coroutineFinishFlag = false;
+
+        UIManager.instance.ActivateExchangeCardsPopup(ExchangeCardCall, DeclareSmallTichuCall);
+        yield return new WaitUntil(() => chooseFlag == true || UIManager.instance.IsTimeOut());
+        UIManager.instance.DeactivateExchangeCardsPopup();
+
+        coroutineFinishFlag = true;
+    }
+
+    public IEnumerator ReceiveCardCoroutine()
+    {
+        UIManager.instance.RenderPlayerInfo();
+        UIManager.instance.RenderCards(Global.initialPosition, Global.numberOfCardsForLineInSmallTichuPhase, cards);
+        
+        chooseFlag = false;
+        
+        coroutineFinishFlag = false;
+
+        UIManager.instance.ActivateReceiveCardPopup(ReceiveCardCall, DeclareSmallTichuCall);
+        yield return new WaitUntil(() => chooseFlag == true || UIManager.instance.IsTimeOut());
+        UIManager.instance.DeactivateReceiveCardPopup();
+
+        coroutineFinishFlag = true;
     }
 }
