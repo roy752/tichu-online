@@ -7,10 +7,10 @@ using System.Linq;
 public class GameManager : MonoBehaviour
 {
     [HideInInspector]
-    public List<Global.Card> cards = new List<Global.Card>();
+    public List<Card> cards = new List<Card>();
 
     [HideInInspector]
-    public List<Global.Card> cardsObjectPool = new List<Global.Card>();
+    public List<Card> cardsObjectPool = new List<Card>();
 
     [HideInInspector]
     public Stack<Global.Trick> trickStack = new Stack<Global.Trick>();
@@ -22,7 +22,7 @@ public class GameManager : MonoBehaviour
     public GamePlayer currentPlayer;
 
     [HideInInspector]
-    public Global.Card currentCard;
+    public Card currentCard;
 
     [HideInInspector]
     public SlotSelectHandler currentSlot;
@@ -84,7 +84,7 @@ public class GameManager : MonoBehaviour
 
     IEnumerator StartPlay()
     {
-        /*
+        
         SplitCardsToPlayer(Global.numberOfCardsLargeTichuPhase);
 
         StartCoroutine(StartLargeTichuPhaseCoroutine()); //카드 8장 나눠주고 라지 티츄 결정
@@ -97,8 +97,7 @@ public class GameManager : MonoBehaviour
 
         StartCoroutine(StartReceiveCardPhaseCoroutine()); //교환한 카드 확인, 스몰티츄 결정
         yield return new WaitUntil(() => phaseChangeFlag);
-        */
-        SplitCardsToPlayer(Global.numberOfCardsForLineInPlayPhase);
+        
         StartCoroutine(StartMainPlayPhaseCoroutine()); //1,2,3,4등이 나뉠 때까지 플레이
         yield return new WaitUntil(() => phaseChangeFlag);
 
@@ -197,13 +196,20 @@ public class GameManager : MonoBehaviour
 
     void MakeCards()
     {
+        
         int typeNumber = 0;
         int idNumber = 0;
         foreach (string cardName in Enum.GetNames(typeof(Global.GeneralCardName)))
         {
             for (int i = 1; i <= Global.numberOfCardsGeneral; ++i)
             {
-                cards.Add(new Global.Card() { cardName = Global.GetCardName(cardName, i), type = typeNumber, value = Global.generalCardsValue[i], id = idNumber });
+                var nowObject = Instantiate(Resources.Load(Global.prefabPath + Global.GetCardName(cardName, i)),
+                                            Global.hiddenCardPosition,
+                                            Global.initialCardRotation,
+                                            cardsParent.transform) as GameObject;
+                var nowCard = nowObject.GetComponent<Card>();
+                nowCard.cardName = Global.GetCardName(cardName, i); nowCard.type = typeNumber; nowCard.value = Global.generalCardsValue[i]; nowCard.id = idNumber;
+                cards.Add(nowCard);
                 idNumber++;
             }
             typeNumber++;
@@ -212,17 +218,14 @@ public class GameManager : MonoBehaviour
         int idx = 0;
         foreach (string nowCardName in Enum.GetNames(typeof(Global.SpecialCardName)))
         {
-            cards.Add(new Global.Card() { cardName = nowCardName, type = typeNumber, value = Global.specialCardsValue[idx], id = idNumber });
+            var nowObject = Instantiate(Resources.Load(Global.prefabPath + nowCardName),
+                                            Global.hiddenCardPosition,
+                                            Global.initialCardRotation,
+                                            cardsParent.transform) as GameObject;
+            var nowCard = nowObject.GetComponent<Card>();
+            nowCard.cardName = nowCardName; nowCard.type = typeNumber; nowCard.value = Global.specialCardsValue[idx]; nowCard.id = idNumber;
+            cards.Add(nowCard);
             idNumber++; idx++; typeNumber++;
-        }
-
-        foreach (var item in cards)
-        {
-            item.cardObject = Instantiate(Resources.Load(Global.prefabPath + item.cardName),
-                                          Global.hiddenCardPosition,
-                                          Global.initialCardRotation,
-                                          cardsParent.transform) as GameObject;
-            item.cardObject.name = item.cardName;
         }
     }
 

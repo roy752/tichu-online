@@ -120,17 +120,6 @@ public static class Global
 
     public static Color massageColor = new Color(1f, 0, 0, 1f);
 
-
-    public class Card
-    {
-        public GameObject cardObject;
-        public string     cardName;
-        public int        value;
-        public int        type;
-        public int        id;
-        public bool       isFixed;
-    }
-
     public struct LargeTichu
     {
         public GameObject largeTichuObject;

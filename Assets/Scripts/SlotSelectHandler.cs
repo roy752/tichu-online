@@ -2,7 +2,7 @@ using System.Collections.Generic;
 
 public class SlotSelectHandler : SelectionHandler
 {
-    public Global.Card card;
+    public Card card;
     public override void OnEnable()
     {
         base.OnEnable();
@@ -43,21 +43,21 @@ public class SlotSelectHandler : SelectionHandler
         UIManager.instance.RenderCards(Global.initialPosition, Global.numberOfCardsForLineInSmallTichuPhase, GameManager.instance.currentPlayer.cards);
     }
 
-    public void PushCardToSlot(Global.Card inputCard)
+    public void PushCardToSlot(Card inputCard)
     {
         GameManager.instance.currentPlayer.RemoveCard(inputCard);
-        inputCard.cardObject.transform.position = gameObject.transform.position + Global.frontEpsilon;
+        inputCard.transform.position = gameObject.transform.position + Global.frontEpsilon;
         inputCard.isFixed = true;
         card = inputCard;
-        card.cardObject.GetComponent<SelectionHandler>().ToggleBase();
+        card.ToggleBase();
         GameManager.instance.currentCard = null;
     }
-    public Global.Card PopCardFromSlot()
+    public Card PopCardFromSlot()
     {
-        GameManager.instance.currentPlayer.AddCards(new List<Global.Card> { card }); //½½·Ô¿¡¼­ Ä«µå¸¦ »«´Ù.
-        card.cardObject.transform.position = Global.hiddenCardPosition;
+        GameManager.instance.currentPlayer.AddCard(card); //½½·Ô¿¡¼­ Ä«µå¸¦ »«´Ù.
+        card.transform.position = Global.hiddenCardPosition;
         card.isFixed = false;
-        Global.Card tmpCard = card;
+        Card tmpCard = card;
         card = null;
         return tmpCard;
     }

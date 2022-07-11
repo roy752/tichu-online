@@ -332,7 +332,7 @@ public class UIManager : MonoBehaviour
         {
             exchangeCard.slots[i].slot.card.isFixed = false;
             exchangeCard.slots[i].player.AddCardToSlot(exchangeCard.slots[i].slot.card, GameManager.instance.currentPlayer);
-            exchangeCard.slots[i].slot.card.cardObject.transform.position = Global.hiddenCardPosition;
+            exchangeCard.slots[i].slot.card.transform.position = Global.hiddenCardPosition;
         }
     }
 
@@ -383,9 +383,9 @@ public class UIManager : MonoBehaviour
         return timerDuration < 0;
     }
 
-    public void RenderCards(Vector3 centerPosition, int numberOfCardsForLine, List<Global.Card> cardList)
+    public void RenderCards(Vector3 centerPosition, int numberOfCardsForLine, List<Card> cardList)
     {
-        foreach (var item in GameManager.instance.cards) if (item.isFixed == false) item.cardObject.transform.position = Global.hiddenCardPosition;
+        foreach (var item in GameManager.instance.cards) if (item.isFixed == false) item.transform.position = Global.hiddenCardPosition;
 
         float offsetX = Global.width / (numberOfCardsForLine - 1);
         float offsetY = Global.offsetY;
@@ -404,7 +404,7 @@ public class UIManager : MonoBehaviour
                 cnt = 0;
             }
 
-            item.cardObject.transform.position = initialPosition + pos;
+            item.transform.position = initialPosition + pos;
             pos.x += offsetX;
             pos.z -= offsetZ;
             ++cnt;
@@ -435,7 +435,7 @@ public class UIManager : MonoBehaviour
             var nowCard = GameManager.instance.currentPlayer.slot[idx].card;
 
             nowCard.isFixed = true;
-            nowCard.cardObject.transform.position = receiveCard.cardReceiveSlots[idx].slotObject.transform.position + Global.frontEpsilon;
+            nowCard.transform.position = receiveCard.cardReceiveSlots[idx].slotObject.transform.position + Global.frontEpsilon;
 
             var nowPlayer = GameManager.instance.currentPlayer.slot[idx].player;
             receiveCard.cardReceiveSlots[idx].playerNameText.text = nowPlayer.playerName;

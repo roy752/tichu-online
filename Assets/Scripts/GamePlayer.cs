@@ -6,8 +6,8 @@ using System.Linq;
 
 public class GamePlayer : MonoBehaviour
 {
-    public List<Global.Card> cards             = new List<Global.Card>();
-    public List<Global.Card> selectCardList    = new List<Global.Card>();
+    public List<Card> cards             = new List<Card>();
+    public List<Card> selectCardList    = new List<Card>();
     public Global.PlayerReceiveCardSlot[] slot = new Global.PlayerReceiveCardSlot[Global.numberOfSlots];
 
     public string playerName;
@@ -22,16 +22,21 @@ public class GamePlayer : MonoBehaviour
 
     public bool canDeclareSmallTichu = true;
       
-    public void AddCards(List<Global.Card> cardList)
+    public void AddCard(Card card)
+    {
+        cards.Add(card);
+    }
+
+    public void AddCards(List<Card> cardList)
     {
         cards.AddRange(cardList);
     }
-    public void AddCardToSlot(Global.Card card, GamePlayer cardGiver)
+    public void AddCardToSlot(Card card, GamePlayer cardGiver)
     {
         slot[Global.GetCardGiverIdx(cardGiver, this)].player = cardGiver;
         slot[Global.GetCardGiverIdx(cardGiver, this)].card   = card;
     }
-    public void RemoveCard(Global.Card card)
+    public void RemoveCard(Card card)
     {
         cards.Remove(card);
     }
@@ -41,34 +46,21 @@ public class GamePlayer : MonoBehaviour
         cards = cards.OrderBy(x => x.value).ToList();
     }
 
-    public void AddSelection(Global.Card card)
+    public void AddSelection(Card card)
     {
         selectCardList.Add(card);
         selectCardList = selectCardList.OrderBy(x => x.value).ToList();
     }
 
-    public void RemoveSelection(Global.Card card)
+    public void RemoveSelection(Card card)
     {
         selectCardList.Remove(card);
     }
 
-    public Global.Card GetCard(GameObject cardObject)
-    {
-        foreach (var item in cards)
-        {
-            if (item.cardObject == cardObject)
-            {
-                return item;
-            }
-        }
-        return null;
-    }
-
     public void DisableSelection()
     {
-        foreach (var card in cards) if (card.cardObject.GetComponent<SelectionHandler>().isSelected) card.cardObject.GetComponent<SelectionHandler>().ToggleSelection();
+        foreach (var card in cards) if (card.isSelected) card.ToggleSelection(); //옮긴다면 다시 pushback 후 sort 과정 필요.
     }
-
 
     public void DeclareLargeTichuCall()
     {
@@ -92,7 +84,7 @@ public class GamePlayer : MonoBehaviour
     {
         if (UIManager.instance.IsAllSlotSelected())
         {
-            GameManager.instance.currentCard?.cardObject.GetComponent<SelectionHandler>().ToggleSelection();
+            GameManager.instance.currentCard?.ToggleSelection();
             GameManager.instance.currentSlot?.ToggleSelection();
             chooseFlag = true;
         }
@@ -109,7 +101,7 @@ public class GamePlayer : MonoBehaviour
         {
             if (UIManager.instance.exchangeCard.slots[i].slot.card == null)
             {
-                cards[Random.Range(0, cards.Count)].cardObject.GetComponent<SelectionHandler>().ToggleSelection();
+                cards[Random.Range(0, cards.Count)].ToggleSelection();
                 UIManager.instance.exchangeCard.slots[i].slot.ToggleSelection();
             }
         }
@@ -121,7 +113,7 @@ public class GamePlayer : MonoBehaviour
         chooseFlag = true;
         for (int idx = 0; idx < slot.Length; ++idx)// var cardSlot in slot)
         {
-            AddCards(new List<Global.Card> { slot[idx].card });
+            AddCard(slot[idx].card);
             slot[idx].card.isFixed = false;
             slot[idx].card = null;
         }
@@ -138,9 +130,8 @@ public class GamePlayer : MonoBehaviour
 
         foreach (var card in selectCardList)
         {
-            RemoveCard(card);
+            RemoveCard(card); // 이 부분 옮기는 것을 고려.
         }
-
 
         UIManager.instance.RenderCards(Global.initialPosition, Global.numberOfCardsForLineInSmallTichuPhase, cards);
         chooseFlag = true;

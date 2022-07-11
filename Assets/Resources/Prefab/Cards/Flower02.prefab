@@ -11,8 +11,8 @@ GameObject:
   - component: {fileID: 6512765193619977733}
   - component: {fileID: 2826848590824999987}
   - component: {fileID: 8360495908516524234}
-  - component: {fileID: -6121653282392332385}
   - component: {fileID: 7133652590070705284}
+  - component: {fileID: 350966370412065824}
   m_Layer: 0
   m_Name: Flower02
   m_TagString: Untagged
@@ -84,18 +84,6 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
---- !u!114 &-6121653282392332385
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7798726810910966806}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 98288fe9849e1a84fa2917d3ebb04c75, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!65 &7133652590070705284
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -109,6 +97,24 @@ BoxCollider:
   serializedVersion: 2
   m_Size: {x: 5.8, y: 0.01, z: 8.8}
   m_Center: {x: 0, y: -1, z: 0}
+--- !u!114 &350966370412065824
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7798726810910966806}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fea378ffaa13c2c448ffa7698ea7d756, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  isSelected: 0
+  cardName: 
+  value: 0
+  type: 0
+  id: 0
+  isFixed: 0
 --- !u!1001 &5077462631817285469
 PrefabInstance:
   m_ObjectHideFlags: 0
