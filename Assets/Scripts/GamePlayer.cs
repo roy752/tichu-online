@@ -49,17 +49,23 @@ public class GamePlayer : MonoBehaviour
     public void AddSelection(Card card)
     {
         selectCardList.Add(card);
+        cards.Remove(card);
         selectCardList = selectCardList.OrderBy(x => x.value).ToList();
     }
 
     public void RemoveSelection(Card card)
     {
         selectCardList.Remove(card);
+        cards.Add(card);
+        SortCards();
     }
 
     public void DisableSelection()
     {
-        foreach (var card in cards) if (card.isSelected) card.ToggleSelection(); //옮긴다면 다시 pushback 후 sort 과정 필요.
+        cards.AddRange(selectCardList);
+        foreach (var selectedCard in selectCardList) selectedCard.ToggleBase();
+        selectCardList.Clear();
+        SortCards();
     }
 
     public void DeclareLargeTichuCall()
