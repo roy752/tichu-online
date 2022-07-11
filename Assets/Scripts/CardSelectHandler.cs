@@ -8,7 +8,7 @@ public class CardSelectHandler : SelectionHandler
 {
     public override void ToggleSelection()
     {
-        if (GameManager.instance.isMultipleSelectionAllowed)
+        if (GameManager.instance.isMultipleSelectionEnabled)
         {
 
         }

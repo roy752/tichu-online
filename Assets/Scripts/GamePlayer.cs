@@ -98,6 +98,10 @@ public class GamePlayer : MonoBehaviour
         StartCoroutine(ReceiveCardCoroutine());
     }
 
+    public void SelectTrick()
+    {
+        StartCoroutine(SelectTrickCoroutine());
+    }
 
 
 
@@ -147,6 +151,22 @@ public class GamePlayer : MonoBehaviour
         UIManager.instance.ActivateReceiveCardPopup(ReceiveCardCall, DeclareSmallTichuCall);
         yield return new WaitUntil(() => chooseFlag == true || UIManager.instance.IsTimeOut());
         UIManager.instance.DeactivateReceiveCardPopup();
+
+        coroutineFinishFlag = true;
+    }
+
+    public IEnumerator SelectTrickCoroutine()
+    {
+        UIManager.instance.RenderPlayerInfo();
+        UIManager.instance.RenderCards(Global.initialPosition, Global.numberOfCardsForLineInSmallTichuPhase, cards);
+
+        chooseFlag = false;
+
+        coroutineFinishFlag = false;
+
+        //UIManager.instance //선택 버튼 각각 활성화
+        yield return new WaitUntil(() => chooseFlag == true || UIManager.instance.IsTimeOut());
+        //UIManager.instance //선택 버튼 각각 활성화
 
         coroutineFinishFlag = true;
     }

@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using System.Linq;
 
 public class GameManager : MonoBehaviour
 {
@@ -30,7 +31,7 @@ public class GameManager : MonoBehaviour
     public bool phaseChangeFlag;
 
     [HideInInspector]
-    public bool isMultipleSelectionAllowed;
+    public bool isMultipleSelectionEnabled;
 
     [HideInInspector]
     public bool isSelectionEnabled;
@@ -43,6 +44,15 @@ public class GameManager : MonoBehaviour
 
     [HideInInspector]
     public bool isGameEnd;
+
+    [HideInInspector]
+    public bool isBirdUsed;
+
+    [HideInInspector]
+    public bool isFirstTrick;
+
+    [HideInInspector]
+    public int startPlayerIdx;
 
     [HideInInspector]
     public static GameManager instance;
@@ -86,19 +96,51 @@ public class GameManager : MonoBehaviour
         StartCoroutine(StartReceiveCardPhaseCoroutine()); //교환한 카드 확인, 스몰티츄 결정
         yield return new WaitUntil(() => phaseChangeFlag);
 
-        //StartCoroutine(StartMainPlayPhaseCoroutine()); //1,2,3,4등이 나뉠 때까지 플레이
-        //yield return new WaitUntil(() => phaseChangeFlag);
+        StartCoroutine(StartMainPlayPhaseCoroutine()); //1,2,3,4등이 나뉠 때까지 플레이
+        yield return new WaitUntil(() => phaseChangeFlag);
 
         //플레이 결과에 따른 점수 계산, 디스플레이. 다시 게임을 시작할지 아니면 게임이 끝났는지 결정.
     }
-    /*
+    
     IEnumerator StartMainPlayPhaseCoroutine()
     {
         phaseChangeFlag = false;
 
         isSelectionEnabled = true;
+        isMultipleSelectionEnabled = true;
+        
+        while(isRoundEnd==false)
+        {
+            StartCoroutine(StartTrickCoroutine());
+            yield return new WaitUntil(() => isTrickEnd);
+        }
 
-    }*/
+        phaseChangeFlag = true;
+    }
+
+    public bool trickFinishFlag = false;
+    
+    IEnumerator StartTrickCoroutine()
+    {
+        //시작 플레이어 찾고
+        //플레이어가 낼 족보 결정하고
+        //모두 패스일때까지 카드 내기 반복
+        isTrickEnd = false;
+        trickFinishFlag = false;
+        isFirstTrick = true;
+
+        FindStartPlayer();
+        int idx = startPlayerIdx;
+
+        while(trickFinishFlag==false)
+        {
+            currentPlayer = players[(idx++) % Global.numberOfPlayers];
+            currentPlayer.SelectTrick();
+            yield return new WaitUntil(() => currentPlayer.coroutineFinishFlag); //폭탄 구현은 어떻게?
+        }
+
+        isTrickEnd = true;
+    }
 
     IEnumerator StartReceiveCardPhaseCoroutine()
     {
@@ -233,6 +275,22 @@ public class GameManager : MonoBehaviour
             GameObject hitObject = Global.GetHitObject( Camera.main.ScreenToWorldPoint(Input.mousePosition));
 
             if (hitObject != null) hitObject.GetComponent<SelectionHandler>().ToggleSelection();
+        }
+    }
+
+    private void FindStartPlayer()
+    {
+        if(isFirstTrick)
+        {
+            isFirstTrick = false;
+            for(int idx = 0; idx<Global.numberOfPlayers; ++idx)
+            {
+                if(players[idx].cards.Any(x=>x.value==Global.specialCardsValue[(int)Global.SpecialCardName.Bird])==true)
+                {
+                    startPlayerIdx = idx;
+                    return;
+                }
+            }
         }
     }
 }

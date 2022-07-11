@@ -212,7 +212,7 @@ public static class Global
     }
     public enum SpecialCardName
     {
-        Bird = 4,
+        Bird,
         Dog,
         Phoenix,
         Dragon
