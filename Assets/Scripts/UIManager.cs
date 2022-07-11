@@ -38,7 +38,7 @@ public class UIManager : MonoBehaviour
         largeTichu.largeTichuObject = uiParent.transform.Find(Global.largeTichuButtonObjectName).gameObject;
         largeTichu.declareButton    = largeTichu.largeTichuObject.transform.Find(Global.largeTichuDeclareButtonName).GetComponent<Button>();
         largeTichu.skipButton       = largeTichu.largeTichuObject.transform.Find(Global.largeTichuSkipButtonName).GetComponent<Button>();
-        ///////////////////////////////////
+        //////////////////////////////////
 
 
         //인포 창 오브젝트
@@ -110,8 +110,8 @@ public class UIManager : MonoBehaviour
 
         for(int idx = 0; idx<Global.numberOfSlots; ++idx)
         {
-            cardReceive.cardReceiveSlots[idx].slotObject = nowCardReceiveObject.Find(Global.cardReceiveSlotObjectNames[idx]).gameObject;
-            cardReceive.cardReceiveSlots[idx].InfoObject = cardReceive.cardReceiveSlots[idx].slotObject.transform.Find(Global.cardReceivePlayerInfoObjectName).gameObject;
+            cardReceive.cardReceiveSlots[idx].slotObject     = nowCardReceiveObject.Find(Global.cardReceiveSlotObjectNames[idx]).gameObject;
+            cardReceive.cardReceiveSlots[idx].InfoObject     = cardReceive.cardReceiveSlots[idx].slotObject.transform.Find(Global.cardReceivePlayerInfoObjectName).gameObject;
             cardReceive.cardReceiveSlots[idx].playerNameText = cardReceive.cardReceiveSlots[idx].InfoObject.transform.Find(Global.cardReceivePlayerNameObjectName).GetComponent<TMP_Text>();
         }
         /////////////////////////////////////////////////
@@ -216,6 +216,9 @@ public class UIManager : MonoBehaviour
     {
         cardReceive.cardReceiveButton.onClick.RemoveAllListeners();
         cardReceive.smallTichuButton.onClick.RemoveAllListeners();
+
+        GameManager.instance.currentPlayer.ReceiveCardCall();
+
         DeactivateAlertPopup();
         DeactivateTimer();
 
@@ -223,8 +226,10 @@ public class UIManager : MonoBehaviour
         HideInfo();
     }
 
+    private bool previousSelectionFlag;
     public void ActivateAlertPopup(string alertText, UnityAction confirmCall)
     {
+        previousSelectionFlag = GameManager.instance.isSelectionEnabled;
         GameManager.instance.isSelectionEnabled = false;
         alertPopup.alertPopupObject.SetActive(true);
         alertPopup.alertText.text = alertText;
@@ -235,7 +240,7 @@ public class UIManager : MonoBehaviour
 
     public void DeactivateAlertPopup()
     {
-        GameManager.instance.isSelectionEnabled = true;
+        GameManager.instance.isSelectionEnabled = previousSelectionFlag;
         alertPopup.alertText.text = null;
 
         alertPopup.alertConfirmButton.onClick.RemoveAllListeners();

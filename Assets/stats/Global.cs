@@ -74,7 +74,7 @@ public static class Global
     public static string   cardReceivePlayerNameObjectName       = "PlayerName";
 
 
-    public static float width = 3.5f;
+    public static float width   = 3.5f;
     public static float offsetY = 0.75f;
     public static float offsetZ = 0.002f;
     public static float cameraPosition = -10f;

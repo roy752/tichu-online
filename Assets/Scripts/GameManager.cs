@@ -36,7 +36,17 @@ public class GameManager : MonoBehaviour
     public bool isSelectionEnabled;
 
     [HideInInspector]
+    public bool isTrickEnd;
+
+    [HideInInspector]
+    public bool isRoundEnd;
+
+    [HideInInspector]
+    public bool isGameEnd;
+
+    [HideInInspector]
     public static GameManager instance;
+
 
 
     private int splitCardIdx;
@@ -65,17 +75,30 @@ public class GameManager : MonoBehaviour
     {
         SplitCardsToPlayer(Global.numberOfCardsLargeTichuPhase);
 
-        StartCoroutine(StartLargeTichuPhaseCoroutine());
-        yield return new WaitUntil(()=>phaseChangeFlag);
+        StartCoroutine(StartLargeTichuPhaseCoroutine()); //카드 8장 나눠주고 라지 티츄 결정
+        yield return new WaitUntil(() => phaseChangeFlag);
 
         SplitCardsToPlayer(Global.numberOfCardsSmallTichuPhase);
-        
-        StartCoroutine(StartExchangeCardPhaseCoroutine());
+
+        StartCoroutine(StartExchangeCardPhaseCoroutine()); //카드 6장 마저 나눠주고 교환,스몰티츄 결정
         yield return new WaitUntil(() => phaseChangeFlag);
 
-        StartCoroutine(StartReceiveCardPhaseCoroutine());
+        StartCoroutine(StartReceiveCardPhaseCoroutine()); //교환한 카드 확인, 스몰티츄 결정
         yield return new WaitUntil(() => phaseChangeFlag);
+
+        //StartCoroutine(StartMainPlayPhaseCoroutine()); //1,2,3,4등이 나뉠 때까지 플레이
+        //yield return new WaitUntil(() => phaseChangeFlag);
+
+        //플레이 결과에 따른 점수 계산, 디스플레이. 다시 게임을 시작할지 아니면 게임이 끝났는지 결정.
     }
+    /*
+    IEnumerator StartMainPlayPhaseCoroutine()
+    {
+        phaseChangeFlag = false;
+
+        isSelectionEnabled = true;
+
+    }*/
 
     IEnumerator StartReceiveCardPhaseCoroutine()
     {
