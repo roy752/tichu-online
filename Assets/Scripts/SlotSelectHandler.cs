@@ -1,8 +1,4 @@
-using System.Collections;
 using System.Collections.Generic;
-using UnityEngine;
-using UnityEngine.UI;
-using UnityEngine.EventSystems;
 
 public class SlotSelectHandler : SelectionHandler
 {
@@ -27,7 +23,7 @@ public class SlotSelectHandler : SelectionHandler
             {
                 PopCardFromSlot(); //슬롯에 카드가 있을 경우 뺸다.
                 GameManager.instance.currentPlayer.SortCards();
-                if (GameManager.instance.currentSlot != null) GameManager.instance.currentSlot.ToggleSelection();
+                GameManager.instance.currentSlot?.ToggleSelection();
             }
             else
             {

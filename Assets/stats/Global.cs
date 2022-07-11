@@ -73,6 +73,12 @@ public static class Global
     public static string   cardReceivePlayerInfoObjectName       = "CardGiverInfo";
     public static string   cardReceivePlayerNameObjectName       = "PlayerName";
 
+    public static string trickSelectionObjectName           = "TrickSelection";
+    public static string trickSelectionBombButtonName       = "BombButton";
+    public static string trickSelectionSubmitButtonName     = "SubmitButton";
+    public static string trickSelectionPassButtonName       = "PassButton";
+    public static string trickSelectionSmallTichuButtonName = "SmallTichuButton";
+
 
     public static float width   = 3.5f;
     public static float offsetY = 0.75f;
@@ -82,13 +88,14 @@ public static class Global
 
     public static Vector3    frontEpsilon        = new Vector3(0, 0, -0.001f);
     public static Vector3    hiddenCardPosition  = new Vector3(-100f, -100f, -100f);
-    public static Vector3    initialPosition     = new Vector3(0f, -3.9f, -1f);
+    public static Vector3    initialPosition     = new Vector3(0f, -2.3f, -1f);
     public static Vector3    initialScale        = new Vector3(0.2f,0.2f, 0.2f);
     public static Quaternion initialCardRotation = Quaternion.Euler(270f, 180f, 180f);
 
     public static string largeTichuInfo     = "라지 티츄 여부를 결정하세요.";
     public static string exchangeCardInfo   = "카드를 한장씩 나눠주세요.";
     public static string receiveCardInfo    = "카드를 받으세요.";
+    public static string selectTrickInfo    = "트릭을 선택하세요.";
     
     public static string SlotSelectErrorMsg = "카드를 모두 나눠주지 않았습니다.";
 
@@ -100,6 +107,7 @@ public static class Global
     public static float massageDuration       = 1.5f;
     public static float shakeDuration         = 0.15f;
     public static float receiveCardDuration   = 15.5f;
+    public static float selectTrickDuration    = 40.5f;
     
     public static float tick      = 0.1f;
     public static float shakeTick = 1 / 60f;
@@ -202,6 +210,27 @@ public static class Global
         public GamePlayer player;
         public Card card;
     }
+
+    public struct TrickSelection
+    {
+        public GameObject trickSelectionObject;
+        public Button bombButton;
+        public Button submitButton;
+        public Button passButton;
+        public Button smallTichuButton;
+    }
+
+    public class Trick
+    {
+        public List<Card> cards;
+
+        public Trick(List<Card> inputCards)
+        {
+            cards = new List<Card>();
+            cards.AddRange(inputCards);
+        }
+    }
+    
 
     public enum GeneralCardName
     {
