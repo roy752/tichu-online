@@ -11,8 +11,8 @@ GameObject:
   - component: {fileID: 6959230992901233968}
   - component: {fileID: 2147971867653924614}
   - component: {fileID: 5689075898322557951}
-  - component: {fileID: 4680039177156711768}
   - component: {fileID: -7449921827198230029}
+  - component: {fileID: 7743318059640598493}
   m_Layer: 0
   m_Name: Moon06
   m_TagString: Untagged
@@ -84,18 +84,6 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
---- !u!114 &4680039177156711768
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6255357424900943651}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 98288fe9849e1a84fa2917d3ebb04c75, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!65 &-7449921827198230029
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -109,6 +97,24 @@ BoxCollider:
   serializedVersion: 2
   m_Size: {x: 5.8, y: 0.01, z: 8.8}
   m_Center: {x: 0, y: -1, z: 0}
+--- !u!114 &7743318059640598493
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6255357424900943651}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fea378ffaa13c2c448ffa7698ea7d756, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  isSelected: 0
+  cardName: 
+  value: 0
+  type: 0
+  id: 0
+  isFixed: 0
 --- !u!1001 &1555772055356514792
 PrefabInstance:
   m_ObjectHideFlags: 0

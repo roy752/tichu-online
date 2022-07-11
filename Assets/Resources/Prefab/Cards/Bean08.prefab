@@ -11,8 +11,8 @@ GameObject:
   - component: {fileID: 2528117400862200670}
   - component: {fileID: 6795557860843399528}
   - component: {fileID: 968875034764694929}
-  - component: {fileID: -839477154277451453}
   - component: {fileID: 7831695968774820695}
+  - component: {fileID: -6244231549048931518}
   m_Layer: 0
   m_Name: Bean08
   m_TagString: Untagged
@@ -84,18 +84,6 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
---- !u!114 &-839477154277451453
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1535433599517909325}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 98288fe9849e1a84fa2917d3ebb04c75, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!65 &7831695968774820695
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -109,6 +97,24 @@ BoxCollider:
   serializedVersion: 2
   m_Size: {x: 5.8, y: 0.01, z: 8.8}
   m_Center: {x: 0, y: -1, z: 0}
+--- !u!114 &-6244231549048931518
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1535433599517909325}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fea378ffaa13c2c448ffa7698ea7d756, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  isSelected: 0
+  cardName: 
+  value: 0
+  type: 0
+  id: 0
+  isFixed: 0
 --- !u!1001 &5865812733113282827
 PrefabInstance:
   m_ObjectHideFlags: 0

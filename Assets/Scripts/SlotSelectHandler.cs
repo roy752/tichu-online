@@ -1,12 +1,8 @@
-using System.Collections;
 using System.Collections.Generic;
-using UnityEngine;
-using UnityEngine.UI;
-using UnityEngine.EventSystems;
 
 public class SlotSelectHandler : SelectionHandler
 {
-    public Global.Card card;
+    public Card card;
     public override void OnEnable()
     {
         base.OnEnable();
@@ -27,7 +23,7 @@ public class SlotSelectHandler : SelectionHandler
             {
                 PopCardFromSlot(); //슬롯에 카드가 있을 경우 뺸다.
                 GameManager.instance.currentPlayer.SortCards();
-                if (GameManager.instance.currentSlot != null) GameManager.instance.currentSlot.ToggleSelection();
+                GameManager.instance.currentSlot?.ToggleSelection();
             }
             else
             {
@@ -47,21 +43,21 @@ public class SlotSelectHandler : SelectionHandler
         UIManager.instance.RenderCards(Global.initialPosition, Global.numberOfCardsForLineInSmallTichuPhase, GameManager.instance.currentPlayer.cards);
     }
 
-    public void PushCardToSlot(Global.Card inputCard)
+    public void PushCardToSlot(Card inputCard)
     {
         GameManager.instance.currentPlayer.RemoveCard(inputCard);
-        inputCard.cardObject.transform.position = gameObject.transform.position + Global.frontEpsilon;
+        inputCard.transform.position = gameObject.transform.position + Global.frontEpsilon;
         inputCard.isFixed = true;
         card = inputCard;
-        card.cardObject.GetComponent<SelectionHandler>().ToggleBase();
+        card.ToggleBase();
         GameManager.instance.currentCard = null;
     }
-    public Global.Card PopCardFromSlot()
+    public Card PopCardFromSlot()
     {
-        GameManager.instance.currentPlayer.AddCards(new List<Global.Card> { card }); //슬롯에서 카드를 뺀다.
-        card.cardObject.transform.position = Global.hiddenCardPosition;
+        GameManager.instance.currentPlayer.AddCard(card); //슬롯에서 카드를 뺀다.
+        card.transform.position = Global.hiddenCardPosition;
         card.isFixed = false;
-        Global.Card tmpCard = card;
+        Card tmpCard = card;
         card = null;
         return tmpCard;
     }

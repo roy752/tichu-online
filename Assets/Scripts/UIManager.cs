@@ -12,13 +12,14 @@ public class UIManager : MonoBehaviour
 
 
     private GameObject               uiParent;
-    private Global.LargeTichu        largeTichu   = new Global.LargeTichu();
-    private Global.InfoBar           infoBar      = new Global.InfoBar();
-    private Global.Timer             timer        = new Global.Timer();
-    private Global.ExchangeCardPopup exchangeCard = new Global.ExchangeCardPopup();
-    private Global.PlayerInfoUI      playerInfo   = new Global.PlayerInfoUI();
-    private Global.AlertPopup        alertPopup   = new Global.AlertPopup();
-    private Global.CardReceivePopup  cardReceive  = new Global.CardReceivePopup();
+    private Global.LargeTichu        largeTichu     = new Global.LargeTichu();
+    private Global.InfoBar           infoBar        = new Global.InfoBar();
+    private Global.Timer             timer          = new Global.Timer();
+    public  Global.ExchangeCardPopup exchangeCard   = new Global.ExchangeCardPopup();
+    private Global.PlayerInfoUI      playerInfo     = new Global.PlayerInfoUI();
+    private Global.AlertPopup        alertPopup     = new Global.AlertPopup();
+    private Global.CardReceivePopup  receiveCard    = new Global.CardReceivePopup();
+    private Global.TrickSelection    selectTrick    = new Global.TrickSelection();
 
     private bool isMassaging = false;
 
@@ -38,7 +39,7 @@ public class UIManager : MonoBehaviour
         largeTichu.largeTichuObject = uiParent.transform.Find(Global.largeTichuButtonObjectName).gameObject;
         largeTichu.declareButton    = largeTichu.largeTichuObject.transform.Find(Global.largeTichuDeclareButtonName).GetComponent<Button>();
         largeTichu.skipButton       = largeTichu.largeTichuObject.transform.Find(Global.largeTichuSkipButtonName).GetComponent<Button>();
-        ///////////////////////////////////
+        //////////////////////////////////
 
 
         //인포 창 오브젝트
@@ -99,23 +100,34 @@ public class UIManager : MonoBehaviour
 
 
         //카드 받는 팝업(card receive popup) 오브젝트
-        cardReceive.cardReceiveObject = uiParent.transform.Find(Global.cardReceivePopupObjectName).gameObject;
+        receiveCard.cardReceiveObject = uiParent.transform.Find(Global.cardReceivePopupObjectName).gameObject;
 
-        var nowCardReceiveObject = cardReceive.cardReceiveObject.transform;
+        var nowCardReceiveObject = receiveCard.cardReceiveObject.transform;
         
-        cardReceive.cardReceiveSlots = new Global.CardReceiveSlot[Global.numberOfSlots];
+        receiveCard.cardReceiveSlots = new Global.CardReceiveSlot[Global.numberOfSlots];
 
-        cardReceive.cardReceiveButton = nowCardReceiveObject.Find(Global.cardReceiveButtonObjectName).GetComponent<Button>();
-        cardReceive.smallTichuButton = nowCardReceiveObject.Find(Global.cardReceiveSmallTichuButtonObjectName).GetComponent<Button>();
+        receiveCard.cardReceiveButton = nowCardReceiveObject.Find(Global.cardReceiveButtonObjectName).GetComponent<Button>();
+        receiveCard.smallTichuButton = nowCardReceiveObject.Find(Global.cardReceiveSmallTichuButtonObjectName).GetComponent<Button>();
 
         for(int idx = 0; idx<Global.numberOfSlots; ++idx)
         {
-            cardReceive.cardReceiveSlots[idx].slotObject = nowCardReceiveObject.Find(Global.cardReceiveSlotObjectNames[idx]).gameObject;
-            cardReceive.cardReceiveSlots[idx].InfoObject = cardReceive.cardReceiveSlots[idx].slotObject.transform.Find(Global.cardReceivePlayerInfoObjectName).gameObject;
-            cardReceive.cardReceiveSlots[idx].playerNameText = cardReceive.cardReceiveSlots[idx].InfoObject.transform.Find(Global.cardReceivePlayerNameObjectName).GetComponent<TMP_Text>();
+            receiveCard.cardReceiveSlots[idx].slotObject     = nowCardReceiveObject.Find(Global.cardReceiveSlotObjectNames[idx]).gameObject;
+            receiveCard.cardReceiveSlots[idx].InfoObject     = receiveCard.cardReceiveSlots[idx].slotObject.transform.Find(Global.cardReceivePlayerInfoObjectName).gameObject;
+            receiveCard.cardReceiveSlots[idx].playerNameText = receiveCard.cardReceiveSlots[idx].InfoObject.transform.Find(Global.cardReceivePlayerNameObjectName).GetComponent<TMP_Text>();
         }
         /////////////////////////////////////////////////
 
+
+        //트릭 선택 관련 버튼(trick selection) 오브젝트
+        selectTrick.trickSelectionObject = uiParent.transform.Find(Global.trickSelectionObjectName).gameObject;
+
+        var nowTrickSelectionObject     = selectTrick.trickSelectionObject.transform;
+
+        selectTrick.bombButton       = nowTrickSelectionObject.Find(Global.trickSelectionBombButtonName).GetComponent<Button>();
+        selectTrick.submitButton     = nowTrickSelectionObject.Find(Global.trickSelectionSubmitButtonName).GetComponent<Button>();
+        selectTrick.passButton       = nowTrickSelectionObject.Find(Global.trickSelectionPassButtonName).GetComponent<Button>();
+        selectTrick.smallTichuButton = nowTrickSelectionObject.Find(Global.trickSelectionSmallTichuButtonName).GetComponent<Button>();
+        ////////////////////////
 
 
     }
@@ -170,16 +182,7 @@ public class UIManager : MonoBehaviour
         exchangeCard.smallTichuButton.onClick.RemoveAllListeners();
         DeactivateAlertPopup();
         DeactivateTimer();
-        if (GameManager.instance.currentCard != null)
-        {
-            GameManager.instance.currentCard.cardObject.GetComponent<SelectionHandler>().ToggleBase();
-            GameManager.instance.currentCard = null;
-        }
-        if (GameManager.instance.currentSlot != null)
-        {
-            GameManager.instance.currentSlot.ToggleBase();
-            GameManager.instance.currentSlot = null;
-        }
+
         FlushCard();
         exchangeCard.exchangeCardPopupObject.SetActive(false);
         HideInfo();
@@ -189,43 +192,68 @@ public class UIManager : MonoBehaviour
     {
         ShowInfo(Global.receiveCardInfo);
         ActivateTimer(Global.receiveCardDuration);
-        cardReceive.cardReceiveObject.SetActive(true);
-        cardReceive.cardReceiveButton.onClick.AddListener(receiveCall);
-        cardReceive.smallTichuButton.onClick.AddListener(
+        receiveCard.cardReceiveObject.SetActive(true);
+        receiveCard.cardReceiveButton.onClick.AddListener(receiveCall);
+        receiveCard.smallTichuButton.onClick.AddListener(
                                                       () => ActivateAlertPopup(
                                                                                 Global.alertSmallTichuMsg, 
-                                                                                ()=> { declareCall(); UpdateSmallTichuButton(cardReceive.smallTichuButton.gameObject); }
+                                                                                ()=> { declareCall(); UpdateSmallTichuButton(receiveCard.smallTichuButton.gameObject); }
                                                                               )
                                                         );
+
+        RenderReceivedCard();
         
-        for(int idx = 0; idx<Global.numberOfSlots; ++idx)
-        {
-            var nowCard = GameManager.instance.currentPlayer.slot[idx].card;
-
-            nowCard.isFixed = true;
-            nowCard.cardObject.transform.position = cardReceive.cardReceiveSlots[idx].slotObject.transform.position + Global.frontEpsilon;
-
-            var nowPlayer = GameManager.instance.currentPlayer.slot[idx].player;
-            cardReceive.cardReceiveSlots[idx].playerNameText.text = nowPlayer.playerName;
-        }
-
-        cardReceive.smallTichuButton.gameObject.SetActive(GameManager.instance.currentPlayer.canDeclareSmallTichu); //수정 필요. 버튼을 enabled = false 로 하고 흐리게 만들어야함.
+        receiveCard.smallTichuButton.gameObject.SetActive(GameManager.instance.currentPlayer.canDeclareSmallTichu); //수정 필요. 버튼을 enabled = false 로 하고 흐리게 만들어야함.
     }
 
     public void DeactivateReceiveCardPopup()
     {
-        cardReceive.cardReceiveButton.onClick.RemoveAllListeners();
-        cardReceive.smallTichuButton.onClick.RemoveAllListeners();
+        receiveCard.cardReceiveButton.onClick.RemoveAllListeners();
+        receiveCard.smallTichuButton.onClick.RemoveAllListeners();
+
         DeactivateAlertPopup();
         DeactivateTimer();
 
-        cardReceive.cardReceiveObject.SetActive(false);
+        receiveCard.cardReceiveObject.SetActive(false);
+        HideInfo();
+    }
+
+    public void ActivateTrickSelection(UnityAction SelectTrickCall, UnityAction PassTrickCall, UnityAction SmallTichuCall)
+    {
+        ShowInfo(Global.selectTrickInfo);
+        ActivateTimer(Global.selectTrickDuration);
+
+        //리스너 삽입.
+        selectTrick.submitButton.onClick.AddListener(SelectTrickCall);
+        selectTrick.passButton.onClick.AddListener(PassTrickCall);
+
+        selectTrick.smallTichuButton.onClick.AddListener(
+                                                      () => ActivateAlertPopup(
+                                                                                Global.alertSmallTichuMsg,
+                                                                                () => { SmallTichuCall(); UpdateSmallTichuButton(selectTrick.smallTichuButton.gameObject); }
+                                                                              )
+                                                        );
+
+        selectTrick.trickSelectionObject.SetActive(true);
+        selectTrick.smallTichuButton.gameObject.SetActive(GameManager.instance.currentPlayer.canDeclareSmallTichu); //수정 필요. 버튼을 enabled = false 로 하고 흐리게 만들어야함.
+    }
+
+    public void DeactivateTrickSelection()
+    {
+        selectTrick.submitButton.onClick.RemoveAllListeners();
+        selectTrick.passButton.onClick.RemoveAllListeners();
+        selectTrick.bombButton.onClick.RemoveAllListeners();
+        selectTrick.smallTichuButton.onClick.RemoveAllListeners();
+
+        DeactivateAlertPopup();
+        DeactivateTimer();
+
+        selectTrick.trickSelectionObject.SetActive(false);
         HideInfo();
     }
 
     public void ActivateAlertPopup(string alertText, UnityAction confirmCall)
     {
-        GameManager.instance.isSelectionEnabled = false;
         alertPopup.alertPopupObject.SetActive(true);
         alertPopup.alertText.text = alertText;
 
@@ -235,7 +263,6 @@ public class UIManager : MonoBehaviour
 
     public void DeactivateAlertPopup()
     {
-        GameManager.instance.isSelectionEnabled = true;
         alertPopup.alertText.text = null;
 
         alertPopup.alertConfirmButton.onClick.RemoveAllListeners();
@@ -301,18 +328,11 @@ public class UIManager : MonoBehaviour
 
     public void FlushCard()
     {
-        for(int i=0; i<Global.numberOfSlots; ++i)
+        for (int i = 0; i < Global.numberOfSlots; ++i)
         {
-            if(exchangeCard.slots[i].slot.card == null)
-            {
-                int idx = Random.Range(0, GameManager.instance.currentPlayer.cards.Count);
-                exchangeCard.slots[i].slot.card = GameManager.instance.currentPlayer.cards[idx];
-                GameManager.instance.currentPlayer.RemoveCard(exchangeCard.slots[i].slot.card);
-            }
             exchangeCard.slots[i].slot.card.isFixed = false;
-
             exchangeCard.slots[i].player.AddCardToSlot(exchangeCard.slots[i].slot.card, GameManager.instance.currentPlayer);
-            exchangeCard.slots[i].slot.card.cardObject.transform.position = Global.hiddenCardPosition;
+            exchangeCard.slots[i].slot.card.transform.position = Global.hiddenCardPosition;
         }
     }
 
@@ -363,16 +383,15 @@ public class UIManager : MonoBehaviour
         return timerDuration < 0;
     }
 
-    public void RenderCards(Vector3 centerPosition, int numberOfCardsForLine, List<Global.Card> cardList)
+    public void RenderCards(Vector3 centerPosition, int numberOfCardsForLine, List<Card> cardList)
     {
-        foreach (var item in GameManager.instance.cards) if (item.isFixed == false) item.cardObject.transform.position = Global.hiddenCardPosition;
+        foreach (var item in GameManager.instance.cards) if (item.isFixed == false) item.transform.position = Global.hiddenCardPosition;
 
         float offsetX = Global.width / (numberOfCardsForLine - 1);
         float offsetY = Global.offsetY;
         float offsetZ = Global.offsetZ;
 
-        Vector3 initialPosition = centerPosition + new Vector3(-offsetX * ((float)(numberOfCardsForLine - 1) / 2f), offsetY * ((cardList.Count - 1) / numberOfCardsForLine), 0);
-
+        Vector3 initialPosition = centerPosition + new Vector3(-offsetX * ((float)(numberOfCardsForLine - 1) / 2f), 0, 0);
         Vector3 pos = Vector3.zero;
 
         int cnt = 0;
@@ -385,7 +404,7 @@ public class UIManager : MonoBehaviour
                 cnt = 0;
             }
 
-            item.cardObject.transform.position = initialPosition + pos;
+            item.transform.position = initialPosition + pos;
             pos.x += offsetX;
             pos.z -= offsetZ;
             ++cnt;
@@ -406,6 +425,20 @@ public class UIManager : MonoBehaviour
             nowPlayerInfo.totalScore.text = nowPlayer.totalScore.ToString();
             nowPlayerInfo.largeTichuIconObject.SetActive(nowPlayer.largeTichuFlag);
             nowPlayerInfo.smallTichuIconObject.SetActive(nowPlayer.smallTichuFlag);
+        }
+    }
+
+    public void RenderReceivedCard()
+    {
+        for (int idx = 0; idx < Global.numberOfSlots; ++idx)
+        {
+            var nowCard = GameManager.instance.currentPlayer.slot[idx].card;
+
+            nowCard.isFixed = true;
+            nowCard.transform.position = receiveCard.cardReceiveSlots[idx].slotObject.transform.position + Global.frontEpsilon;
+
+            var nowPlayer = GameManager.instance.currentPlayer.slot[idx].player;
+            receiveCard.cardReceiveSlots[idx].playerNameText.text = nowPlayer.playerName;
         }
     }
 }
