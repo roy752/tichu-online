@@ -7,6 +7,8 @@ using System.Collections.Generic;
 using System.Linq;
 public static class Global
 {
+    public static int numberOfGeneralCardType       = 4;
+    public static int numberOfSpecialCardType       = 4;
     public static int numberOfCardsGeneral          = 13;
     public static int numberOfCardsSpecial          = 4;
     public static int numberOfCardsLargeTichuPhase  = 8;
@@ -20,8 +22,10 @@ public static class Global
     public static int numberOfCardsForLineInPlayPhase       = 14;
 
     public static int[] generalCardsValue           = new int[] { 0, 14, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13 };
-    public static int[] specialCardsValue           = new int[]{ 1, 15, 16, 17 }; //새 개 봉 용 순서로
+    public static int[] specialCardsValue           = new int[]{ 1, 16, 17, 18 }; //새 개 봉 용 순서로
     public static int   aceCardsValue               = 14;
+    
+    public static int   invalidTrickValue           = -1;
 
 
     public static string prefabPath                 = "Prefab/Cards/";
@@ -92,15 +96,24 @@ public static class Global
     public static Vector3    initialScale        = new Vector3(0.2f,0.2f, 0.2f);
     public static Quaternion initialCardRotation = Quaternion.Euler(270f, 180f, 180f);
 
-    public static string largeTichuInfo     = "라지 티츄 여부를 결정하세요.";
-    public static string exchangeCardInfo   = "카드를 한장씩 나눠주세요.";
-    public static string receiveCardInfo    = "카드를 받으세요.";
-    public static string selectTrickInfo    = "트릭을 선택하세요.";
+    public static string largeTichuInfo       = "라지 티츄 여부를 결정하세요.";
+    public static string exchangeCardInfo     = "카드를 한장씩 나눠주세요.";
+    public static string receiveCardInfo      = "카드를 받으세요.";
+    public static string selectTrickInfo      = "트릭을 선택하세요.";
     
-    public static string SlotSelectErrorMsg = "카드를 모두 나눠주지 않았습니다.";
+    public static string isNotTrickInfo           = "트릭이 아닙니다.";
+    public static string singleTrickInfo          = "싱글";
+    public static string pairTrickInfo            = "페어";
+    public static string consecutivePairTrickInfo = "연속 페어";
+    public static string tripleTrickInfo          = "트리플";
+    public static string fullHouseTrickInfo       = "풀하우스";
+    public static string straightTrickInfo        = "스트레이트";
 
-    public static string alertLargeTichuMsg = "정말 라지 티츄를 선언하시겠습니까?";
-    public static string alertSmallTichuMsg = "정말 스몰 티츄를 선언하시겠습니까?";
+    public static string slotSelectErrorMsg   = "카드를 모두 나눠주지 않았습니다.";
+    public static string trickSelectErrorMsg  = "이 트릭을 낼 수 없습니다.";
+
+    public static string alertLargeTichuMsg   = "정말 라지 티츄를 선언하시겠습니까?";
+    public static string alertSmallTichuMsg   = "정말 스몰 티츄를 선언하시겠습니까?";
 
     public static float largeTichuDuration    = 20.5f;
     public static float exchangeCardsDuration = 30.5f;
@@ -212,6 +225,9 @@ public static class Global
     public class Trick
     {
         public List<Card> cards;
+        public int trickLength;
+        public int trickValue;
+        public TrickType trickType;
 
         public Trick(List<Card> inputCards)
         {
@@ -221,19 +237,29 @@ public static class Global
     }
     
 
-    public enum GeneralCardName
+    public enum CardType
     {
         Bean,
         Flower,
         Shu,
-        Moon
-    }
-    public enum SpecialCardName
-    {
+        Moon,
         Bird,
         Dog,
         Phoenix,
         Dragon
+    }
+
+    public enum TrickType
+    {
+        IsNotTrick,
+        Single,
+        Pair,
+        ConsecutivePair,
+        Triple,
+        FullHouse,
+        Straight,
+        FourCardBomb,
+        StraightFlushBomb
     }
 
     static public int Next(RNGCryptoServiceProvider random)
@@ -267,5 +293,117 @@ public static class Global
         int receiverIdx = receiver.playerNumber;
         if (giverIdx < receiverIdx) giverIdx += numberOfPlayers;
         return giverIdx - receiverIdx - 1;
+    }
+
+    static public Trick MakeTrick(List<Card> cardList) //cardList 는 정렬되어있음이 보장.
+    {
+        int length = cardList.Count;
+        Trick nowTrick = null;
+        if (length == 0) nowTrick = WriteTrick(cardList, 0, invalidTrickValue, TrickType.IsNotTrick);
+        else if (length == 1)
+        {
+            //싱글의 경우가 있음.
+            if (cardList[0].type == CardType.Phoenix) nowTrick = WriteTrick(cardList, 1, cardList[0].value * 2 - 1, TrickType.Single); //봉황의 경우 2배에 -1.
+            else nowTrick = WriteTrick(cardList, 1, cardList[0].value * 2, TrickType.Single);//일반 싱글의 경우 2배를 곱하는 테크닉.
+        }
+        else if (length == 2)
+        {
+            //페어의 경우가 있음.
+            if (cardList.All(x => x.value == cardList[0].value)) nowTrick = WriteTrick(cardList, 2, cardList[0].value, TrickType.Pair);
+            else nowTrick = WriteTrick(cardList, 2, invalidTrickValue, TrickType.IsNotTrick);
+        }
+        else if (length == 3)
+        {
+            //트리플의 경우가 있음.
+            if (cardList.All(x => x.value == cardList[0].value)) nowTrick = WriteTrick(cardList, 3, cardList[0].value, TrickType.Triple);
+            else nowTrick = WriteTrick(cardList, 3, invalidTrickValue, TrickType.IsNotTrick);
+        }
+        else if (length == 4)
+        {
+            //포카드 폭탄, 연속 페어의 경우가 있음.
+            if (cardList.All(x => x.value == cardList[0].value)) nowTrick = WriteTrick(cardList, 4, cardList[0].value, TrickType.FourCardBomb);
+            else
+            {
+                if (cardList[0].value == cardList[1].value && cardList[2].value == cardList[3].value && cardList[0].value + 1 == cardList[2].value)
+                {
+                    nowTrick = WriteTrick(cardList, 4, cardList[2].value, TrickType.ConsecutivePair);
+                }
+                else
+                {
+                    nowTrick = WriteTrick(cardList, 4, invalidTrickValue, TrickType.IsNotTrick);
+                }
+            }
+        }
+        else if (length == 5)
+        {
+            //풀하우스, 스트레이트, 스플 폭탄의 경우가 있음.
+            var frontDouble = cardList.Take(2).ToList();
+            var backTriple = cardList.Skip(2).ToList();
+            if(frontDouble.All(x=>x.value==frontDouble[0].value)&&backTriple.All(x=>x.value==backTriple[0].value))
+            {
+                nowTrick = WriteTrick(cardList, 5, backTriple[0].value, TrickType.FullHouse); // 뒤가 트리플
+            }
+            else
+            {
+                var frontTriple = cardList.Take(3).ToList();
+                var  backDouble = cardList.Skip(3).ToList();
+
+                if(frontTriple.All(x=>x.value==frontTriple[0].value)&&backDouble.All(x=>x.value==backDouble[0].value))
+                {
+                    nowTrick = WriteTrick(cardList, 5, frontTriple[0].value, TrickType.FullHouse); //앞이 트리플
+                }
+                else
+                {
+                    //풀하우스가 아님. 스트레이트, 스플 폭탄 테스트.
+                    if (IsStraight(cardList))
+                    {
+                        if (cardList.All(x => x.type == cardList[0].type)) nowTrick = WriteTrick(cardList, 5, cardList.Last().value, TrickType.StraightFlushBomb);
+                        else nowTrick = WriteTrick(cardList, 5, cardList.Last().value, TrickType.Straight);
+                    }
+                    else nowTrick = WriteTrick(cardList, 5, invalidTrickValue, TrickType.IsNotTrick);
+                }
+            }
+        }
+        else
+        {
+            //스플 폭탄, 스트레이트, 연속 페어의 경우가 있음.
+            //스플 폭탄, 스트레이트
+            if(IsStraight(cardList))
+            {
+                if (cardList.All(x => x.type == cardList[0].type)) nowTrick = WriteTrick(cardList, cardList.Count(), cardList.Last().value, TrickType.StraightFlushBomb);
+                else nowTrick = WriteTrick(cardList, cardList.Count(), cardList.Last().value, TrickType.Straight);
+            }
+            else //연속페어
+            {
+                var oddCardList = cardList.Where((x, index) => index % 2 != 0).ToList();
+                var evenCardList = cardList.Where((x, index) => index % 2 == 0).ToList();
+                if (cardList.Count()%2==0&&IsStraight(oddCardList)&&IsStraight(evenCardList)) //짝수 개수의 카드이고,짝홀카드 리스트에 대해 연속이라면 연속 페어.
+                {
+                    nowTrick = WriteTrick(cardList, cardList.Count(), cardList.Last().value, TrickType.ConsecutivePair);
+                }
+                else nowTrick = WriteTrick(cardList, cardList.Count(), invalidTrickValue, TrickType.IsNotTrick);
+            }
+        }
+        return nowTrick;
+    }
+
+    static Trick WriteTrick(List<Card> cardList, int length, int value, TrickType type)
+    {
+        Trick nowTrick = new Trick(cardList);
+        nowTrick.trickLength = length;
+        nowTrick.trickType = type;
+        nowTrick.trickValue = value;
+        return nowTrick;
+    }
+    static bool IsStraight(List<Card> cardList)
+    {
+        int val = cardList[0].value;
+        bool flag = true;
+        foreach(var card in cardList)
+        {
+            if(card.value!=val) { flag = false; break; }
+            ++val;
+        }
+        return flag;
     }
 }

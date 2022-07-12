@@ -55,6 +55,9 @@ public class GameManager : MonoBehaviour
     public bool isFirstTrick;
 
     [HideInInspector]
+    public bool isFirstRound;
+
+    [HideInInspector]
     public int startPlayerIdx;
 
     [HideInInspector]
@@ -108,6 +111,7 @@ public class GameManager : MonoBehaviour
     {
         phaseChangeFlag = false;
 
+        isFirstRound = true;
         isSelectionEnabled = true;
         isMultipleSelectionEnabled = true;
         
@@ -196,36 +200,40 @@ public class GameManager : MonoBehaviour
 
     void MakeCards()
     {
-        
         int typeNumber = 0;
         int idNumber = 0;
-        foreach (string cardName in Enum.GetNames(typeof(Global.GeneralCardName)))
-        {
-            for (int i = 1; i <= Global.numberOfCardsGeneral; ++i)
-            {
-                var nowObject = Instantiate(Resources.Load(Global.prefabPath + Global.GetCardName(cardName, i)),
-                                            Global.hiddenCardPosition,
-                                            Global.initialCardRotation,
-                                            cardsParent.transform) as GameObject;
-                var nowCard = nowObject.GetComponent<Card>();
-                nowCard.cardName = Global.GetCardName(cardName, i); nowCard.type = typeNumber; nowCard.value = Global.generalCardsValue[i]; nowCard.id = idNumber;
-                cards.Add(nowCard);
-                idNumber++;
-            }
-            typeNumber++;
-        }
-
         int idx = 0;
-        foreach (string nowCardName in Enum.GetNames(typeof(Global.SpecialCardName)))
+        foreach (string cardName in Enum.GetNames(typeof(Global.CardType)))
         {
-            var nowObject = Instantiate(Resources.Load(Global.prefabPath + nowCardName),
-                                            Global.hiddenCardPosition,
-                                            Global.initialCardRotation,
-                                            cardsParent.transform) as GameObject;
-            var nowCard = nowObject.GetComponent<Card>();
-            nowCard.cardName = nowCardName; nowCard.type = typeNumber; nowCard.value = Global.specialCardsValue[idx]; nowCard.id = idNumber;
-            cards.Add(nowCard);
-            idNumber++; idx++; typeNumber++;
+            if (typeNumber < Global.numberOfGeneralCardType)
+            {
+                for (int i = 1; i <= Global.numberOfCardsGeneral; ++i)
+                {
+                    var nowCard = (
+                                    Instantiate(Resources.Load(Global.prefabPath + Global.GetCardName(cardName, i)),Global.hiddenCardPosition,
+                                                Global.initialCardRotation,cardsParent.transform) as GameObject
+                                   ).GetComponent<Card>();
+
+                    
+                    nowCard.cardName = Global.GetCardName(cardName, i); nowCard.type = (Global.CardType)Enum.Parse(typeof(Global.CardType),cardName); 
+                    nowCard.value = Global.generalCardsValue[i]; nowCard.id = idNumber;
+                    cards.Add(nowCard);
+                    idNumber++;
+                }
+                typeNumber++;
+            }
+            else
+            {
+                var nowCard = (
+                                Instantiate(Resources.Load(Global.prefabPath + cardName), Global.hiddenCardPosition,
+                                           Global.initialCardRotation,cardsParent.transform) as GameObject
+                              ).GetComponent<Card>();
+                
+                nowCard.cardName = cardName; nowCard.type = (Global.CardType)Enum.Parse(typeof(Global.CardType), cardName);
+                nowCard.value = Global.specialCardsValue[idx]; nowCard.id = idNumber;
+                cards.Add(nowCard);
+                idNumber++; idx++; typeNumber++;
+            }
         }
     }
 
@@ -258,17 +266,60 @@ public class GameManager : MonoBehaviour
 
     private void FindStartPlayer()
     {
-        if(isFirstTrick)
+        if(isFirstRound)
         {
-            isFirstTrick = false;
+            isFirstRound = false;
             for(int idx = 0; idx<Global.numberOfPlayers; ++idx)
             {
-                if(players[idx].cards.Any(x=>x.value==Global.specialCardsValue[(int)Global.SpecialCardName.Bird])==true)
+                if(players[idx].cards.Any(x=>x.value==Global.specialCardsValue[0])==true) //새로 바꿀 수 없을까
                 {
                     startPlayerIdx = idx;
                     return;
                 }
             }
+        }
+    }
+
+    public bool isTrickValid(Global.Trick trick)
+    {
+        if (trick.trickType == Global.TrickType.IsNotTrick)
+        {
+            return false;
+        }
+        else if (isFirstTrick)
+        {
+            isFirstTrick = false;
+            return true;
+        }
+        else
+        {
+            var topTrick = trickStack.Peek();
+            if (trick.trickType == Global.TrickType.StraightFlushBomb)
+            {
+                if (topTrick.trickType == Global.TrickType.StraightFlushBomb)
+                {
+                    if (trick.trickLength > topTrick.trickLength) return true;
+                    else if (trick.trickLength == topTrick.trickLength && trick.trickValue > topTrick.trickValue) return true;
+                    else return false;
+                }
+                else return true;
+            }
+            else if (trick.trickType == Global.TrickType.FourCardBomb)
+            {
+                if (topTrick.trickType == Global.TrickType.StraightFlushBomb) return false;
+                else if (topTrick.trickType == Global.TrickType.FourCardBomb)
+                {
+                    if (trick.trickValue > topTrick.trickValue) return true;
+                    else return false;
+                }
+                else return true;
+            }
+            else
+            {
+                if (trick.trickType != topTrick.trickType) return false;
+                else if (trick.trickValue > topTrick.trickValue) return true;
+                else return false;
+            } 
         }
     }
 }

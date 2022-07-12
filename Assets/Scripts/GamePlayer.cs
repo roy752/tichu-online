@@ -63,9 +63,14 @@ public class GamePlayer : MonoBehaviour
     public void DisableSelection()
     {
         cards.AddRange(selectCardList);
+        ClearSelection();
+        SortCards();
+    }
+
+    public void ClearSelection()
+    {
         foreach (var selectedCard in selectCardList) selectedCard.ToggleBase();
         selectCardList.Clear();
-        SortCards();
     }
 
     public void DeclareLargeTichuCall()
@@ -96,7 +101,7 @@ public class GamePlayer : MonoBehaviour
         }
         else
         {
-            UIManager.instance.Massage(Global.SlotSelectErrorMsg);
+            UIManager.instance.Massage(Global.slotSelectErrorMsg);
             return;
         }
     }
@@ -131,16 +136,21 @@ public class GamePlayer : MonoBehaviour
     public void SelectTrickCall()
     {
         //족보가 맞는지 확인하고, 맞으면 카드를 선택해서 제거하는 추가 로직 필요함.
+        Global.Trick nowTrick = Global.MakeTrick(selectCardList);
 
-        GameManager.instance.trickStack.Push(new Global.Trick(selectCardList));
-
-        foreach (var card in selectCardList)
+        if (GameManager.instance.isTrickValid(nowTrick))
         {
-            RemoveCard(card); // 이 부분 옮기는 것을 고려.
+            GameManager.instance.trickStack.Push(nowTrick); // 수정 필요.
+            ClearSelection();
+            canDeclareSmallTichu = false;
+            UIManager.instance.RenderCards(Global.initialPosition, Global.numberOfCardsForLineInSmallTichuPhase, cards);
+            chooseFlag = true;
         }
-
-        UIManager.instance.RenderCards(Global.initialPosition, Global.numberOfCardsForLineInSmallTichuPhase, cards);
-        chooseFlag = true;
+        else
+        {
+            UIManager.instance.Massage(Global.trickSelectErrorMsg);
+            return;
+        }
     }
 
     public void PassTrickCall()
