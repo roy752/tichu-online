@@ -41,30 +41,25 @@ public class GamePlayer : MonoBehaviour
         cards.Remove(card);
     }
 
-    public void SortCards()
-    {
-        cards = cards.OrderBy(x => x.value).ToList();
-    }
-
     public void AddSelection(Card card)
     {
         selectCardList.Add(card);
         cards.Remove(card);
-        selectCardList = selectCardList.OrderBy(x => x.value).ToList();
+        Global.SortCard(ref selectCardList);
     }
 
     public void RemoveSelection(Card card)
     {
         selectCardList.Remove(card);
         cards.Add(card);
-        SortCards();
+        Global.SortCard(ref cards);
     }
 
     public void DisableSelection()
     {
         cards.AddRange(selectCardList);
         ClearSelection();
-        SortCards();
+        Global.SortCard(ref cards);
     }
 
     public void ClearSelection()
@@ -128,7 +123,7 @@ public class GamePlayer : MonoBehaviour
             slot[idx].card.isFixed = false;
             slot[idx].card = null;
         }
-        SortCards();
+        Global.SortCard(ref cards);
         UIManager.instance.RenderCards(Global.initialPosition, Global.numberOfCardsForLineInSmallTichuPhase, cards);
         //버퍼에 있는 카드를 AddCard() 하고, isFixed 풀고, 정렬하고, 렌더.
     }
@@ -163,13 +158,13 @@ public class GamePlayer : MonoBehaviour
 
     public void ChooseLargeTichu()
     {
-        SortCards();
+        Global.SortCard(ref cards);
         StartCoroutine(ChooseLargeTichuCoroutine());
     }
 
     public void ExchangeCards()
     {
-        SortCards();
+        Global.SortCard(ref cards);
         StartCoroutine(ExchangeCardsCoroutine());
     }
 

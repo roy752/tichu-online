@@ -441,4 +441,21 @@ public class UIManager : MonoBehaviour
             receiveCard.cardReceiveSlots[idx].playerNameText.text = nowPlayer.playerName;
         }
     }
+
+    public void DisplayTrickInfo(Global.Trick trick)
+    {
+        switch(trick.trickType)
+        {
+            case Global.TrickType.Blank:             ShowInfo(Global.selectTrickInfo);          break;
+            case Global.TrickType.IsNotTrick:        ShowInfo(Global.isNotTrickInfo);           break;
+            case Global.TrickType.Single:            ShowInfo(Global.singleTrickInfo);          break;
+            case Global.TrickType.Pair:              ShowInfo(Global.pairTrickInfo);            break;
+            case Global.TrickType.Triple:            ShowInfo(Global.tripleTrickInfo);          break;
+            case Global.TrickType.ConsecutivePair:   ShowInfo(Global.consecutivePairTrickInfo); break;
+            case Global.TrickType.Straight:          ShowInfo(Global.straightTrickInfo);        break;
+            case Global.TrickType.FullHouse:         ShowInfo(Global.fullHouseTrickInfo);       break;
+            case Global.TrickType.FourCardBomb:      ShowInfo(Global.fourCardTrickInfo);        break;
+            case Global.TrickType.StraightFlushBomb: ShowInfo(Global.straightFlushTrickInfo);   break;
+        }
+    }
 }

@@ -14,7 +14,7 @@ public class SlotSelectHandler : SelectionHandler
         {
             if (card != null) PopCardFromSlot();
             PushCardToSlot(GameManager.instance.currentCard);
-            GameManager.instance.currentPlayer.SortCards();
+            Global.SortCard(ref GameManager.instance.currentPlayer.cards);
             GameManager.instance.currentSlot = null;
         }
         else //카드가 선택되어 있지 않다면
@@ -22,7 +22,7 @@ public class SlotSelectHandler : SelectionHandler
             if (card != null)
             {
                 PopCardFromSlot(); //슬롯에 카드가 있을 경우 뺸다.
-                GameManager.instance.currentPlayer.SortCards();
+                Global.SortCard(ref GameManager.instance.currentPlayer.cards);
                 GameManager.instance.currentSlot?.ToggleSelection();
             }
             else

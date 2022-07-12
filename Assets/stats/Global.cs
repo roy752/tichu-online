@@ -108,6 +108,8 @@ public static class Global
     public static string tripleTrickInfo          = "트리플";
     public static string fullHouseTrickInfo       = "풀하우스";
     public static string straightTrickInfo        = "스트레이트";
+    public static string fourCardTrickInfo        = "포카드 폭탄";
+    public static string straightFlushTrickInfo   = "스트레이트 플러쉬 폭탄";
 
     public static string slotSelectErrorMsg   = "카드를 모두 나눠주지 않았습니다.";
     public static string trickSelectErrorMsg  = "이 트릭을 낼 수 없습니다.";
@@ -251,6 +253,7 @@ public static class Global
 
     public enum TrickType
     {
+        Blank,
         IsNotTrick,
         Single,
         Pair,
@@ -277,6 +280,11 @@ public static class Global
         else return null;
     }
 
+    static public void SortCard(ref List<Card> cardList)
+    {
+        cardList = cardList.OrderBy(x => x.value).ToList();
+    }
+
     static public void ShuffleCards(ref List<Card> cardList)
     {
         RNGCryptoServiceProvider random = new RNGCryptoServiceProvider();
@@ -299,7 +307,7 @@ public static class Global
     {
         int length = cardList.Count;
         Trick nowTrick = null;
-        if (length == 0) nowTrick = WriteTrick(cardList, 0, invalidTrickValue, TrickType.IsNotTrick);
+        if (length == 0) nowTrick = WriteTrick(cardList, 0, invalidTrickValue, TrickType.Blank);
         else if (length == 1)
         {
             //싱글의 경우가 있음.
@@ -321,7 +329,7 @@ public static class Global
         else if (length == 4)
         {
             //포카드 폭탄, 연속 페어의 경우가 있음.
-            if (cardList.All(x => x.value == cardList[0].value)) nowTrick = WriteTrick(cardList, 4, cardList[0].value, TrickType.FourCardBomb);
+            if (cardList.All(x => x.value == cardList[0].value)&&FindPhoenix(cardList)==null) nowTrick = WriteTrick(cardList, 4, cardList[0].value, TrickType.FourCardBomb);
             else
             {
                 if (cardList[0].value == cardList[1].value && cardList[2].value == cardList[3].value && cardList[0].value + 1 == cardList[2].value)
@@ -357,7 +365,7 @@ public static class Global
                     //풀하우스가 아님. 스트레이트, 스플 폭탄 테스트.
                     if (IsStraight(cardList))
                     {
-                        if (cardList.All(x => x.type == cardList[0].type)) nowTrick = WriteTrick(cardList, 5, cardList.Last().value, TrickType.StraightFlushBomb);
+                        if (cardList.All(x => x.type == cardList[0].type)&&FindPhoenix(cardList)==null) nowTrick = WriteTrick(cardList, 5, cardList.Last().value, TrickType.StraightFlushBomb);
                         else nowTrick = WriteTrick(cardList, 5, cardList.Last().value, TrickType.Straight);
                     }
                     else nowTrick = WriteTrick(cardList, 5, invalidTrickValue, TrickType.IsNotTrick);
@@ -405,5 +413,43 @@ public static class Global
             ++val;
         }
         return flag;
+    }
+
+    static public int? FindPhoenix(List<Card> cardList)
+    {
+        int? ret = null;
+        for(int idx = 0; idx<cardList.Count(); ++idx)
+        {
+            if(cardList[idx].type == CardType.Phoenix)
+            {
+                ret = idx;
+                break;
+            }
+        }
+        return ret;
+    }
+
+    static public void EstimatePhoenix(List<Card> cardList, int? phoenixIdx)
+    {
+        if (phoenixIdx == null) return;
+        else
+        {
+            if (cardList.Count == 1) { cardList[(int)phoenixIdx].value = 1; return; }
+            int retVal = 2;
+            Card phoenix = cardList[(int)phoenixIdx];
+            phoenix.value = 2;
+            Trick retTrick = MakeTrick(cardList);
+            for(int val = 3; val<=14; ++val)
+            {
+                phoenix.value = val;
+                SortCard(ref cardList);
+                Trick nowTrick = MakeTrick(cardList);
+                if (retTrick.trickType == TrickType.FourCardBomb || retTrick.trickType == TrickType.StraightFlushBomb) continue;
+                if ((int)retTrick.trickType < (int)nowTrick.trickType) retVal = val;
+                else if (retTrick.trickType == nowTrick.trickType && retTrick.trickValue < nowTrick.trickValue) retVal = val;
+                else continue;
+            }
+            phoenix.value = retVal;
+        }
     }
 }

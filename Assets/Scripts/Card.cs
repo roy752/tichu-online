@@ -23,6 +23,10 @@ public class Card : SelectionHandler
             // 봉황의 value를 predict 하는 로직 구현 필요. 봉황은 숫자카드로만 대체할 수 있으므로 value estimation 이 one&only 중요함.
             if (isSelected) GameManager.instance.currentPlayer.AddSelection(this);
             else            GameManager.instance.currentPlayer.RemoveSelection(this);
+            // 봉황 predict 하고
+            Global.EstimatePhoenix(GameManager.instance.currentPlayer.selectCardList, Global.FindPhoenix(GameManager.instance.currentPlayer.selectCardList));
+            Global.SortCard(ref GameManager.instance.currentPlayer.selectCardList);
+            UIManager.instance.DisplayTrickInfo(Global.MakeTrick(GameManager.instance.currentPlayer.selectCardList));
         }
         else
         {

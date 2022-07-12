@@ -87,7 +87,7 @@ public class GameManager : MonoBehaviour
 
     IEnumerator StartPlay()
     {
-        
+        /*
         SplitCardsToPlayer(Global.numberOfCardsLargeTichuPhase);
 
         StartCoroutine(StartLargeTichuPhaseCoroutine()); //카드 8장 나눠주고 라지 티츄 결정
@@ -100,7 +100,10 @@ public class GameManager : MonoBehaviour
 
         StartCoroutine(StartReceiveCardPhaseCoroutine()); //교환한 카드 확인, 스몰티츄 결정
         yield return new WaitUntil(() => phaseChangeFlag);
-        
+        */
+        SplitCardsToPlayer(Global.numberOfCardsForLineInPlayPhase);//디버그용
+        foreach (var player in players) Global.SortCard(ref player.cards);
+
         StartCoroutine(StartMainPlayPhaseCoroutine()); //1,2,3,4등이 나뉠 때까지 플레이
         yield return new WaitUntil(() => phaseChangeFlag);
 
@@ -282,7 +285,7 @@ public class GameManager : MonoBehaviour
 
     public bool isTrickValid(Global.Trick trick)
     {
-        if (trick.trickType == Global.TrickType.IsNotTrick)
+        if (trick.trickType == Global.TrickType.IsNotTrick||trick.trickType == Global.TrickType.Blank)
         {
             return false;
         }
@@ -317,7 +320,7 @@ public class GameManager : MonoBehaviour
             else
             {
                 if (trick.trickType != topTrick.trickType) return false;
-                else if (trick.trickValue > topTrick.trickValue) return true;
+                else if (trick.trickLength == topTrick.trickLength && trick.trickValue > topTrick.trickValue) return true;
                 else return false;
             } 
         }
