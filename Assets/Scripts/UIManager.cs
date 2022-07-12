@@ -22,6 +22,7 @@ public class UIManager : MonoBehaviour
     private Global.TrickSelection    selectTrick    = new Global.TrickSelection();
 
     private bool isMassaging = false;
+    private string originalMsg;
 
     private float timerDuration;
 
@@ -84,6 +85,7 @@ public class UIManager : MonoBehaviour
             playerInfo.playerInfo[idx].largeTichuIconObject = nowInfoObject.Find(Global.playerInfoTichuObjectName).Find(Global.playerInfoLargeTichuName).gameObject;
             playerInfo.playerInfo[idx].roundScore           = nowInfoObject.Find(Global.playerInfoScoreObjectName).Find(Global.playerInfoRoundScoreName).GetComponent<TMP_Text>();
             playerInfo.playerInfo[idx].totalScore           = nowInfoObject.Find(Global.playerInfoScoreObjectName).Find(Global.playerInfoTotalScoreName).GetComponent<TMP_Text>();
+            playerInfo.playerInfo[idx].trick                = nowInfoObject.Find(Global.playerInfoTrickTextName).GetComponent<TMP_Text>();
         }
         ///////////////////////////////
 
@@ -345,7 +347,7 @@ public class UIManager : MonoBehaviour
     {
         StartCoroutine(ShakeCoroutine(infoBar.infoBarText.gameObject, Global.shakeDuration));
         isMassaging = true;
-        string originalMsg = infoBar.infoBarText.text;
+        originalMsg = infoBar.infoBarText.text;
         Color originalColor = infoBar.infoBarText.color;
         ShowInfo(msg);
         infoBar.infoBarText.color = Global.massageColor;
@@ -423,8 +425,10 @@ public class UIManager : MonoBehaviour
             nowPlayerInfo.hand.text       = nowPlayer.cards.Count.ToString();
             nowPlayerInfo.roundScore.text = nowPlayer.roundScore.ToString();
             nowPlayerInfo.totalScore.text = nowPlayer.totalScore.ToString();
+            nowPlayerInfo.trick.text      = nowPlayer.previousTrick;
             nowPlayerInfo.largeTichuIconObject.SetActive(nowPlayer.largeTichuFlag);
             nowPlayerInfo.smallTichuIconObject.SetActive(nowPlayer.smallTichuFlag);
+
         }
     }
 
@@ -442,20 +446,24 @@ public class UIManager : MonoBehaviour
         }
     }
 
+    public void RenderTrickCard(List<Card> cardList)
+    {
+        if (GameManager.instance.trickStack.Count > 0)
+        {
+            foreach (var card in GameManager.instance.trickStack.Peek().cards) card.isFixed = false;
+        }
+        Vector3 nowPosition = Global.initialTrickPosition + new Vector3((-(cardList.Count - 1) / 2)*Global.trickCardOffset,0,0);
+        foreach (var card in cardList)
+        {
+            card.transform.position = nowPosition;
+            card.isFixed = true;
+            nowPosition += new Vector3(Global.trickCardOffset, 0, -Global.offsetZ);
+        }
+    }
+
     public void DisplayTrickInfo(Global.Trick trick)
     {
-        switch(trick.trickType)
-        {
-            case Global.TrickType.Blank:             ShowInfo(Global.selectTrickInfo);          break;
-            case Global.TrickType.IsNotTrick:        ShowInfo(Global.isNotTrickInfo);           break;
-            case Global.TrickType.Single:            ShowInfo(Global.singleTrickInfo);          break;
-            case Global.TrickType.Pair:              ShowInfo(Global.pairTrickInfo);            break;
-            case Global.TrickType.Triple:            ShowInfo(Global.tripleTrickInfo);          break;
-            case Global.TrickType.ConsecutivePair:   ShowInfo(Global.consecutivePairTrickInfo); break;
-            case Global.TrickType.Straight:          ShowInfo(Global.straightTrickInfo);        break;
-            case Global.TrickType.FullHouse:         ShowInfo(Global.fullHouseTrickInfo);       break;
-            case Global.TrickType.FourCardBomb:      ShowInfo(Global.fourCardTrickInfo);        break;
-            case Global.TrickType.StraightFlushBomb: ShowInfo(Global.straightFlushTrickInfo);   break;
-        }
+        if (isMassaging) originalMsg = Global.GetTrickInfo(trick);
+        else ShowInfo(Global.GetTrickInfo(trick));
     }
 }

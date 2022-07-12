@@ -21,6 +21,8 @@ public class GamePlayer : MonoBehaviour
     public bool smallTichuFlag      = false;
 
     public bool canDeclareSmallTichu = true;
+
+    public string previousTrick = null;
       
     public void AddCard(Card card)
     {
@@ -135,6 +137,8 @@ public class GamePlayer : MonoBehaviour
 
         if (GameManager.instance.isTrickValid(nowTrick))
         {
+            previousTrick = Global.GetTrickInfo(nowTrick);
+            UIManager.instance.RenderTrickCard(selectCardList);
             GameManager.instance.trickStack.Push(nowTrick); // 수정 필요.
             ClearSelection();
             canDeclareSmallTichu = false;
@@ -151,6 +155,7 @@ public class GamePlayer : MonoBehaviour
     public void PassTrickCall()
     {
         DisableSelection();
+        previousTrick = Global.passInfo;
         chooseFlag = true;
     }
 

@@ -21,8 +21,9 @@ public static class Global
     public static int numberOfCardsForLineInSmallTichuPhase = 5;
     public static int numberOfCardsForLineInPlayPhase       = 14;
 
-    public static int[] generalCardsValue           = new int[] { 0, 14, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13 };
-    public static int[] specialCardsValue           = new int[]{ 1, 16, 17, 18 }; //새 개 봉 용 순서로
+    public static int[]    generalCardsValue        = new int[] { 0, 14, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13 };
+    public static int[]    specialCardsValue        = new int[]{ 1, 16, 17, 18 }; //새 개 봉 용 순서로
+    public static string[] valueToStrTable          = new string[] {"0","1","2","3","4","5","6","7","8","9","10", "J", "Q", "K", "A" };
     public static int   aceCardsValue               = 14;
     
     public static int   invalidTrickValue           = -1;
@@ -64,6 +65,7 @@ public static class Global
     public static string   playerInfoScoreObjectName = "PlayerScore";
     public static string   playerInfoRoundScoreName  = "RoundScore";
     public static string   playerInfoTotalScoreName  = "TotalScore";
+    public static string   playerInfoTrickTextName   = "PlayerTrick";
 
     public static string alertPopupObjectName         = "AlertPopup";
     public static string alertTextObjectName          = "AlertContent";
@@ -83,24 +85,28 @@ public static class Global
     public static string trickSelectionPassButtonName       = "PassButton";
     public static string trickSelectionSmallTichuButtonName = "SmallTichuButton";
 
-
     public static float width   = 3.5f;
     public static float offsetY = 0.75f;
     public static float offsetZ = 0.002f;
     public static float cameraPosition = -10f;
 
 
+    public static float    trickCardOffset     = 0.4f;
+
     public static Vector3    frontEpsilon        = new Vector3(0, 0, -0.001f);
     public static Vector3    hiddenCardPosition  = new Vector3(-100f, -100f, -100f);
-    public static Vector3    initialPosition     = new Vector3(0f, -2.3f, -1f);
+    public static Vector3    initialPosition     = new Vector3(0f, -2.4f, -1f);
     public static Vector3    initialScale        = new Vector3(0.2f,0.2f, 0.2f);
     public static Quaternion initialCardRotation = Quaternion.Euler(270f, 180f, 180f);
+
+    public static Vector3 initialTrickPosition   = new Vector3(0f, 1.7f, -1f);
 
     public static string largeTichuInfo       = "라지 티츄 여부를 결정하세요.";
     public static string exchangeCardInfo     = "카드를 한장씩 나눠주세요.";
     public static string receiveCardInfo      = "카드를 받으세요.";
     public static string selectTrickInfo      = "트릭을 선택하세요.";
-    
+
+    public static string passInfo = "패스";
     public static string isNotTrickInfo           = "트릭이 아닙니다.";
     public static string singleTrickInfo          = "싱글";
     public static string pairTrickInfo            = "페어";
@@ -178,6 +184,7 @@ public static class Global
         public GameObject smallTichuIconObject;
         public TMP_Text   roundScore;
         public TMP_Text   totalScore;
+        public TMP_Text   trick;
     }
 
     public struct PlayerInfoUI
@@ -311,7 +318,11 @@ public static class Global
         else if (length == 1)
         {
             //싱글의 경우가 있음.
-            if (cardList[0].type == CardType.Phoenix) nowTrick = WriteTrick(cardList, 1, cardList[0].value * 2 - 1, TrickType.Single); //봉황의 경우 2배에 -1.
+            if (cardList[0].type == CardType.Phoenix)
+            {
+                if (cardList[0].value == invalidTrickValue) nowTrick = WriteTrick(cardList, 1, invalidTrickValue, TrickType.IsNotTrick);
+                else nowTrick = WriteTrick(cardList, 1, cardList[0].value * 2 + 1, TrickType.Single); //봉황의 경우 2배에 + 1.
+            }
             else nowTrick = WriteTrick(cardList, 1, cardList[0].value * 2, TrickType.Single);//일반 싱글의 경우 2배를 곱하는 테크닉.
         }
         else if (length == 2)
@@ -434,7 +445,23 @@ public static class Global
         if (phoenixIdx == null) return;
         else
         {
-            if (cardList.Count == 1) { cardList[(int)phoenixIdx].value = 1; return; }
+            if (cardList.Count == 1) 
+            {
+                if (GameManager.instance.isFirstTrick) { cardList[(int)phoenixIdx].value = 1; return; }
+                else
+                {
+                    if (GameManager.instance.trickStack.Peek().cards[0].value != specialCardsValue[3])
+                    {
+                        cardList[(int)phoenixIdx].value = GameManager.instance.trickStack.Peek().cards[0].value;
+                        return;
+                    }
+                    else
+                    {
+                        cardList[(int)phoenixIdx].value = invalidTrickValue;
+                        return;
+                    }
+                }
+            }
             int retVal = 2;
             Card phoenix = cardList[(int)phoenixIdx];
             phoenix.value = 2;
@@ -451,5 +478,33 @@ public static class Global
             }
             phoenix.value = retVal;
         }
+    }
+
+    static public string GetTrickInfo(Trick trick)
+    {
+        string retInfo = null;
+        switch (trick.trickType)
+        {
+            case TrickType.Single:
+                switch (trick.cards[0].type)
+                {
+                    case CardType.Phoenix: retInfo = valueToStrTable[trick.cards[0].value] + ".5 " + singleTrickInfo; break;
+                    case CardType.Bird: retInfo = valueToStrTable[trick.cards[0].value] + " " + singleTrickInfo + "(새)"; break;
+                    case CardType.Dragon: retInfo = "용"; break;
+                    case CardType.Dog: retInfo = "개"; break;
+                    default: retInfo = valueToStrTable[trick.trickValue / 2] + " " + singleTrickInfo; break;
+                }
+                break;
+            case TrickType.Blank:             retInfo = selectTrickInfo; break;
+            case TrickType.IsNotTrick:        retInfo = isNotTrickInfo; break;
+            case TrickType.Pair:              retInfo = valueToStrTable[trick.trickValue] + " " + pairTrickInfo; break;
+            case TrickType.Triple:            retInfo = valueToStrTable[trick.trickValue] + " " + tripleTrickInfo; break;
+            case TrickType.ConsecutivePair:   retInfo = valueToStrTable[trick.trickValue] + " " + consecutivePairTrickInfo; break;
+            case TrickType.Straight:          retInfo = valueToStrTable[trick.trickValue] + " " + straightTrickInfo; break;
+            case TrickType.FullHouse:         retInfo = valueToStrTable[trick.trickValue] + " " + fullHouseTrickInfo; break;
+            case TrickType.FourCardBomb:      retInfo = valueToStrTable[trick.trickValue] + " " + fourCardTrickInfo; break;
+            case TrickType.StraightFlushBomb: retInfo = valueToStrTable[trick.trickValue] + " " + straightFlushTrickInfo; break;
+        }
+        return retInfo;
     }
 }
