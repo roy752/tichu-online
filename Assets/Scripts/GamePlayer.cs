@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.Events;
 using System.Linq;
 
 public class GamePlayer : MonoBehaviour
@@ -14,6 +15,8 @@ public class GamePlayer : MonoBehaviour
     public int    playerNumber;
     public int    roundScore;
     public int    totalScore;
+    public int    smallTichuScore;
+    public int    largeTichuScore;
 
     public bool chooseFlag          = false;
     public bool coroutineFinishFlag = false;
@@ -84,7 +87,7 @@ public class GamePlayer : MonoBehaviour
     public void FindNextPlayer(Global.Trick nowTrick)
     {
         int startIdx = GameManager.instance.startPlayerIdx + 1;
-        if (nowTrick?.trickType == Global.TrickType.Dog) startIdx++;
+        if (nowTrick?.trickType == Global.TrickType.Dog) { startIdx++; GameManager.instance.trickFinishFlag = true; }
         for(int i = 0; i<Global.numberOfPlayers; ++i)
         {
             if (GameManager.instance.players[startIdx%Global.numberOfPlayers] != GameManager.instance.currentPlayer && 
@@ -106,7 +109,64 @@ public class GamePlayer : MonoBehaviour
         {
             GameManager.instance.isRoundEnd = true;
             GameManager.instance.trickFinishFlag = true;
+            // 1,2,3등이 나눠짐.
         }
+    }
+
+    private bool getTrickScoreFlag;
+    private bool dragonChooseFlag;
+    private int dragonChoosePlayerIdx;
+    public IEnumerator GetTrickScore()
+    {
+        getTrickScoreFlag = false;
+        dragonChooseFlag = false;
+        if (GameManager.instance.IsDragonOnTop())
+        {
+            // 용으로 딴 트릭은 줄 사람을 정하는 팝업 띄우고,
+            UIManager.instance.ActivateDragonSelection(DragonChooseNextOpponentCall,DragonChoosePreviousOpponentCall);
+            yield return new WaitUntil(() => dragonChooseFlag || UIManager.instance.IsTimeOut());
+            UIManager.instance.DeactivateDragonSelection();
+            if (dragonChooseFlag == false) RandomDragonChooseCall();
+
+            var trickTaker = GameManager.instance.players[dragonChoosePlayerIdx % Global.numberOfPlayers];
+            foreach (var trick in GameManager.instance.trickStack)
+            {
+                int score = 0;
+                foreach (var card in trick.cards)
+                {
+                    score += card.score;
+                    card.transform.position = Global.hiddenCardPosition;
+                }
+                trickTaker.roundScore += score;
+            }
+
+            // 선택 후 그 사람에 대해 Give.
+        }
+        else
+        {
+            foreach (var trick in GameManager.instance.trickStack)
+            {
+                int score = 0;
+                foreach (var card in trick.cards)
+                {
+                    score += card.score;
+                    card.transform.position = Global.hiddenCardPosition;
+                }
+                roundScore += score;
+            }
+        }
+        GameManager.instance.trickStack.Clear();
+        getTrickScoreFlag = true;
+    }
+
+    private bool isDogTrick;
+    public void ProgressIfDog(Global.Trick nowTrick)
+    {
+        if (nowTrick.trickType == Global.TrickType.Dog)
+        {
+            isDogTrick = true;
+        }
+        else isDogTrick = false;
     }
 
     public void DeclareLargeTichuCall()
@@ -184,6 +244,7 @@ public class GamePlayer : MonoBehaviour
 
             CalculateHandRunOut();
             FindNextPlayer(nowTrick);
+            ProgressIfDog(nowTrick);
             CalculateIsRoundEnd();
 
             //UIManager.instance.RenderCards(Global.initialPosition, Global.numberOfCardsForLineInSmallTichuPhase, cards);
@@ -218,6 +279,38 @@ public class GamePlayer : MonoBehaviour
         previousTrick = Global.passInfo;
         FindNextPlayer(null);
         chooseFlag = true;
+    }
+
+    public void PassOrRandomSingleTrickCall()
+    {
+        if (GameManager.instance.isFirstTrick)
+        {
+            DisableSelection();
+            cards[Random.Range(0, cards.Count)].ToggleSelection();
+            SelectTrickCall();
+        }
+        else
+        {
+            PassTrickCall();
+        }
+    }
+
+    public void DragonChooseNextOpponentCall()
+    {
+        dragonChoosePlayerIdx = playerNumber + 1;
+        dragonChooseFlag = true;
+    }
+
+    public void DragonChoosePreviousOpponentCall()
+    {
+        dragonChoosePlayerIdx = playerNumber + 3;
+        dragonChooseFlag = true;
+    }
+
+    public void RandomDragonChooseCall()
+    {
+        var rnd = new UnityAction[] { DragonChooseNextOpponentCall, DragonChoosePreviousOpponentCall };
+        rnd[Random.Range(0, 2)]();
     }
 
 
@@ -308,19 +401,24 @@ public class GamePlayer : MonoBehaviour
         coroutineFinishFlag = false;
         if(GameManager.instance.IsAllDone())
         {
-            //'나' 가 트릭을 가져갑니다.(3초)
-            Debug.Log("트릭을 가져갈 차례");
+            StartCoroutine(GetTrickScore());
+            yield return new WaitUntil(() => getTrickScoreFlag);
             GameManager.instance.trickFinishFlag = true;
             GameManager.instance.startPlayerIdx = playerNumber;
             GameManager.instance.ClearPass();
-            UIManager.instance.ShowInfo(Global.GetTrickTakeInfo(playerName));
+
+            if (dragonChooseFlag)
+            {
+                UIManager.instance.ShowInfo(Global.GetTrickTakeInfo(GameManager.instance.players[dragonChoosePlayerIdx % Global.numberOfPlayers].playerName));
+                dragonChooseFlag = false;
+            }
+            else UIManager.instance.ShowInfo(Global.GetTrickTakeInfo(playerName));
+            
             UIManager.instance.Wait(Global.trickTakeDuration);
             yield return new WaitUntil(()=>UIManager.instance.IsWaitFinished());
         }
         else if(GameManager.instance.IsAllPassed())
         {
-            //bomb 받는 과정 활성화. 메세지 교체.
-            Debug.Log("폭탄을 받을 차례");
             UIManager.instance.ActivateBombSelection(SelectBombCall, PassTrickCall, DeclareSmallTichuCall);
             yield return new WaitUntil(() => chooseFlag == true || UIManager.instance.IsTimeOut());
             if (chooseFlag == false) PassTrickCall();
@@ -328,11 +426,21 @@ public class GamePlayer : MonoBehaviour
         }
         else
         {
-            Debug.Log("일반 교환할 차례");
             UIManager.instance.ActivateTrickSelection(SelectTrickCall, PassTrickCall, DeclareSmallTichuCall);
             yield return new WaitUntil(() => chooseFlag == true || UIManager.instance.IsTimeOut());
-            if (chooseFlag == false) PassTrickCall();
+            if (chooseFlag == false) PassOrRandomSingleTrickCall();
             UIManager.instance.DeactivateTrickSelection();
+
+            if(isDogTrick)
+            {
+                isDogTrick = false;
+                UIManager.instance.ShowInfo(GameManager.instance.players[GameManager.instance.startPlayerIdx % Global.numberOfPlayers].playerName + Global.selectDogInfo);
+                UIManager.instance.Wait(Global.selectDogDuration);
+                yield return new WaitUntil(() => UIManager.instance.IsWaitFinished());
+                StartCoroutine(GetTrickScore());
+                yield return new WaitUntil(() => getTrickScoreFlag);
+            }
+
         }
 
         coroutineFinishFlag = true;

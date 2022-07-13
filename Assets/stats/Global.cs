@@ -22,7 +22,9 @@ public static class Global
     public static int numberOfCardsForLineInPlayPhase       = 14;
 
     public static int[]    generalCardsValue        = new int[] { 0, 14, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13 };
+    public static int[]    generalCardsScore        = new int[] { 0, 0, 0, 0, 0, 5, 0, 0, 0, 0, 10, 0, 0, 10};
     public static int[]    specialCardsValue        = new int[]{ 1, 16, 17, 18 }; //새 개 봉 용 순서로
+    public static int[]    specialCardsScore        = new int[] { 0, 0, -25, 25 };
     public static string[] valueToStrTable          = new string[] {"0","1","2","3","4","5","6","7","8","9","10", "J", "Q", "K", "A" };
     public static int   aceCardsValue               = 14;
     
@@ -85,6 +87,10 @@ public static class Global
     public static string trickSelectionPassButtonName       = "PassButton";
     public static string trickSelectionSmallTichuButtonName = "SmallTichuButton";
 
+    public static string   dragonSelectionPopupObjectName     = "DragonSelectionPopup";
+    public static string[] dragonSelectionOpponentButtonNames = new string[] { "PreviousOpponent", "NextOpponent" };
+    public static string[] dragonSelectionOpponentTextNames   = new string[] { "PreviousOpponentName", "NextOpponentName" };
+
     public static float width   = 3.5f;
     public static float offsetY = 0.75f;
     public static float offsetZ = 0.002f;
@@ -107,8 +113,13 @@ public static class Global
     public static string selectTrickInfo      = "트릭을 선택하세요.";
     public static string selectBombInfo       = "트릭이 끝났습니다. 폭탄을 낼지 선택하세요.";
     public static string takeTrickInfo        = " 가 트릭을 가져갑니다.";
+    public static string selectDragonInfo     = "용으로 딴 트릭을 넘겨줄 사람을 선택하세요.";
+    public static string selectDogInfo        = " 에게 차례를 넘깁니다.";
 
     public static string passInfo                 = "패스";
+    public static string dogTrickInfo             = "개";
+    public static string birdTrickInfo            = "새";
+    public static string dragonTrickInfo          = "용";
     public static string isNotTrickInfo           = "트릭이 아닙니다.";
     public static string singleTrickInfo          = "싱글";
     public static string pairTrickInfo            = "페어";
@@ -133,6 +144,8 @@ public static class Global
     public static float selectTrickDuration   = 40.5f;
     public static float selectBombDuration    = 5.5f;
     public static float trickTakeDuration     = 3.5f;
+    public static float selectDragonDuration  = 15.5f;
+    public static float selectDogDuration     = 3.5f;
     
     public static float tick      = 0.1f;
     public static float shakeTick = 1 / 60f;
@@ -249,6 +262,15 @@ public static class Global
         }
     }
     
+    public class DragonSelection
+    {
+        public GameObject dragonSelectionObject;
+        public Button     previousOpponentButton;
+        public Button     nextOpponentButton;
+
+        public TMP_Text previousOpponentName;
+        public TMP_Text nextOpponentName;
+    }
 
     public enum CardType
     {
@@ -497,22 +519,22 @@ public static class Global
             case TrickType.Single:
                 switch (trick.cards[0].type)
                 {
+                    case CardType.Bird:    retInfo = birdTrickInfo;   break;
+                    case CardType.Dragon:  retInfo = dragonTrickInfo; break;
                     case CardType.Phoenix: retInfo = valueToStrTable[trick.cards[0].value] + ".5 " + singleTrickInfo; break;
-                    case CardType.Bird: retInfo = valueToStrTable[trick.cards[0].value] + " " + singleTrickInfo + "(새)"; break;
-                    case CardType.Dragon: retInfo = "용"; break;
-                    case CardType.Dog: retInfo = "개"; break;
-                    default: retInfo = valueToStrTable[trick.trickValue / 2] + " " + singleTrickInfo; break;
+                    default:               retInfo = valueToStrTable[trick.trickValue / 2] + " " + singleTrickInfo;   break;
                 }
                 break;
+            case TrickType.Dog:               retInfo = dogTrickInfo;    break;
             case TrickType.Blank:             retInfo = selectTrickInfo; break;
-            case TrickType.IsNotTrick:        retInfo = isNotTrickInfo; break;
-            case TrickType.Pair:              retInfo = valueToStrTable[trick.trickValue] + " " + pairTrickInfo; break;
-            case TrickType.Triple:            retInfo = valueToStrTable[trick.trickValue] + " " + tripleTrickInfo; break;
+            case TrickType.IsNotTrick:        retInfo = isNotTrickInfo;  break;
+            case TrickType.Pair:              retInfo = valueToStrTable[trick.trickValue] + " " + pairTrickInfo;            break;
+            case TrickType.Triple:            retInfo = valueToStrTable[trick.trickValue] + " " + tripleTrickInfo;          break;
             case TrickType.ConsecutivePair:   retInfo = valueToStrTable[trick.trickValue] + " " + consecutivePairTrickInfo; break;
-            case TrickType.Straight:          retInfo = valueToStrTable[trick.trickValue] + " " + straightTrickInfo; break;
-            case TrickType.FullHouse:         retInfo = valueToStrTable[trick.trickValue] + " " + fullHouseTrickInfo; break;
-            case TrickType.FourCardBomb:      retInfo = valueToStrTable[trick.trickValue] + " " + fourCardTrickInfo; break;
-            case TrickType.StraightFlushBomb: retInfo = valueToStrTable[trick.trickValue] + " " + straightFlushTrickInfo; break;
+            case TrickType.Straight:          retInfo = valueToStrTable[trick.trickValue] + " " + straightTrickInfo;        break;
+            case TrickType.FullHouse:         retInfo = valueToStrTable[trick.trickValue] + " " + fullHouseTrickInfo;       break;
+            case TrickType.FourCardBomb:      retInfo = valueToStrTable[trick.trickValue] + " " + fourCardTrickInfo;        break;
+            case TrickType.StraightFlushBomb: retInfo = valueToStrTable[trick.trickValue] + " " + straightFlushTrickInfo;   break;
         }
         return retInfo;
     }

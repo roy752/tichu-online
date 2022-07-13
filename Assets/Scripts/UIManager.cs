@@ -20,6 +20,7 @@ public class UIManager : MonoBehaviour
     private Global.AlertPopup        alertPopup     = new Global.AlertPopup();
     private Global.CardReceivePopup  receiveCard    = new Global.CardReceivePopup();
     private Global.TrickSelection    selectTrick    = new Global.TrickSelection();
+    private Global.DragonSelection   selectDragon   = new Global.DragonSelection();
 
     private bool isMassaging = false;
     private string originalMsg;
@@ -132,6 +133,19 @@ public class UIManager : MonoBehaviour
         ////////////////////////
 
 
+        //용 선택 관련 버튼(dragon selection) 오브젝트
+        selectDragon.dragonSelectionObject = uiParent.transform.Find(Global.dragonSelectionPopupObjectName).gameObject;
+
+        var nowDragonSelectionObject = selectDragon.dragonSelectionObject.transform;
+
+        selectDragon.previousOpponentButton = nowDragonSelectionObject.Find(Global.dragonSelectionOpponentButtonNames[0]).GetComponent<Button>();
+        selectDragon.previousOpponentName   = selectDragon.previousOpponentButton.transform.Find(Global.dragonSelectionOpponentTextNames[0]).GetComponent<TMP_Text>();
+        selectDragon.nextOpponentButton     = nowDragonSelectionObject.Find(Global.dragonSelectionOpponentButtonNames[1]).GetComponent<Button>();
+        selectDragon.nextOpponentName       = selectDragon.nextOpponentButton.transform.Find(Global.dragonSelectionOpponentTextNames[1]).GetComponent<TMP_Text>();
+        /////////////////////////////
+
+
+
     }
 
     public void ActivateLargeTichu(UnityAction DeclareCall, UnityAction SkipCall)
@@ -237,6 +251,7 @@ public class UIManager : MonoBehaviour
                                                         );
 
         selectTrick.trickSelectionObject.SetActive(true);
+        selectTrick.passButton.gameObject.SetActive(!GameManager.instance.isFirstTrick);
         selectTrick.smallTichuButton.gameObject.SetActive(GameManager.instance.currentPlayer.canDeclareSmallTichu); //수정 필요. 버튼을 enabled = false 로 하고 흐리게 만들어야함.
     }
 
@@ -251,6 +266,31 @@ public class UIManager : MonoBehaviour
         DeactivateTimer();
 
         selectTrick.trickSelectionObject.SetActive(false);
+        HideInfo();
+    }
+
+    public void ActivateDragonSelection(UnityAction SelectNextOpponentCall, UnityAction SelectPreviousOpponentCall)
+    {
+        ShowInfo(Global.selectDragonInfo);
+        ActivateTimer(Global.selectDragonDuration);
+        
+        selectDragon.dragonSelectionObject.SetActive(true);
+
+        selectDragon.previousOpponentName.text = GameManager.instance.players[(GameManager.instance.currentPlayer.playerNumber + 3) % Global.numberOfPlayers].playerName;
+        selectDragon.nextOpponentName.text = GameManager.instance.players[(GameManager.instance.currentPlayer.playerNumber + 1) % Global.numberOfPlayers].playerName;
+
+        selectDragon.previousOpponentButton.onClick.AddListener(SelectPreviousOpponentCall);
+        selectDragon.nextOpponentButton.onClick.AddListener(SelectNextOpponentCall);
+
+    }
+
+    public void DeactivateDragonSelection()
+    {
+        selectDragon.nextOpponentButton.onClick.RemoveAllListeners();
+        selectDragon.previousOpponentButton.onClick.RemoveAllListeners();
+
+        selectDragon.dragonSelectionObject.SetActive(false);
+        DeactivateTimer();
         HideInfo();
     }
 

@@ -14,6 +14,8 @@ public class Card : SelectionHandler
     public int             id;
     [HideInInspector]
     public bool            isFixed = false;
+    [HideInInspector]
+    public int             score;
 
     public override void ToggleSelection()
     {
