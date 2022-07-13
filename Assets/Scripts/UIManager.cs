@@ -20,8 +20,10 @@ public class UIManager : MonoBehaviour
     private Global.AlertPopup        alertPopup     = new Global.AlertPopup();
     private Global.CardReceivePopup  receiveCard    = new Global.CardReceivePopup();
     private Global.TrickSelection    selectTrick    = new Global.TrickSelection();
+    private Global.DragonSelection   selectDragon   = new Global.DragonSelection();
 
     private bool isMassaging = false;
+    private string originalMsg;
 
     private float timerDuration;
 
@@ -84,6 +86,7 @@ public class UIManager : MonoBehaviour
             playerInfo.playerInfo[idx].largeTichuIconObject = nowInfoObject.Find(Global.playerInfoTichuObjectName).Find(Global.playerInfoLargeTichuName).gameObject;
             playerInfo.playerInfo[idx].roundScore           = nowInfoObject.Find(Global.playerInfoScoreObjectName).Find(Global.playerInfoRoundScoreName).GetComponent<TMP_Text>();
             playerInfo.playerInfo[idx].totalScore           = nowInfoObject.Find(Global.playerInfoScoreObjectName).Find(Global.playerInfoTotalScoreName).GetComponent<TMP_Text>();
+            playerInfo.playerInfo[idx].trick                = nowInfoObject.Find(Global.playerInfoTrickTextName).GetComponent<TMP_Text>();
         }
         ///////////////////////////////
 
@@ -128,6 +131,19 @@ public class UIManager : MonoBehaviour
         selectTrick.passButton       = nowTrickSelectionObject.Find(Global.trickSelectionPassButtonName).GetComponent<Button>();
         selectTrick.smallTichuButton = nowTrickSelectionObject.Find(Global.trickSelectionSmallTichuButtonName).GetComponent<Button>();
         ////////////////////////
+
+
+        //용 선택 관련 버튼(dragon selection) 오브젝트
+        selectDragon.dragonSelectionObject = uiParent.transform.Find(Global.dragonSelectionPopupObjectName).gameObject;
+
+        var nowDragonSelectionObject = selectDragon.dragonSelectionObject.transform;
+
+        selectDragon.previousOpponentButton = nowDragonSelectionObject.Find(Global.dragonSelectionOpponentButtonNames[0]).GetComponent<Button>();
+        selectDragon.previousOpponentName   = selectDragon.previousOpponentButton.transform.Find(Global.dragonSelectionOpponentTextNames[0]).GetComponent<TMP_Text>();
+        selectDragon.nextOpponentButton     = nowDragonSelectionObject.Find(Global.dragonSelectionOpponentButtonNames[1]).GetComponent<Button>();
+        selectDragon.nextOpponentName       = selectDragon.nextOpponentButton.transform.Find(Global.dragonSelectionOpponentTextNames[1]).GetComponent<TMP_Text>();
+        /////////////////////////////
+
 
 
     }
@@ -235,6 +251,7 @@ public class UIManager : MonoBehaviour
                                                         );
 
         selectTrick.trickSelectionObject.SetActive(true);
+        selectTrick.passButton.gameObject.SetActive(!GameManager.instance.isFirstTrick);
         selectTrick.smallTichuButton.gameObject.SetActive(GameManager.instance.currentPlayer.canDeclareSmallTichu); //수정 필요. 버튼을 enabled = false 로 하고 흐리게 만들어야함.
     }
 
@@ -252,6 +269,63 @@ public class UIManager : MonoBehaviour
         HideInfo();
     }
 
+    public void ActivateDragonSelection(UnityAction SelectNextOpponentCall, UnityAction SelectPreviousOpponentCall)
+    {
+        ShowInfo(Global.selectDragonInfo);
+        ActivateTimer(Global.selectDragonDuration);
+        
+        selectDragon.dragonSelectionObject.SetActive(true);
+
+        selectDragon.previousOpponentName.text = GameManager.instance.players[(GameManager.instance.currentPlayer.playerNumber + 3) % Global.numberOfPlayers].playerName;
+        selectDragon.nextOpponentName.text = GameManager.instance.players[(GameManager.instance.currentPlayer.playerNumber + 1) % Global.numberOfPlayers].playerName;
+
+        selectDragon.previousOpponentButton.onClick.AddListener(SelectPreviousOpponentCall);
+        selectDragon.nextOpponentButton.onClick.AddListener(SelectNextOpponentCall);
+
+    }
+
+    public void DeactivateDragonSelection()
+    {
+        selectDragon.nextOpponentButton.onClick.RemoveAllListeners();
+        selectDragon.previousOpponentButton.onClick.RemoveAllListeners();
+
+        selectDragon.dragonSelectionObject.SetActive(false);
+        DeactivateTimer();
+        HideInfo();
+    }
+
+    public void ActivateBombSelection(UnityAction SelectBombCall, UnityAction PassCall, UnityAction SmallTichuCall)
+    {
+        ShowInfo(Global.selectBombInfo);
+        ActivateTimer(Global.selectBombDuration);
+
+        //리스너 삽입.
+        selectTrick.submitButton.onClick.AddListener(SelectBombCall);
+        selectTrick.passButton.onClick.AddListener(PassCall);
+        selectTrick.smallTichuButton.onClick.AddListener(
+                                                      () => ActivateAlertPopup(
+                                                                                Global.alertSmallTichuMsg,
+                                                                                () => { SmallTichuCall(); UpdateSmallTichuButton(selectTrick.smallTichuButton.gameObject); }
+                                                                              )
+                                                        );
+
+        selectTrick.trickSelectionObject.SetActive(true);
+        selectTrick.smallTichuButton.gameObject.SetActive(GameManager.instance.currentPlayer.canDeclareSmallTichu); //수정 필요. 버튼을 enabled = false 로 하고 흐리게 만들어야함.
+    }
+
+    public void DeactivateBombSelection()
+    {
+        selectTrick.submitButton.onClick.RemoveAllListeners();
+        selectTrick.passButton.onClick.RemoveAllListeners();
+        selectTrick.bombButton.onClick.RemoveAllListeners();
+        selectTrick.smallTichuButton.onClick.RemoveAllListeners();
+
+        DeactivateAlertPopup();
+        DeactivateTimer();
+
+        selectTrick.trickSelectionObject.SetActive(false);
+        HideInfo();
+    }
     public void ActivateAlertPopup(string alertText, UnityAction confirmCall)
     {
         alertPopup.alertPopupObject.SetActive(true);
@@ -345,7 +419,7 @@ public class UIManager : MonoBehaviour
     {
         StartCoroutine(ShakeCoroutine(infoBar.infoBarText.gameObject, Global.shakeDuration));
         isMassaging = true;
-        string originalMsg = infoBar.infoBarText.text;
+        originalMsg = infoBar.infoBarText.text;
         Color originalColor = infoBar.infoBarText.color;
         ShowInfo(msg);
         infoBar.infoBarText.color = Global.massageColor;
@@ -423,8 +497,10 @@ public class UIManager : MonoBehaviour
             nowPlayerInfo.hand.text       = nowPlayer.cards.Count.ToString();
             nowPlayerInfo.roundScore.text = nowPlayer.roundScore.ToString();
             nowPlayerInfo.totalScore.text = nowPlayer.totalScore.ToString();
+            nowPlayerInfo.trick.text      = nowPlayer.previousTrick;
             nowPlayerInfo.largeTichuIconObject.SetActive(nowPlayer.largeTichuFlag);
             nowPlayerInfo.smallTichuIconObject.SetActive(nowPlayer.smallTichuFlag);
+
         }
     }
 
@@ -440,5 +516,49 @@ public class UIManager : MonoBehaviour
             var nowPlayer = GameManager.instance.currentPlayer.slot[idx].player;
             receiveCard.cardReceiveSlots[idx].playerNameText.text = nowPlayer.playerName;
         }
+    }
+
+    public void RenderTrickCard(List<Card> cardList)
+    {
+        if (GameManager.instance.trickStack.Count > 0)
+        {
+            foreach (var card in GameManager.instance.trickStack.Peek().cards) card.isFixed = false;
+        }
+        Vector3 nowPosition = Global.initialTrickPosition + new Vector3((-(cardList.Count - 1) / 2)*Global.trickCardOffset,0,0);
+        foreach (var card in cardList)
+        {
+            card.transform.position = nowPosition;
+            card.isFixed = true;
+            nowPosition += new Vector3(Global.trickCardOffset, 0, -Global.offsetZ);
+        }
+    }
+
+    public void DisplayTrickInfo(Global.Trick trick)
+    {
+        if (isMassaging) originalMsg = Global.GetTrickInfo(trick);
+        else ShowInfo(Global.GetTrickInfo(trick));
+    }
+
+
+    private bool isWaitFinished;
+    public void Wait(float duration)
+    {
+        StartCoroutine(WaitCoroutine(duration));
+    }
+
+    public IEnumerator WaitCoroutine(float duration)
+    {
+        isWaitFinished = false;
+        while (duration > 0)
+        {
+            duration -= Global.tick;
+            yield return new WaitForSeconds(Global.tick);
+        }
+        isWaitFinished = true;
+    }
+
+    public bool IsWaitFinished()
+    {
+        return isWaitFinished;
     }
 }

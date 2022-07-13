@@ -51,11 +51,20 @@ public class GameManager : MonoBehaviour
     [HideInInspector]
     public bool isBirdUsed;
 
+    /// <summary> 
+    /// 첫번째 트릭인가? 첫번째 트릭은 아무거나 낼 수 있고 패스가 불가능.
+    /// </summary>
     [HideInInspector]
     public bool isFirstTrick;
 
     [HideInInspector]
+    public bool isFirstRound;
+
+    [HideInInspector]
     public int startPlayerIdx;
+
+    [HideInInspector]
+    public int passCount = 0;
 
     [HideInInspector]
     public static GameManager instance;
@@ -74,6 +83,7 @@ public class GameManager : MonoBehaviour
 
     void Start()
     {
+        //UIManager.instance.RenderTrickCard(cards.Take(5).ToList());
         StartCoroutine(StartPlay());
     }
 
@@ -84,7 +94,8 @@ public class GameManager : MonoBehaviour
 
     IEnumerator StartPlay()
     {
-        
+        ResetRoundSetting();
+        /*
         SplitCardsToPlayer(Global.numberOfCardsLargeTichuPhase);
 
         StartCoroutine(StartLargeTichuPhaseCoroutine()); //카드 8장 나눠주고 라지 티츄 결정
@@ -97,7 +108,11 @@ public class GameManager : MonoBehaviour
 
         StartCoroutine(StartReceiveCardPhaseCoroutine()); //교환한 카드 확인, 스몰티츄 결정
         yield return new WaitUntil(() => phaseChangeFlag);
-        
+        */
+
+        SplitCardsToPlayer(Global.numberOfCardsPlay);
+        foreach (var player in players) Global.SortCard(ref player.cards);
+
         StartCoroutine(StartMainPlayPhaseCoroutine()); //1,2,3,4등이 나뉠 때까지 플레이
         yield return new WaitUntil(() => phaseChangeFlag);
 
@@ -110,16 +125,18 @@ public class GameManager : MonoBehaviour
 
         isSelectionEnabled = true;
         isMultipleSelectionEnabled = true;
-        
+
         while(isRoundEnd==false)
         {
             StartCoroutine(StartTrickCoroutine());
             yield return new WaitUntil(() => isTrickEnd);
         }
-
         phaseChangeFlag = true;
     }
 
+    /// <summary>
+    /// 트릭이 끝나면 이 플래그를 true로.
+    /// </summary>
     public bool trickFinishFlag = false;
     
     IEnumerator StartTrickCoroutine()
@@ -128,15 +145,11 @@ public class GameManager : MonoBehaviour
         //플레이어가 낼 족보 결정하고
         //모두 패스일때까지 카드 내기 반복
         isTrickEnd = false;
-        trickFinishFlag = false;
-        isFirstTrick = true;
 
-        FindStartPlayer();
-        int idx = startPlayerIdx;
-
+        ResetTrickSetting();
         while(trickFinishFlag==false)
         {
-            currentPlayer = players[(idx++) % Global.numberOfPlayers];
+            currentPlayer = players[startPlayerIdx % Global.numberOfPlayers];
             currentPlayer.SelectTrick();
             yield return new WaitUntil(() => currentPlayer.coroutineFinishFlag); //폭탄 구현은 어떻게?
         }
@@ -196,36 +209,40 @@ public class GameManager : MonoBehaviour
 
     void MakeCards()
     {
-        
         int typeNumber = 0;
         int idNumber = 0;
-        foreach (string cardName in Enum.GetNames(typeof(Global.GeneralCardName)))
-        {
-            for (int i = 1; i <= Global.numberOfCardsGeneral; ++i)
-            {
-                var nowObject = Instantiate(Resources.Load(Global.prefabPath + Global.GetCardName(cardName, i)),
-                                            Global.hiddenCardPosition,
-                                            Global.initialCardRotation,
-                                            cardsParent.transform) as GameObject;
-                var nowCard = nowObject.GetComponent<Card>();
-                nowCard.cardName = Global.GetCardName(cardName, i); nowCard.type = typeNumber; nowCard.value = Global.generalCardsValue[i]; nowCard.id = idNumber;
-                cards.Add(nowCard);
-                idNumber++;
-            }
-            typeNumber++;
-        }
-
         int idx = 0;
-        foreach (string nowCardName in Enum.GetNames(typeof(Global.SpecialCardName)))
+        foreach (string cardName in Enum.GetNames(typeof(Global.CardType)))
         {
-            var nowObject = Instantiate(Resources.Load(Global.prefabPath + nowCardName),
-                                            Global.hiddenCardPosition,
-                                            Global.initialCardRotation,
-                                            cardsParent.transform) as GameObject;
-            var nowCard = nowObject.GetComponent<Card>();
-            nowCard.cardName = nowCardName; nowCard.type = typeNumber; nowCard.value = Global.specialCardsValue[idx]; nowCard.id = idNumber;
-            cards.Add(nowCard);
-            idNumber++; idx++; typeNumber++;
+            if (typeNumber < Global.numberOfGeneralCardType)
+            {
+                for (int i = 1; i <= Global.numberOfCardsGeneral; ++i)
+                {
+                    var nowCard = (
+                                    Instantiate(Resources.Load(Global.prefabPath + Global.GetCardName(cardName, i)),Global.hiddenCardPosition,
+                                                Global.initialCardRotation,cardsParent.transform) as GameObject
+                                   ).GetComponent<Card>();
+
+                    
+                    nowCard.cardName = Global.GetCardName(cardName, i); nowCard.type = (Global.CardType)Enum.Parse(typeof(Global.CardType),cardName); 
+                    nowCard.value = Global.generalCardsValue[i]; nowCard.id = idNumber; nowCard.score = Global.generalCardsScore[i];
+                    cards.Add(nowCard);
+                    idNumber++;
+                }
+                typeNumber++;
+            }
+            else
+            {
+                var nowCard = (
+                                Instantiate(Resources.Load(Global.prefabPath + cardName), Global.hiddenCardPosition,
+                                           Global.initialCardRotation,cardsParent.transform) as GameObject
+                              ).GetComponent<Card>();
+                
+                nowCard.cardName = cardName; nowCard.type = (Global.CardType)Enum.Parse(typeof(Global.CardType), cardName);
+                nowCard.value = Global.specialCardsValue[idx]; nowCard.id = idNumber; nowCard.score = Global.specialCardsScore[idx];
+                cards.Add(nowCard);
+                idNumber++; idx++; typeNumber++;
+            }
         }
     }
 
@@ -258,17 +275,126 @@ public class GameManager : MonoBehaviour
 
     private void FindStartPlayer()
     {
-        if(isFirstTrick)
+        if(isFirstRound)
         {
-            isFirstTrick = false;
+            isFirstRound = false;
             for(int idx = 0; idx<Global.numberOfPlayers; ++idx)
             {
-                if(players[idx].cards.Any(x=>x.value==Global.specialCardsValue[(int)Global.SpecialCardName.Bird])==true)
+                if(players[idx].cards.Any(x=>x.type==Global.CardType.Bird)==true) //새로 바꿀 수 없을까
                 {
                     startPlayerIdx = idx;
                     return;
                 }
             }
         }
+    }
+
+    public bool isTrickValid(Global.Trick trick)
+    {
+        if (trick.trickType == Global.TrickType.IsNotTrick||trick.trickType == Global.TrickType.Blank)
+        {
+            return false;
+        }
+        else if (isFirstTrick)
+        {
+            isFirstTrick = false;
+            return true;
+        }
+        else
+        {
+            var topTrick = trickStack.Peek();
+            if (trick.trickType == Global.TrickType.StraightFlushBomb)
+            {
+                if (topTrick.trickType == Global.TrickType.StraightFlushBomb)
+                {
+                    if (trick.trickLength > topTrick.trickLength) return true;
+                    else if (trick.trickLength == topTrick.trickLength && trick.trickValue > topTrick.trickValue) return true;
+                    else return false;
+                }
+                else return true;
+            }
+            else if (trick.trickType == Global.TrickType.FourCardBomb)
+            {
+                if (topTrick.trickType == Global.TrickType.StraightFlushBomb) return false;
+                else if (topTrick.trickType == Global.TrickType.FourCardBomb)
+                {
+                    if (trick.trickValue > topTrick.trickValue) return true;
+                    else return false;
+                }
+                else return true;
+            }
+            else
+            {
+                if (trick.trickType != topTrick.trickType) return false;
+                else if (trick.trickLength == topTrick.trickLength && trick.trickValue > topTrick.trickValue) return true;
+                else return false;
+            } 
+        }
+    }
+
+    public int CountFinishedPlayer()
+    {
+        int ret = 0;
+        foreach(var player in players)
+        {
+            if (player.isFinished == true) ++ret; 
+        }
+        return ret;
+    }
+
+    public void AddPass()
+    {
+        passCount++;
+    }
+
+    public void ClearPass()
+    {
+        passCount = 0;
+    }
+
+    public bool IsAllPassed()
+    {
+        int cnt = 0;
+        foreach (var player in players) if (player.isFinished == false) ++cnt;
+        if (passCount >= cnt - 1) return true;
+        else return false;
+    }
+
+    public bool IsAllDone()
+    {
+        int cnt = 0;
+        foreach (var player in players) if (player.isFinished == false) ++cnt;
+        if (passCount >= cnt + cnt - 1) return true;
+        else return false;
+    }
+
+    public void ResetTrickSetting()
+    {
+        passCount = 0;
+        trickFinishFlag = false;
+        isFirstTrick = true;
+        foreach(var player in players)
+        {
+            player.previousTrick = null;
+        }
+        FindStartPlayer();
+    }
+
+    public void ResetRoundSetting()
+    {
+        isFirstRound = true;
+        foreach(var player in players)
+        {
+            player.canDeclareSmallTichu = true;
+            player.smallTichuFlag = false;
+            player.largeTichuFlag = false;
+            player.ranking = 0;
+            player.isFinished = false;
+        }
+    }
+    
+    public bool IsDragonOnTop()
+    {
+        return trickStack.Peek().cards.Any(x => x.type == Global.CardType.Dragon) == true;
     }
 }
