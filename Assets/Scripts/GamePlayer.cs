@@ -19,10 +19,14 @@ public class GamePlayer : MonoBehaviour
     public bool coroutineFinishFlag = false;
     public bool largeTichuFlag      = false;
     public bool smallTichuFlag      = false;
+    public int  ranking;
 
     public bool canDeclareSmallTichu = true;
 
+    public bool isFinished = false;
+
     public string previousTrick = null;
+
       
     public void AddCard(Card card)
     {
@@ -68,6 +72,41 @@ public class GamePlayer : MonoBehaviour
     {
         foreach (var selectedCard in selectCardList) selectedCard.ToggleBase();
         selectCardList.Clear();
+    }
+
+    public bool CalculateHandRunOut()
+    {
+        if (cards.Count == 0) { ranking = GameManager.instance.CountFinishedPlayer() + 1; isFinished = true; }
+        return isFinished;
+        //스몰 티츄, 라지 티츄 관련 로직이 있으면 좋을 듯.
+    }
+
+    public void FindNextPlayer(Global.Trick nowTrick)
+    {
+        int startIdx = GameManager.instance.startPlayerIdx + 1;
+        if (nowTrick?.trickType == Global.TrickType.Dog) startIdx++;
+        for(int i = 0; i<Global.numberOfPlayers; ++i)
+        {
+            if (GameManager.instance.players[startIdx%Global.numberOfPlayers] != GameManager.instance.currentPlayer && 
+                GameManager.instance.players[startIdx%Global.numberOfPlayers].isFinished == false) break;
+            ++startIdx;
+        }
+        GameManager.instance.startPlayerIdx = startIdx;
+    }
+
+    public void CalculateIsRoundEnd()
+    {
+        if(isFinished == true&&GameManager.instance.players[(playerNumber+2)%2].isFinished == true)
+        {
+            GameManager.instance.isRoundEnd = true;
+            GameManager.instance.trickFinishFlag = true;
+            // 원투로 끝남. 원투 관련 셋업.
+        }
+        else if(isFinished == true && GameManager.instance.CountFinishedPlayer()==2)
+        {
+            GameManager.instance.isRoundEnd = true;
+            GameManager.instance.trickFinishFlag = true;
+        }
     }
 
     public void DeclareLargeTichuCall()
@@ -126,13 +165,12 @@ public class GamePlayer : MonoBehaviour
             slot[idx].card = null;
         }
         Global.SortCard(ref cards);
-        UIManager.instance.RenderCards(Global.initialPosition, Global.numberOfCardsForLineInSmallTichuPhase, cards);
+        //UIManager.instance.RenderCards(Global.initialPosition, Global.numberOfCardsForLineInSmallTichuPhase, cards);
         //버퍼에 있는 카드를 AddCard() 하고, isFixed 풀고, 정렬하고, 렌더.
     }
 
     public void SelectTrickCall()
     {
-        //족보가 맞는지 확인하고, 맞으면 카드를 선택해서 제거하는 추가 로직 필요함.
         Global.Trick nowTrick = Global.MakeTrick(selectCardList);
 
         if (GameManager.instance.isTrickValid(nowTrick))
@@ -141,9 +179,30 @@ public class GamePlayer : MonoBehaviour
             UIManager.instance.RenderTrickCard(selectCardList);
             GameManager.instance.trickStack.Push(nowTrick); // 수정 필요.
             ClearSelection();
+            GameManager.instance.ClearPass();
             canDeclareSmallTichu = false;
-            UIManager.instance.RenderCards(Global.initialPosition, Global.numberOfCardsForLineInSmallTichuPhase, cards);
+
+            CalculateHandRunOut();
+            FindNextPlayer(nowTrick);
+            CalculateIsRoundEnd();
+
+            //UIManager.instance.RenderCards(Global.initialPosition, Global.numberOfCardsForLineInSmallTichuPhase, cards);
             chooseFlag = true;
+        }
+        else
+        {
+            UIManager.instance.Massage(Global.trickSelectErrorMsg);
+            return;
+        }
+    }
+
+    public void SelectBombCall()
+    {
+        Global.Trick nowTrick = Global.MakeTrick(selectCardList);
+
+        if(nowTrick.trickType==Global.TrickType.FourCardBomb || nowTrick.trickType==Global.TrickType.StraightFlushBomb)
+        {
+            SelectTrickCall();
         }
         else
         {
@@ -155,7 +214,9 @@ public class GamePlayer : MonoBehaviour
     public void PassTrickCall()
     {
         DisableSelection();
+        GameManager.instance.AddPass();
         previousTrick = Global.passInfo;
+        FindNextPlayer(null);
         chooseFlag = true;
     }
 
@@ -245,12 +306,34 @@ public class GamePlayer : MonoBehaviour
         chooseFlag = false;
 
         coroutineFinishFlag = false;
-
-        UIManager.instance.ActivateTrickSelection(SelectTrickCall,PassTrickCall,DeclareSmallTichuCall);
-        yield return new WaitUntil(() => chooseFlag == true || UIManager.instance.IsTimeOut());
-        if (chooseFlag == false) PassTrickCall();
-        UIManager.instance.DeactivateTrickSelection();
-
+        if(GameManager.instance.IsAllDone())
+        {
+            //'나' 가 트릭을 가져갑니다.(3초)
+            Debug.Log("트릭을 가져갈 차례");
+            GameManager.instance.trickFinishFlag = true;
+            GameManager.instance.startPlayerIdx = playerNumber;
+            GameManager.instance.ClearPass();
+            UIManager.instance.ShowInfo(Global.GetTrickTakeInfo(playerName));
+            UIManager.instance.Wait(Global.trickTakeDuration);
+            yield return new WaitUntil(()=>UIManager.instance.IsWaitFinished());
+        }
+        else if(GameManager.instance.IsAllPassed())
+        {
+            //bomb 받는 과정 활성화. 메세지 교체.
+            Debug.Log("폭탄을 받을 차례");
+            UIManager.instance.ActivateBombSelection(SelectBombCall, PassTrickCall, DeclareSmallTichuCall);
+            yield return new WaitUntil(() => chooseFlag == true || UIManager.instance.IsTimeOut());
+            if (chooseFlag == false) PassTrickCall();
+            UIManager.instance.DeactivateBombSelection();
+        }
+        else
+        {
+            Debug.Log("일반 교환할 차례");
+            UIManager.instance.ActivateTrickSelection(SelectTrickCall, PassTrickCall, DeclareSmallTichuCall);
+            yield return new WaitUntil(() => chooseFlag == true || UIManager.instance.IsTimeOut());
+            if (chooseFlag == false) PassTrickCall();
+            UIManager.instance.DeactivateTrickSelection();
+        }
 
         coroutineFinishFlag = true;
     }

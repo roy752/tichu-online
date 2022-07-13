@@ -61,6 +61,9 @@ public class GameManager : MonoBehaviour
     public int startPlayerIdx;
 
     [HideInInspector]
+    public int passCount = 0;
+
+    [HideInInspector]
     public static GameManager instance;
 
     private int splitCardIdx;
@@ -88,6 +91,8 @@ public class GameManager : MonoBehaviour
 
     IEnumerator StartPlay()
     {
+        ResetRoundSetting();
+        /*
         SplitCardsToPlayer(Global.numberOfCardsLargeTichuPhase);
 
         StartCoroutine(StartLargeTichuPhaseCoroutine()); //카드 8장 나눠주고 라지 티츄 결정
@@ -100,7 +105,11 @@ public class GameManager : MonoBehaviour
 
         StartCoroutine(StartReceiveCardPhaseCoroutine()); //교환한 카드 확인, 스몰티츄 결정
         yield return new WaitUntil(() => phaseChangeFlag);
-        
+        */
+
+        SplitCardsToPlayer(Global.numberOfCardsPlay);
+        foreach (var player in players) Global.SortCard(ref player.cards);
+
         StartCoroutine(StartMainPlayPhaseCoroutine()); //1,2,3,4등이 나뉠 때까지 플레이
         yield return new WaitUntil(() => phaseChangeFlag);
 
@@ -111,20 +120,19 @@ public class GameManager : MonoBehaviour
     {
         phaseChangeFlag = false;
 
-        isFirstRound = true;
         isSelectionEnabled = true;
         isMultipleSelectionEnabled = true;
-        
+
         while(isRoundEnd==false)
         {
             StartCoroutine(StartTrickCoroutine());
             yield return new WaitUntil(() => isTrickEnd);
         }
-
         phaseChangeFlag = true;
     }
 
     public bool trickFinishFlag = false;
+    public bool bombFinishFlag = false;
     
     IEnumerator StartTrickCoroutine()
     {
@@ -132,18 +140,16 @@ public class GameManager : MonoBehaviour
         //플레이어가 낼 족보 결정하고
         //모두 패스일때까지 카드 내기 반복
         isTrickEnd = false;
-        trickFinishFlag = false;
-        isFirstTrick = true;
 
-        FindStartPlayer();
-        int idx = startPlayerIdx;
-
+        ResetTrickSetting();
         while(trickFinishFlag==false)
         {
-            currentPlayer = players[(idx++) % Global.numberOfPlayers];
+            currentPlayer = players[startPlayerIdx % Global.numberOfPlayers];
             currentPlayer.SelectTrick();
             yield return new WaitUntil(() => currentPlayer.coroutineFinishFlag); //폭탄 구현은 어떻게?
         }
+
+
 
         isTrickEnd = true;
     }
@@ -320,6 +326,64 @@ public class GameManager : MonoBehaviour
                 else if (trick.trickLength == topTrick.trickLength && trick.trickValue > topTrick.trickValue) return true;
                 else return false;
             } 
+        }
+    }
+
+    public int CountFinishedPlayer()
+    {
+        int ret = 0;
+        foreach(var player in players)
+        {
+            if (player.isFinished == true) ++ret; 
+        }
+        return ret;
+    }
+
+    public void AddPass()
+    {
+        passCount++;
+    }
+
+    public void ClearPass()
+    {
+        passCount = 0;
+    }
+
+    public bool IsAllPassed()
+    {
+        if (passCount >= 3) return true;
+        else return false;
+    }
+
+    public bool IsAllDone()
+    {
+        if (passCount >= 7) return true;
+        else return false;
+    }
+
+    public void ResetTrickSetting()
+    {
+        passCount = 0;
+        trickFinishFlag = false;
+        bombFinishFlag = false;
+        isFirstTrick = true;
+        foreach(var player in players)
+        {
+            player.isFinished = false;
+            player.previousTrick = null;
+        }
+        FindStartPlayer();
+    }
+
+    public void ResetRoundSetting()
+    {
+        isFirstRound = true;
+        foreach(var player in players)
+        {
+            player.canDeclareSmallTichu = true;
+            player.smallTichuFlag = false;
+            player.largeTichuFlag = false;
+            player.ranking = 0;
         }
     }
 }

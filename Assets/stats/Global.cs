@@ -105,8 +105,10 @@ public static class Global
     public static string exchangeCardInfo     = "카드를 한장씩 나눠주세요.";
     public static string receiveCardInfo      = "카드를 받으세요.";
     public static string selectTrickInfo      = "트릭을 선택하세요.";
+    public static string selectBombInfo       = "트릭이 끝났습니다. 폭탄을 낼지 선택하세요.";
+    public static string takeTrickInfo        = " 가 트릭을 가져갑니다.";
 
-    public static string passInfo = "패스";
+    public static string passInfo                 = "패스";
     public static string isNotTrickInfo           = "트릭이 아닙니다.";
     public static string singleTrickInfo          = "싱글";
     public static string pairTrickInfo            = "페어";
@@ -128,7 +130,9 @@ public static class Global
     public static float massageDuration       = 1.5f;
     public static float shakeDuration         = 0.15f;
     public static float receiveCardDuration   = 15.5f;
-    public static float selectTrickDuration    = 40.5f;
+    public static float selectTrickDuration   = 40.5f;
+    public static float selectBombDuration    = 5.5f;
+    public static float trickTakeDuration     = 3.5f;
     
     public static float tick      = 0.1f;
     public static float shakeTick = 1 / 60f;
@@ -262,6 +266,7 @@ public static class Global
     {
         Blank,
         IsNotTrick,
+        Dog,
         Single,
         Pair,
         ConsecutivePair,
@@ -322,6 +327,10 @@ public static class Global
             {
                 if (cardList[0].value == invalidTrickValue) nowTrick = WriteTrick(cardList, 1, invalidTrickValue, TrickType.IsNotTrick);
                 else nowTrick = WriteTrick(cardList, 1, cardList[0].value * 2 + 1, TrickType.Single); //봉황의 경우 2배에 + 1.
+            }
+            else if(cardList[0].type == CardType.Dog)
+            {
+                nowTrick = WriteTrick(cardList, 1, cardList[0].value * 2, TrickType.Dog);
             }
             else nowTrick = WriteTrick(cardList, 1, cardList[0].value * 2, TrickType.Single);//일반 싱글의 경우 2배를 곱하는 테크닉.
         }
@@ -450,7 +459,7 @@ public static class Global
                 if (GameManager.instance.isFirstTrick) { cardList[(int)phoenixIdx].value = 1; return; }
                 else
                 {
-                    if (GameManager.instance.trickStack.Peek().cards[0].value != specialCardsValue[3])
+                    if (GameManager.instance.trickStack.Peek().trickType==TrickType.Single&&GameManager.instance.trickStack.Peek().cards[0].value != specialCardsValue[3])
                     {
                         cardList[(int)phoenixIdx].value = GameManager.instance.trickStack.Peek().cards[0].value;
                         return;
@@ -506,5 +515,9 @@ public static class Global
             case TrickType.StraightFlushBomb: retInfo = valueToStrTable[trick.trickValue] + " " + straightFlushTrickInfo; break;
         }
         return retInfo;
+    }
+    static public string GetTrickTakeInfo(string playerName)
+    {
+        return playerName + takeTrickInfo;
     }
 }

@@ -254,6 +254,38 @@ public class UIManager : MonoBehaviour
         HideInfo();
     }
 
+    public void ActivateBombSelection(UnityAction SelectBombCall, UnityAction PassCall, UnityAction SmallTichuCall)
+    {
+        ShowInfo(Global.selectBombInfo);
+        ActivateTimer(Global.selectBombDuration);
+
+        //리스너 삽입.
+        selectTrick.submitButton.onClick.AddListener(SelectBombCall);
+        selectTrick.passButton.onClick.AddListener(PassCall);
+        selectTrick.smallTichuButton.onClick.AddListener(
+                                                      () => ActivateAlertPopup(
+                                                                                Global.alertSmallTichuMsg,
+                                                                                () => { SmallTichuCall(); UpdateSmallTichuButton(selectTrick.smallTichuButton.gameObject); }
+                                                                              )
+                                                        );
+
+        selectTrick.trickSelectionObject.SetActive(true);
+        selectTrick.smallTichuButton.gameObject.SetActive(GameManager.instance.currentPlayer.canDeclareSmallTichu); //수정 필요. 버튼을 enabled = false 로 하고 흐리게 만들어야함.
+    }
+
+    public void DeactivateBombSelection()
+    {
+        selectTrick.submitButton.onClick.RemoveAllListeners();
+        selectTrick.passButton.onClick.RemoveAllListeners();
+        selectTrick.bombButton.onClick.RemoveAllListeners();
+        selectTrick.smallTichuButton.onClick.RemoveAllListeners();
+
+        DeactivateAlertPopup();
+        DeactivateTimer();
+
+        selectTrick.trickSelectionObject.SetActive(false);
+        HideInfo();
+    }
     public void ActivateAlertPopup(string alertText, UnityAction confirmCall)
     {
         alertPopup.alertPopupObject.SetActive(true);
@@ -465,5 +497,28 @@ public class UIManager : MonoBehaviour
     {
         if (isMassaging) originalMsg = Global.GetTrickInfo(trick);
         else ShowInfo(Global.GetTrickInfo(trick));
+    }
+
+
+    private bool isWaitFinished;
+    public void Wait(float duration)
+    {
+        StartCoroutine(WaitCoroutine(duration));
+    }
+
+    public IEnumerator WaitCoroutine(float duration)
+    {
+        isWaitFinished = false;
+        while (duration > 0)
+        {
+            duration -= Global.tick;
+            yield return new WaitForSeconds(Global.tick);
+        }
+        isWaitFinished = true;
+    }
+
+    public bool IsWaitFinished()
+    {
+        return isWaitFinished;
     }
 }
