@@ -393,6 +393,8 @@ public class GamePlayer : MonoBehaviour
 
     public IEnumerator SelectTrickCoroutine()
     {
+        GameManager.instance.isSelectionEnabled = true;
+
         UIManager.instance.RenderPlayerInfo();
         UIManager.instance.RenderCards(Global.initialPosition, Global.numberOfCardsForLineInSmallTichuPhase, cards);
 
@@ -401,6 +403,7 @@ public class GamePlayer : MonoBehaviour
         coroutineFinishFlag = false;
         if(GameManager.instance.IsAllDone())
         {
+            GameManager.instance.isSelectionEnabled = false;
             StartCoroutine(GetTrickScore());
             yield return new WaitUntil(() => getTrickScoreFlag);
             GameManager.instance.trickFinishFlag = true;
@@ -433,6 +436,7 @@ public class GamePlayer : MonoBehaviour
 
             if(isDogTrick)
             {
+                GameManager.instance.isSelectionEnabled = false;
                 isDogTrick = false;
                 UIManager.instance.ShowInfo(GameManager.instance.players[GameManager.instance.startPlayerIdx % Global.numberOfPlayers].playerName + Global.selectDogInfo);
                 UIManager.instance.Wait(Global.selectDogDuration);
@@ -440,7 +444,6 @@ public class GamePlayer : MonoBehaviour
                 StartCoroutine(GetTrickScore());
                 yield return new WaitUntil(() => getTrickScoreFlag);
             }
-
         }
 
         coroutineFinishFlag = true;

@@ -28,7 +28,7 @@ public class Card : SelectionHandler
             // ∫¿»≤ predict «œ∞Ì
             Global.EstimatePhoenix(GameManager.instance.currentPlayer.selectCardList, Global.FindPhoenix(GameManager.instance.currentPlayer.selectCardList));
             Global.SortCard(ref GameManager.instance.currentPlayer.selectCardList);
-            UIManager.instance.DisplayTrickInfo(Global.MakeTrick(GameManager.instance.currentPlayer.selectCardList));
+            UIManager.instance.ShowInfo(Global.GetTrickInfo(Global.MakeTrick(GameManager.instance.currentPlayer.selectCardList)));
         }
         else
         {

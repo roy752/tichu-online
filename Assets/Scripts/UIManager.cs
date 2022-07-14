@@ -360,6 +360,7 @@ public class UIManager : MonoBehaviour
 
     public void ShowInfo(string text)
     {
+        if (isMassaging) originalMsg = text;
         infoBar.infoBarText.text = text;
     }
 
@@ -532,13 +533,6 @@ public class UIManager : MonoBehaviour
             nowPosition += new Vector3(Global.trickCardOffset, 0, -Global.offsetZ);
         }
     }
-
-    public void DisplayTrickInfo(Global.Trick trick)
-    {
-        if (isMassaging) originalMsg = Global.GetTrickInfo(trick);
-        else ShowInfo(Global.GetTrickInfo(trick));
-    }
-
 
     private bool isWaitFinished;
     public void Wait(float duration)
