@@ -12,15 +12,16 @@ public class UIManager : MonoBehaviour
 
 
     private GameObject               uiParent;
-    private Global.LargeTichu        largeTichu     = new Global.LargeTichu();
-    private Global.InfoBar           infoBar        = new Global.InfoBar();
-    private Global.Timer             timer          = new Global.Timer();
-    public  Global.ExchangeCardPopup exchangeCard   = new Global.ExchangeCardPopup();
-    private Global.PlayerInfoUI      playerInfo     = new Global.PlayerInfoUI();
-    private Global.AlertPopup        alertPopup     = new Global.AlertPopup();
-    private Global.CardReceivePopup  receiveCard    = new Global.CardReceivePopup();
-    private Global.TrickSelection    selectTrick    = new Global.TrickSelection();
-    private Global.DragonSelection   selectDragon   = new Global.DragonSelection();
+    private Util.LargeTichu        largeTichu     = new Util.LargeTichu();
+    private Util.InfoBar           infoBar        = new Util.InfoBar();
+    private Util.Timer             timer          = new Util.Timer();
+    public  Util.ExchangeCardPopup exchangeCard   = new Util.ExchangeCardPopup();
+    private Util.PlayerInfoUI      playerInfo     = new Util.PlayerInfoUI();
+    private Util.AlertPopup        alertPopup     = new Util.AlertPopup();
+    private Util.CardReceivePopup  receiveCard    = new Util.CardReceivePopup();
+    private Util.TrickSelection    selectTrick    = new Util.TrickSelection();
+    private Util.DragonSelection   selectDragon   = new Util.DragonSelection();
+    private Util.RoundResult       roundResult    = new Util.RoundResult();
 
     private bool isMassaging = false;
     private string originalMsg;
@@ -35,128 +36,144 @@ public class UIManager : MonoBehaviour
 
     private void InitializeVariables()
     {
-        uiParent = GameObject.Find(Global.uiParentObjectName);
+        uiParent = GameObject.Find(Util.uiParentObjectName);
 
         //라지티츄 오브젝트
-        largeTichu.largeTichuObject = uiParent.transform.Find(Global.largeTichuButtonObjectName).gameObject;
-        largeTichu.declareButton    = largeTichu.largeTichuObject.transform.Find(Global.largeTichuDeclareButtonName).GetComponent<Button>();
-        largeTichu.skipButton       = largeTichu.largeTichuObject.transform.Find(Global.largeTichuSkipButtonName).GetComponent<Button>();
+        largeTichu.largeTichuObject = uiParent.transform.Find(Util.largeTichuButtonObjectName).gameObject;
+        largeTichu.declareButton    = largeTichu.largeTichuObject.transform.Find(Util.largeTichuDeclareButtonName).GetComponent<Button>();
+        largeTichu.skipButton       = largeTichu.largeTichuObject.transform.Find(Util.largeTichuSkipButtonName).GetComponent<Button>();
         //////////////////////////////////
 
 
         //인포 창 오브젝트
-        infoBar.infoBarObject = uiParent.transform.Find(Global.infoBarObjectName).gameObject;
-        infoBar.infoBarText   = infoBar.infoBarObject.transform.Find(Global.infoBarTextObjectName).GetComponent<TMP_Text>();
+        infoBar.infoBarObject = uiParent.transform.Find(Util.infoBarObjectName).gameObject;
+        infoBar.infoBarText   = infoBar.infoBarObject.transform.Find(Util.infoBarTextObjectName).GetComponent<TMP_Text>();
         //////////////////////////////////
         
 
         //타이머 오브젝트
-        timer.timerObject = uiParent.transform.Find(Global.timerObjectName).gameObject;
+        timer.timerObject = uiParent.transform.Find(Util.timerObjectName).gameObject;
         timer.timerText   = timer.timerObject.GetComponent<TMP_Text>();
         /////////////////////////////////
         
 
         //카드 교환 팝업 오브젝트
-        exchangeCard.exchangeCardPopupObject = uiParent.transform.Find(Global.exchangeCardObjectName).gameObject;
-        exchangeCard.exchangeCardButton      = exchangeCard.exchangeCardPopupObject.transform.Find(Global.exchangeCardButtonObjectName).GetComponent<Button>();
-        exchangeCard.smallTichuButton        = exchangeCard.exchangeCardPopupObject.transform.Find(Global.exchangeCardSmallTichuButtonObjectName).GetComponent<Button>();
-        exchangeCard.slots = new Global.ExchangeCardSlot[Global.numberOfSlots];
-        for (int i = 0; i < Global.numberOfSlots; ++i)
+        exchangeCard.exchangeCardPopupObject = uiParent.transform.Find(Util.exchangeCardObjectName).gameObject;
+        exchangeCard.exchangeCardButton      = exchangeCard.exchangeCardPopupObject.transform.Find(Util.exchangeCardButtonObjectName).GetComponent<Button>();
+        exchangeCard.smallTichuButton        = exchangeCard.exchangeCardPopupObject.transform.Find(Util.exchangeCardSmallTichuButtonObjectName).GetComponent<Button>();
+        exchangeCard.slots = new Util.ExchangeCardSlot[Util.numberOfSlots];
+        for (int i = 0; i < Util.numberOfSlots; ++i)
         {
-            var nowSlotObject = exchangeCard.exchangeCardPopupObject.transform.Find(Global.exchangeCardSlotObjectName[i]);
+            var nowSlotObject = exchangeCard.exchangeCardPopupObject.transform.Find(Util.exchangeCardSlotObjectName[i]);
             exchangeCard.slots[i].slot       = nowSlotObject.GetComponent<SlotSelectHandler>();
-            exchangeCard.slots[i].playerText = nowSlotObject.Find(Global.exchangeplayerObjectName).GetComponent<TMP_Text>();
+            exchangeCard.slots[i].playerText = nowSlotObject.Find(Util.exchangeplayerObjectName).GetComponent<TMP_Text>();
         }
         /////////////////////////////////
 
 
         //플레이어 인포 오브젝트
-        playerInfo.playerInfoObject = uiParent.transform.Find(Global.playerInfoObjectName).gameObject;
-        playerInfo.playerInfo       = new Global.PlayerInfo[Global.numberOfPlayers];
+        playerInfo.playerInfoObject = uiParent.transform.Find(Util.playerInfoObjectName).gameObject;
+        playerInfo.playerInfo       = new Util.PlayerInfo[Util.numberOfPlayers];
 
         for(int idx = 0; idx<playerInfo.playerInfo.Length; ++idx)
         {
-            playerInfo.playerInfo[idx].playerInfoObject = playerInfo.playerInfoObject.transform.Find(Global.playerInfoObjectNames[idx]).gameObject;
+            playerInfo.playerInfo[idx].playerInfoObject = playerInfo.playerInfoObject.transform.Find(Util.playerInfoObjectNames[idx]).gameObject;
 
             var nowInfoObject = playerInfo.playerInfo[idx].playerInfoObject.transform;
 
-            playerInfo.playerInfo[idx].name                 = nowInfoObject.Find(Global.playerInfoNameObjectName).GetComponent<TMP_Text>();
-            playerInfo.playerInfo[idx].hand                 = nowInfoObject.Find(Global.playerInfoHandObjectName).Find(Global.playerInfoHandName).GetComponent<TMP_Text>();
-            playerInfo.playerInfo[idx].smallTichuIconObject = nowInfoObject.Find(Global.playerInfoTichuObjectName).Find(Global.playerInfoSmallTichuName).gameObject;
-            playerInfo.playerInfo[idx].largeTichuIconObject = nowInfoObject.Find(Global.playerInfoTichuObjectName).Find(Global.playerInfoLargeTichuName).gameObject;
-            playerInfo.playerInfo[idx].roundScore           = nowInfoObject.Find(Global.playerInfoScoreObjectName).Find(Global.playerInfoRoundScoreName).GetComponent<TMP_Text>();
-            playerInfo.playerInfo[idx].totalScore           = nowInfoObject.Find(Global.playerInfoScoreObjectName).Find(Global.playerInfoTotalScoreName).GetComponent<TMP_Text>();
-            playerInfo.playerInfo[idx].trick                = nowInfoObject.Find(Global.playerInfoTrickTextName).GetComponent<TMP_Text>();
+            playerInfo.playerInfo[idx].name                 = nowInfoObject.Find(Util.playerInfoNameObjectName).GetComponent<TMP_Text>();
+            playerInfo.playerInfo[idx].hand                 = nowInfoObject.Find(Util.playerInfoHandObjectName).Find(Util.playerInfoHandName).GetComponent<TMP_Text>();
+            playerInfo.playerInfo[idx].smallTichuIconObject = nowInfoObject.Find(Util.playerInfoTichuObjectName).Find(Util.playerInfoSmallTichuName).gameObject;
+            playerInfo.playerInfo[idx].largeTichuIconObject = nowInfoObject.Find(Util.playerInfoTichuObjectName).Find(Util.playerInfoLargeTichuName).gameObject;
+            playerInfo.playerInfo[idx].roundScore           = nowInfoObject.Find(Util.playerInfoScoreObjectName).Find(Util.playerInfoRoundScoreName).GetComponent<TMP_Text>();
+            playerInfo.playerInfo[idx].totalScore           = nowInfoObject.Find(Util.playerInfoScoreObjectName).Find(Util.playerInfoTotalScoreName).GetComponent<TMP_Text>();
+            playerInfo.playerInfo[idx].trick                = nowInfoObject.Find(Util.playerInfoTrickTextName).GetComponent<TMP_Text>();
         }
         ///////////////////////////////
 
 
         //확인창 팝업(alert popup) 오브젝트
-        alertPopup.alertPopupObject = uiParent.transform.Find(Global.alertPopupObjectName).gameObject;
+        alertPopup.alertPopupObject = uiParent.transform.Find(Util.alertPopupObjectName).gameObject;
 
         var nowAlertObject          = alertPopup.alertPopupObject.transform;
         
-        alertPopup.alertText          = nowAlertObject.Find(Global.alertTextObjectName).GetComponent<TMP_Text>();
-        alertPopup.alertConfirmButton = nowAlertObject.Find(Global.alertConfirmButtonObjectName).GetComponent<Button>();
-        alertPopup.alertCancelButton  = nowAlertObject.Find(Global.alertCancelButtonObjectName).GetComponent<Button>();
+        alertPopup.alertText          = nowAlertObject.Find(Util.alertTextObjectName).GetComponent<TMP_Text>();
+        alertPopup.alertConfirmButton = nowAlertObject.Find(Util.alertConfirmButtonObjectName).GetComponent<Button>();
+        alertPopup.alertCancelButton  = nowAlertObject.Find(Util.alertCancelButtonObjectName).GetComponent<Button>();
         //////////////////////
 
 
         //카드 받는 팝업(card receive popup) 오브젝트
-        receiveCard.cardReceiveObject = uiParent.transform.Find(Global.cardReceivePopupObjectName).gameObject;
+        receiveCard.cardReceiveObject = uiParent.transform.Find(Util.cardReceivePopupObjectName).gameObject;
 
         var nowCardReceiveObject = receiveCard.cardReceiveObject.transform;
         
-        receiveCard.cardReceiveSlots = new Global.CardReceiveSlot[Global.numberOfSlots];
+        receiveCard.cardReceiveSlots = new Util.CardReceiveSlot[Util.numberOfSlots];
 
-        receiveCard.cardReceiveButton = nowCardReceiveObject.Find(Global.cardReceiveButtonObjectName).GetComponent<Button>();
-        receiveCard.smallTichuButton = nowCardReceiveObject.Find(Global.cardReceiveSmallTichuButtonObjectName).GetComponent<Button>();
+        receiveCard.cardReceiveButton = nowCardReceiveObject.Find(Util.cardReceiveButtonObjectName).GetComponent<Button>();
+        receiveCard.smallTichuButton = nowCardReceiveObject.Find(Util.cardReceiveSmallTichuButtonObjectName).GetComponent<Button>();
 
-        for(int idx = 0; idx<Global.numberOfSlots; ++idx)
+        for(int idx = 0; idx<Util.numberOfSlots; ++idx)
         {
-            receiveCard.cardReceiveSlots[idx].slotObject     = nowCardReceiveObject.Find(Global.cardReceiveSlotObjectNames[idx]).gameObject;
-            receiveCard.cardReceiveSlots[idx].InfoObject     = receiveCard.cardReceiveSlots[idx].slotObject.transform.Find(Global.cardReceivePlayerInfoObjectName).gameObject;
-            receiveCard.cardReceiveSlots[idx].playerNameText = receiveCard.cardReceiveSlots[idx].InfoObject.transform.Find(Global.cardReceivePlayerNameObjectName).GetComponent<TMP_Text>();
+            receiveCard.cardReceiveSlots[idx].slotObject     = nowCardReceiveObject.Find(Util.cardReceiveSlotObjectNames[idx]).gameObject;
+            receiveCard.cardReceiveSlots[idx].InfoObject     = receiveCard.cardReceiveSlots[idx].slotObject.transform.Find(Util.cardReceivePlayerInfoObjectName).gameObject;
+            receiveCard.cardReceiveSlots[idx].playerNameText = receiveCard.cardReceiveSlots[idx].InfoObject.transform.Find(Util.cardReceivePlayerNameObjectName).GetComponent<TMP_Text>();
         }
         /////////////////////////////////////////////////
 
 
         //트릭 선택 관련 버튼(trick selection) 오브젝트
-        selectTrick.trickSelectionObject = uiParent.transform.Find(Global.trickSelectionObjectName).gameObject;
+        selectTrick.trickSelectionObject = uiParent.transform.Find(Util.trickSelectionObjectName).gameObject;
 
         var nowTrickSelectionObject     = selectTrick.trickSelectionObject.transform;
 
-        selectTrick.bombButton       = nowTrickSelectionObject.Find(Global.trickSelectionBombButtonName).GetComponent<Button>();
-        selectTrick.submitButton     = nowTrickSelectionObject.Find(Global.trickSelectionSubmitButtonName).GetComponent<Button>();
-        selectTrick.passButton       = nowTrickSelectionObject.Find(Global.trickSelectionPassButtonName).GetComponent<Button>();
-        selectTrick.smallTichuButton = nowTrickSelectionObject.Find(Global.trickSelectionSmallTichuButtonName).GetComponent<Button>();
+        selectTrick.bombButton       = nowTrickSelectionObject.Find(Util.trickSelectionBombButtonName).GetComponent<Button>();
+        selectTrick.submitButton     = nowTrickSelectionObject.Find(Util.trickSelectionSubmitButtonName).GetComponent<Button>();
+        selectTrick.passButton       = nowTrickSelectionObject.Find(Util.trickSelectionPassButtonName).GetComponent<Button>();
+        selectTrick.smallTichuButton = nowTrickSelectionObject.Find(Util.trickSelectionSmallTichuButtonName).GetComponent<Button>();
         ////////////////////////
 
 
         //용 선택 관련 버튼(dragon selection) 오브젝트
-        selectDragon.dragonSelectionObject = uiParent.transform.Find(Global.dragonSelectionPopupObjectName).gameObject;
+        selectDragon.dragonSelectionObject = uiParent.transform.Find(Util.dragonSelectionPopupObjectName).gameObject;
 
         var nowDragonSelectionObject = selectDragon.dragonSelectionObject.transform;
 
-        selectDragon.previousOpponentButton = nowDragonSelectionObject.Find(Global.dragonSelectionOpponentButtonNames[0]).GetComponent<Button>();
-        selectDragon.previousOpponentName   = selectDragon.previousOpponentButton.transform.Find(Global.dragonSelectionOpponentTextNames[0]).GetComponent<TMP_Text>();
-        selectDragon.nextOpponentButton     = nowDragonSelectionObject.Find(Global.dragonSelectionOpponentButtonNames[1]).GetComponent<Button>();
-        selectDragon.nextOpponentName       = selectDragon.nextOpponentButton.transform.Find(Global.dragonSelectionOpponentTextNames[1]).GetComponent<TMP_Text>();
+        selectDragon.previousOpponentButton = nowDragonSelectionObject.Find(Util.dragonSelectionOpponentButtonNames[0]).GetComponent<Button>();
+        selectDragon.previousOpponentName   = selectDragon.previousOpponentButton.transform.Find(Util.dragonSelectionOpponentTextNames[0]).GetComponent<TMP_Text>();
+        selectDragon.nextOpponentButton     = nowDragonSelectionObject.Find(Util.dragonSelectionOpponentButtonNames[1]).GetComponent<Button>();
+        selectDragon.nextOpponentName       = selectDragon.nextOpponentButton.transform.Find(Util.dragonSelectionOpponentTextNames[1]).GetComponent<TMP_Text>();
         /////////////////////////////
 
 
+        //라운드 결과 관련(round result) 오브젝트
+        roundResult.roundResultObject = uiParent.transform.Find(Util.roundResultPopupObjectName).gameObject;
+        roundResult.team = new Util.RoundResultTeam[Util.numberOfTeam];
+        for(int idx = 0; idx<Util.numberOfTeam; ++idx)
+        {
+            roundResult.team[idx].roundResultTeamObject = roundResult.roundResultObject.transform.Find(Util.roundResultTeamObjectNames[idx]).gameObject;
+            
+            var nowObject = roundResult.team[idx].roundResultTeamObject.transform;
+
+            roundResult.team[idx].teamName        = nowObject.Find(Util.roundResultTeamNameTextName).GetComponent<TMP_Text>();
+            roundResult.team[idx].trickScore      = nowObject.Find(Util.roundResultTrickScoreTextName).GetComponent<TMP_Text>();
+            roundResult.team[idx].tichuScore      = nowObject.Find(Util.roundResultTichuScoreTextName).GetComponent<TMP_Text>();
+            roundResult.team[idx].oneTwoScore     = nowObject.Find(Util.roundResultOneTwoScoreTextName).GetComponent<TMP_Text>();
+            roundResult.team[idx].roundTotalScore = nowObject.Find(Util.roundResultRoundTotalScoreTextName).GetComponent<TMP_Text>();
+            roundResult.team[idx].presentScore    = nowObject.Find(Util.roundResultPresentScoreTextName).GetComponent<TMP_Text>();
+        }
 
     }
 
     public void ActivateLargeTichu(UnityAction DeclareCall, UnityAction SkipCall)
     {
 
-        ShowInfo(Global.largeTichuInfo);
-        ActivateTimer(Global.largeTichuDuration);
+        ShowInfo(Util.largeTichuInfo);
+        ActivateTimer(Util.largeTichuDuration);
 
         largeTichu.largeTichuObject.SetActive(true);
 
-        largeTichu.declareButton.onClick.AddListener(() => ActivateAlertPopup(Global.alertLargeTichuMsg, DeclareCall)); // 람다식, 델리게이트 알아볼 것.
+        largeTichu.declareButton.onClick.AddListener(() => ActivateAlertPopup(Util.alertLargeTichuMsg, DeclareCall)); // 람다식, 델리게이트 알아볼 것.
         largeTichu.skipButton.onClick.AddListener(SkipCall);
         
         // btn.onClick.AddListener(() => { Function(param); OtherFunction(param); }); //이런 코드도 동작함.
@@ -177,14 +194,14 @@ public class UIManager : MonoBehaviour
 
     public void ActivateExchangeCardsPopup(UnityAction exchangeCall, UnityAction declareCall)
     {
-        ShowInfo(Global.exchangeCardInfo);
-        ActivateTimer(Global.exchangeCardsDuration);
+        ShowInfo(Util.exchangeCardInfo);
+        ActivateTimer(Util.exchangeCardsDuration);
         exchangeCard.exchangeCardPopupObject.SetActive(true);
         WritePlayerNameToSlot();
         exchangeCard.exchangeCardButton.onClick.AddListener(exchangeCall);
         exchangeCard.smallTichuButton.onClick.AddListener(
                                                       () => ActivateAlertPopup(
-                                                                                Global.alertSmallTichuMsg,
+                                                                                Util.alertSmallTichuMsg,
                                                                                 () => { declareCall(); UpdateSmallTichuButton(exchangeCard.smallTichuButton.gameObject); }
                                                                               )
                                                         );
@@ -206,13 +223,13 @@ public class UIManager : MonoBehaviour
 
     public void ActivateReceiveCardPopup(UnityAction receiveCall, UnityAction declareCall)
     {
-        ShowInfo(Global.receiveCardInfo);
-        ActivateTimer(Global.receiveCardDuration);
+        ShowInfo(Util.receiveCardInfo);
+        ActivateTimer(Util.receiveCardDuration);
         receiveCard.cardReceiveObject.SetActive(true);
         receiveCard.cardReceiveButton.onClick.AddListener(receiveCall);
         receiveCard.smallTichuButton.onClick.AddListener(
                                                       () => ActivateAlertPopup(
-                                                                                Global.alertSmallTichuMsg, 
+                                                                                Util.alertSmallTichuMsg, 
                                                                                 ()=> { declareCall(); UpdateSmallTichuButton(receiveCard.smallTichuButton.gameObject); }
                                                                               )
                                                         );
@@ -236,8 +253,8 @@ public class UIManager : MonoBehaviour
 
     public void ActivateTrickSelection(UnityAction SelectTrickCall, UnityAction PassTrickCall, UnityAction SmallTichuCall)
     {
-        ShowInfo(Global.selectTrickInfo);
-        ActivateTimer(Global.selectTrickDuration);
+        ShowInfo(Util.selectTrickInfo);
+        ActivateTimer(Util.selectTrickDuration);
 
         //리스너 삽입.
         selectTrick.submitButton.onClick.AddListener(SelectTrickCall);
@@ -245,7 +262,7 @@ public class UIManager : MonoBehaviour
 
         selectTrick.smallTichuButton.onClick.AddListener(
                                                       () => ActivateAlertPopup(
-                                                                                Global.alertSmallTichuMsg,
+                                                                                Util.alertSmallTichuMsg,
                                                                                 () => { SmallTichuCall(); UpdateSmallTichuButton(selectTrick.smallTichuButton.gameObject); }
                                                                               )
                                                         );
@@ -271,13 +288,13 @@ public class UIManager : MonoBehaviour
 
     public void ActivateDragonSelection(UnityAction SelectNextOpponentCall, UnityAction SelectPreviousOpponentCall)
     {
-        ShowInfo(Global.selectDragonInfo);
-        ActivateTimer(Global.selectDragonDuration);
+        ShowInfo(Util.selectDragonInfo);
+        ActivateTimer(Util.selectDragonDuration);
         
         selectDragon.dragonSelectionObject.SetActive(true);
 
-        selectDragon.previousOpponentName.text = GameManager.instance.players[(GameManager.instance.currentPlayer.playerNumber + 3) % Global.numberOfPlayers].playerName;
-        selectDragon.nextOpponentName.text = GameManager.instance.players[(GameManager.instance.currentPlayer.playerNumber + 1) % Global.numberOfPlayers].playerName;
+        selectDragon.previousOpponentName.text = GameManager.instance.players[(GameManager.instance.currentPlayer.playerNumber + 3) % Util.numberOfPlayers].playerName;
+        selectDragon.nextOpponentName.text = GameManager.instance.players[(GameManager.instance.currentPlayer.playerNumber + 1) % Util.numberOfPlayers].playerName;
 
         selectDragon.previousOpponentButton.onClick.AddListener(SelectPreviousOpponentCall);
         selectDragon.nextOpponentButton.onClick.AddListener(SelectNextOpponentCall);
@@ -296,15 +313,15 @@ public class UIManager : MonoBehaviour
 
     public void ActivateBombSelection(UnityAction SelectBombCall, UnityAction PassCall, UnityAction SmallTichuCall)
     {
-        ShowInfo(Global.selectBombInfo);
-        ActivateTimer(Global.selectBombDuration);
+        ShowInfo(Util.selectBombInfo);
+        ActivateTimer(Util.selectBombDuration);
 
         //리스너 삽입.
         selectTrick.submitButton.onClick.AddListener(SelectBombCall);
         selectTrick.passButton.onClick.AddListener(PassCall);
         selectTrick.smallTichuButton.onClick.AddListener(
                                                       () => ActivateAlertPopup(
-                                                                                Global.alertSmallTichuMsg,
+                                                                                Util.alertSmallTichuMsg,
                                                                                 () => { SmallTichuCall(); UpdateSmallTichuButton(selectTrick.smallTichuButton.gameObject); }
                                                                               )
                                                         );
@@ -326,6 +343,33 @@ public class UIManager : MonoBehaviour
         selectTrick.trickSelectionObject.SetActive(false);
         HideInfo();
     }
+
+    public void ActivateRoundResult(Util.Score[] teamScore)
+    {
+        ShowInfo(Util.roundResultInfo);
+
+        roundResult.roundResultObject.SetActive(true);
+
+
+        for(int idx = 0;idx<Util.numberOfTeam; ++idx)
+        {
+            roundResult.team[idx].teamName.text = Util.GetTeamName(GameManager.instance.players[idx], GameManager.instance.players[idx + 2]);
+            roundResult.team[idx].trickScore.text = teamScore[idx].trickScore.ToString();
+            roundResult.team[idx].tichuScore.text = teamScore[idx].tichuScore.ToString();
+            roundResult.team[idx].oneTwoScore.text = teamScore[idx].oneTwoScore.ToString();
+            roundResult.team[idx].roundTotalScore.text = (teamScore[idx].trickScore + teamScore[idx].tichuScore + teamScore[idx].oneTwoScore).ToString();
+            roundResult.team[idx].presentScore.text = (teamScore[idx].previousScore + teamScore[idx].trickScore + teamScore[idx].tichuScore + teamScore[idx].oneTwoScore).ToString();
+        }
+    }
+
+    public void DeactivateRoundResult()
+    {
+
+        roundResult.roundResultObject.SetActive(false);
+
+        HideInfo();
+    }
+
     public void ActivateAlertPopup(string alertText, UnityAction confirmCall)
     {
         alertPopup.alertPopupObject.SetActive(true);
@@ -361,6 +405,11 @@ public class UIManager : MonoBehaviour
     public void ShowInfo(string text)
     {
         if (isMassaging) originalMsg = text;
+        else infoBar.infoBarText.text = text;
+    }
+
+    public void ForceShowInfo(string text)
+    {
         infoBar.infoBarText.text = text;
     }
 
@@ -375,8 +424,8 @@ public class UIManager : MonoBehaviour
         while (timerDuration >= 0)
         {
             ShowTimer(((int)(timerDuration)).ToString());
-            timerDuration -= Global.tick;
-            yield return new WaitForSeconds(Global.tick);
+            timerDuration -= Util.tick;
+            yield return new WaitForSeconds(Util.tick);
         }
     }
 
@@ -392,10 +441,10 @@ public class UIManager : MonoBehaviour
 
     public void WritePlayerNameToSlot()
     {
-        for(int idx = GameManager.instance.currentPlayer.playerNumber + 1; idx < GameManager.instance.currentPlayer.playerNumber + 1 + Global.numberOfSlots; ++idx)
+        for(int idx = GameManager.instance.currentPlayer.playerNumber + 1; idx < GameManager.instance.currentPlayer.playerNumber + 1 + Util.numberOfSlots; ++idx)
         {
             int nowSlotIdx = idx - (GameManager.instance.currentPlayer.playerNumber + 1);
-            int nowPlayerIdx = idx % Global.numberOfPlayers;
+            int nowPlayerIdx = idx % Util.numberOfPlayers;
             exchangeCard.slots[nowSlotIdx].player = GameManager.instance.players[nowPlayerIdx];
             exchangeCard.slots[nowSlotIdx].playerText.text = exchangeCard.slots[nowSlotIdx].player.playerName;
         }
@@ -403,11 +452,11 @@ public class UIManager : MonoBehaviour
 
     public void FlushCard()
     {
-        for (int i = 0; i < Global.numberOfSlots; ++i)
+        for (int i = 0; i < Util.numberOfSlots; ++i)
         {
             exchangeCard.slots[i].slot.card.isFixed = false;
             exchangeCard.slots[i].player.AddCardToSlot(exchangeCard.slots[i].slot.card, GameManager.instance.currentPlayer);
-            exchangeCard.slots[i].slot.card.transform.position = Global.hiddenCardPosition;
+            exchangeCard.slots[i].slot.card.transform.position = Util.hiddenCardPosition;
         }
     }
 
@@ -418,14 +467,14 @@ public class UIManager : MonoBehaviour
 
     private IEnumerator MassageCoroutine(string msg)
     {
-        StartCoroutine(ShakeCoroutine(infoBar.infoBarText.gameObject, Global.shakeDuration));
+        StartCoroutine(ShakeCoroutine(infoBar.infoBarText.gameObject, Util.shakeDuration));
         isMassaging = true;
         originalMsg = infoBar.infoBarText.text;
         Color originalColor = infoBar.infoBarText.color;
-        ShowInfo(msg);
-        infoBar.infoBarText.color = Global.massageColor;
-        yield return new WaitForSeconds(Global.massageDuration);
-        ShowInfo(originalMsg);
+        ForceShowInfo(msg);
+        infoBar.infoBarText.color = Util.massageColor;
+        yield return new WaitForSeconds(Util.massageDuration);
+        ForceShowInfo(originalMsg);
         infoBar.infoBarText.color = originalColor;
         isMassaging = false;
     }
@@ -442,13 +491,13 @@ public class UIManager : MonoBehaviour
         float startPosY = shakeObject.transform.position.y;
         while(duration>0)
         {
-            duration -= Global.shakeTick;
+            duration -= Util.shakeTick;
             shakeObject.transform.position = new Vector3(
-                                                        startPosX + Mathf.Sin(Time.time * Global.shakeSpeedX) * Global.shakeAmountX,
-                                                        startPosY + Mathf.Sin(Time.time * Global.shakeSpeedY) * Global.shakeAmountY,
+                                                        startPosX + Mathf.Sin(Time.time * Util.shakeSpeedX) * Util.shakeAmountX,
+                                                        startPosY + Mathf.Sin(Time.time * Util.shakeSpeedY) * Util.shakeAmountY,
                                                         shakeObject.transform.position.z
                                                         );
-            yield return new WaitForSeconds(Global.shakeTick);
+            yield return new WaitForSeconds(Util.shakeTick);
         }
         shakeObject.transform.position = new Vector3(startPosX, startPosY, shakeObject.transform.position.z);
     }
@@ -460,11 +509,11 @@ public class UIManager : MonoBehaviour
 
     public void RenderCards(Vector3 centerPosition, int numberOfCardsForLine, List<Card> cardList)
     {
-        foreach (var item in GameManager.instance.cards) if (item.isFixed == false) item.transform.position = Global.hiddenCardPosition;
+        foreach (var item in GameManager.instance.cards) if (item.isFixed == false) item.transform.position = Util.hiddenCardPosition;
 
-        float offsetX = Global.width / (numberOfCardsForLine - 1);
-        float offsetY = Global.offsetY;
-        float offsetZ = Global.offsetZ;
+        float offsetX = Util.width / (numberOfCardsForLine - 1);
+        float offsetY = Util.offsetY;
+        float offsetZ = Util.offsetZ;
 
         Vector3 initialPosition = centerPosition + new Vector3(-offsetX * ((float)(numberOfCardsForLine - 1) / 2f), 0, 0);
         Vector3 pos = Vector3.zero;
@@ -488,9 +537,9 @@ public class UIManager : MonoBehaviour
 
     public void RenderPlayerInfo()
     {
-        for(int idx = GameManager.instance.currentPlayer.playerNumber; idx <GameManager.instance.currentPlayer.playerNumber + Global.numberOfPlayers; ++idx)
+        for(int idx = GameManager.instance.currentPlayer.playerNumber; idx <GameManager.instance.currentPlayer.playerNumber + Util.numberOfPlayers; ++idx)
         {
-            var nowPlayerIdx         = idx % Global.numberOfPlayers;
+            var nowPlayerIdx         = idx % Util.numberOfPlayers;
             var nowPlayer            = GameManager.instance.players[nowPlayerIdx];
             var nowPlayerInfo        = playerInfo.playerInfo[idx - GameManager.instance.currentPlayer.playerNumber];
 
@@ -507,12 +556,12 @@ public class UIManager : MonoBehaviour
 
     public void RenderReceivedCard()
     {
-        for (int idx = 0; idx < Global.numberOfSlots; ++idx)
+        for (int idx = 0; idx < Util.numberOfSlots; ++idx)
         {
             var nowCard = GameManager.instance.currentPlayer.slot[idx].card;
 
             nowCard.isFixed = true;
-            nowCard.transform.position = receiveCard.cardReceiveSlots[idx].slotObject.transform.position + Global.frontEpsilon;
+            nowCard.transform.position = receiveCard.cardReceiveSlots[idx].slotObject.transform.position + Util.frontEpsilon;
 
             var nowPlayer = GameManager.instance.currentPlayer.slot[idx].player;
             receiveCard.cardReceiveSlots[idx].playerNameText.text = nowPlayer.playerName;
@@ -525,12 +574,15 @@ public class UIManager : MonoBehaviour
         {
             foreach (var card in GameManager.instance.trickStack.Peek().cards) card.isFixed = false;
         }
-        Vector3 nowPosition = Global.initialTrickPosition + new Vector3((-(cardList.Count - 1) / 2)*Global.trickCardOffset,0,0);
-        foreach (var card in cardList)
+        if (cardList != null)
         {
-            card.transform.position = nowPosition;
-            card.isFixed = true;
-            nowPosition += new Vector3(Global.trickCardOffset, 0, -Global.offsetZ);
+            Vector3 nowPosition = Util.initialTrickPosition + new Vector3((-(cardList.Count - 1) / 2)*Util.trickCardOffset,0,0);
+            foreach (var card in cardList)
+            {
+                card.transform.position = nowPosition;
+                card.isFixed = true;
+                nowPosition += new Vector3(Util.trickCardOffset, 0, -Util.offsetZ);
+            }
         }
     }
 
@@ -545,8 +597,8 @@ public class UIManager : MonoBehaviour
         isWaitFinished = false;
         while (duration > 0)
         {
-            duration -= Global.tick;
-            yield return new WaitForSeconds(Global.tick);
+            duration -= Util.tick;
+            yield return new WaitForSeconds(Util.tick);
         }
         isWaitFinished = true;
     }

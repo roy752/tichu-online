@@ -7,7 +7,7 @@ public class SelectionHandler : MonoBehaviour
 
     public virtual void OnEnable()
     {
-        edgeObject = transform.Find(Global.edgeObjectName).gameObject;
+        edgeObject = transform.Find(Util.edgeObjectName).gameObject;
         edgeObject.SetActive(false);
     }
 
