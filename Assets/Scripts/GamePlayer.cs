@@ -308,7 +308,8 @@ public class GamePlayer : MonoBehaviour
     public void PassTrickCall()
     {
         DisableSelection();
-        if(isFinished == false) previousTrick = Util.trickPassInfo;
+        if (isFinished == false) previousTrick = Util.trickPassInfo;
+        else previousTrick = null;
         FindNextPlayer(null);
         isTrickPassed = true;
         chooseFlag = true;
@@ -319,6 +320,7 @@ public class GamePlayer : MonoBehaviour
         isBombPassed = true;
         PassTrickCall();
         if (isFinished == false) previousTrick = Util.bombPassInfo;
+        else previousTrick = null;
     }
 
     public void PassOrRandomSingleTrickCall()

@@ -11,7 +11,7 @@ public class UIManager : MonoBehaviour
     public static UIManager instance;
 
 
-    private GameObject               uiParent;
+    private GameObject             uiParent;
     private Util.LargeTichu        largeTichu     = new Util.LargeTichu();
     private Util.InfoBar           infoBar        = new Util.InfoBar();
     private Util.Timer             timer          = new Util.Timer();
@@ -551,6 +551,10 @@ public class UIManager : MonoBehaviour
             nowPlayerInfo.largeTichuIconObject.SetActive(nowPlayer.largeTichuFlag);
             nowPlayerInfo.smallTichuIconObject.SetActive(nowPlayer.smallTichuFlag);
 
+            var nowInfoRenderer = nowPlayerInfo.playerInfoObject.GetComponent<CanvasGroup>();
+
+            if (nowPlayer.isFinished) nowInfoRenderer.alpha = 0.5f;
+            else nowInfoRenderer.alpha = 1f;
         }
     }
 
