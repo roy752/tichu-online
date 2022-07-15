@@ -14,7 +14,7 @@ public class SlotSelectHandler : SelectionHandler
         {
             if (card != null) PopCardFromSlot();
             PushCardToSlot(GameManager.instance.currentCard);
-            Global.SortCard(ref GameManager.instance.currentPlayer.cards);
+            Util.SortCard(ref GameManager.instance.currentPlayer.cards);
             GameManager.instance.currentSlot = null;
         }
         else //카드가 선택되어 있지 않다면
@@ -22,7 +22,7 @@ public class SlotSelectHandler : SelectionHandler
             if (card != null)
             {
                 PopCardFromSlot(); //슬롯에 카드가 있을 경우 뺸다.
-                Global.SortCard(ref GameManager.instance.currentPlayer.cards);
+                Util.SortCard(ref GameManager.instance.currentPlayer.cards);
                 GameManager.instance.currentSlot?.ToggleSelection();
             }
             else
@@ -32,13 +32,13 @@ public class SlotSelectHandler : SelectionHandler
                 else { GameManager.instance.currentSlot?.ToggleBase(); GameManager.instance.currentSlot = this;}
             }
         }
-        UIManager.instance.RenderCards(Global.initialPosition, Global.numberOfCardsForLineInSmallTichuPhase, GameManager.instance.currentPlayer.cards);
+        UIManager.instance.RenderCards(Util.initialPosition, Util.numberOfCardsForLineInSmallTichuPhase, GameManager.instance.currentPlayer.cards);
     }
 
     public void PushCardToSlot(Card inputCard)
     {
         GameManager.instance.currentPlayer.RemoveCard(inputCard);
-        inputCard.transform.position = gameObject.transform.position + Global.frontEpsilon;
+        inputCard.transform.position = gameObject.transform.position + Util.frontEpsilon;
         inputCard.isFixed = true;
         card = inputCard;
         card.ToggleBase();
@@ -47,7 +47,7 @@ public class SlotSelectHandler : SelectionHandler
     public Card PopCardFromSlot()
     {
         GameManager.instance.currentPlayer.AddCard(card); //슬롯에서 카드를 뺀다.
-        card.transform.position = Global.hiddenCardPosition;
+        card.transform.position = Util.hiddenCardPosition;
         card.isFixed = false;
         Card tmpCard = card;
         card = null;

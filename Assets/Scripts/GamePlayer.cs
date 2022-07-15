@@ -9,19 +9,19 @@ public class GamePlayer : MonoBehaviour
 {
     public List<Card> cards             = new List<Card>();
     public List<Card> selectCardList    = new List<Card>();
-    public Global.PlayerReceiveCardSlot[] slot = new Global.PlayerReceiveCardSlot[Global.numberOfSlots];
+    public Util.PlayerReceiveCardSlot[] slot = new Util.PlayerReceiveCardSlot[Util.numberOfSlots];
 
     public string playerName;
     public int    playerNumber;
     public int    roundScore;
     public int    totalScore;
-    public int    smallTichuScore;
-    public int    largeTichuScore;
 
     public bool chooseFlag          = false;
     public bool coroutineFinishFlag = false;
     public bool largeTichuFlag      = false;
     public bool smallTichuFlag      = false;
+    public bool isTrickPassed       = false;
+    public bool isBombPassed        = false;
     public int  ranking;
 
     public bool canDeclareSmallTichu = true;
@@ -30,6 +30,36 @@ public class GamePlayer : MonoBehaviour
 
     public string previousTrick = null;
 
+    /// <summary>
+    /// 트릭이 끝날때마다 리셋할 변수들.
+    /// </summary>
+    public void ResetPerTrick()
+    {
+        isBombPassed  = false;
+        isTrickPassed = false;
+        previousTrick = null;
+        isDogTrick = false;
+        dragonChooseFlag = false;
+        getTrickScoreFlag = false;
+        dragonChoosePlayerIdx = -1;
+    }
+    /// <summary>
+    /// 라운드가 끝날때마다(1,2,3,4등) 리셋할 변수들.
+    /// </summary>
+    public void ResetPerRound()
+    {
+        roundScore = 0;
+        chooseFlag = false;
+        coroutineFinishFlag = false;
+        largeTichuFlag = false;
+        smallTichuFlag = false;
+        ranking = -1;
+        canDeclareSmallTichu = true;
+        isFinished = false;
+        cards.Clear();
+        selectCardList.Clear();
+        ResetPerTrick();
+    }
       
     public void AddCard(Card card)
     {
@@ -42,8 +72,8 @@ public class GamePlayer : MonoBehaviour
     }
     public void AddCardToSlot(Card card, GamePlayer cardGiver)
     {
-        slot[Global.GetCardGiverIdx(cardGiver, this)].player = cardGiver;
-        slot[Global.GetCardGiverIdx(cardGiver, this)].card   = card;
+        slot[Util.GetCardGiverIdx(cardGiver, this)].player = cardGiver;
+        slot[Util.GetCardGiverIdx(cardGiver, this)].card   = card;
     }
     public void RemoveCard(Card card)
     {
@@ -54,27 +84,28 @@ public class GamePlayer : MonoBehaviour
     {
         selectCardList.Add(card);
         cards.Remove(card);
-        Global.SortCard(ref selectCardList);
+        Util.SortCard(ref selectCardList);
     }
 
     public void RemoveSelection(Card card)
     {
         selectCardList.Remove(card);
         cards.Add(card);
-        Global.SortCard(ref cards);
+        Util.SortCard(ref cards);
     }
 
     public void DisableSelection()
     {
         cards.AddRange(selectCardList);
         ClearSelection();
-        Global.SortCard(ref cards);
     }
 
     public void ClearSelection()
     {
         foreach (var selectedCard in selectCardList) selectedCard.ToggleBase();
         selectCardList.Clear();
+        GameManager.instance.RestorePhoenixValue();
+        Util.SortCard(ref cards);
     }
 
     public bool CalculateHandRunOut()
@@ -84,28 +115,32 @@ public class GamePlayer : MonoBehaviour
         //스몰 티츄, 라지 티츄 관련 로직이 있으면 좋을 듯.
     }
 
-    public void FindNextPlayer(Global.Trick nowTrick)
+    public void FindNextPlayer(Util.Trick nowTrick)
     {
         int startIdx = GameManager.instance.startPlayerIdx + 1;
-        if (nowTrick?.trickType == Global.TrickType.Dog) { startIdx++; GameManager.instance.trickFinishFlag = true; }
-        for(int i = 0; i<Global.numberOfPlayers; ++i)
+        if (nowTrick?.trickType == Util.TrickType.Dog) 
         {
-            if (GameManager.instance.players[startIdx%Global.numberOfPlayers] != GameManager.instance.currentPlayer && 
-                GameManager.instance.players[startIdx%Global.numberOfPlayers].isFinished == false) break;
-            ++startIdx;
+            startIdx++;
+            for (int i = 0; i < Util.numberOfPlayers; ++i)
+            {
+                if (GameManager.instance.players[startIdx % Util.numberOfPlayers] != GameManager.instance.currentPlayer &&
+                    GameManager.instance.players[startIdx % Util.numberOfPlayers].isFinished == false) break;
+                ++startIdx;
+            }
+            GameManager.instance.trickFinishFlag = true;
         }
         GameManager.instance.startPlayerIdx = startIdx;
     }
 
     public void CalculateIsRoundEnd()
     {
-        if(isFinished == true&&GameManager.instance.players[(playerNumber+2)%2].isFinished == true)
+        if(isFinished == true&&GameManager.instance.players[(playerNumber+2)%Util.numberOfPlayers].isFinished == true)
         {
             GameManager.instance.isRoundEnd = true;
             GameManager.instance.trickFinishFlag = true;
             // 원투로 끝남. 원투 관련 셋업.
         }
-        else if(isFinished == true && GameManager.instance.CountFinishedPlayer()==2)
+        else if(GameManager.instance.CountFinishedPlayer()==3)
         {
             GameManager.instance.isRoundEnd = true;
             GameManager.instance.trickFinishFlag = true;
@@ -128,14 +163,14 @@ public class GamePlayer : MonoBehaviour
             UIManager.instance.DeactivateDragonSelection();
             if (dragonChooseFlag == false) RandomDragonChooseCall();
 
-            var trickTaker = GameManager.instance.players[dragonChoosePlayerIdx % Global.numberOfPlayers];
+            var trickTaker = GameManager.instance.players[dragonChoosePlayerIdx % Util.numberOfPlayers];
             foreach (var trick in GameManager.instance.trickStack)
             {
                 int score = 0;
                 foreach (var card in trick.cards)
                 {
                     score += card.score;
-                    card.transform.position = Global.hiddenCardPosition;
+                    card.transform.position = Util.hiddenCardPosition;
                 }
                 trickTaker.roundScore += score;
             }
@@ -150,7 +185,7 @@ public class GamePlayer : MonoBehaviour
                 foreach (var card in trick.cards)
                 {
                     score += card.score;
-                    card.transform.position = Global.hiddenCardPosition;
+                    card.transform.position = Util.hiddenCardPosition;
                 }
                 roundScore += score;
             }
@@ -160,9 +195,9 @@ public class GamePlayer : MonoBehaviour
     }
 
     private bool isDogTrick;
-    public void ProgressIfDog(Global.Trick nowTrick)
+    public void ProgressIfDog(Util.Trick nowTrick)
     {
-        if (nowTrick.trickType == Global.TrickType.Dog)
+        if (nowTrick.trickType == Util.TrickType.Dog)
         {
             isDogTrick = true;
         }
@@ -197,14 +232,14 @@ public class GamePlayer : MonoBehaviour
         }
         else
         {
-            UIManager.instance.Massage(Global.slotSelectErrorMsg);
+            UIManager.instance.Massage(Util.slotSelectErrorMsg);
             return;
         }
     }
 
     public void RandomExchangeCardCall()
     {
-        for (int i = 0; i < Global.numberOfSlots; ++i)
+        for (int i = 0; i < Util.numberOfSlots; ++i)
         {
             if (UIManager.instance.exchangeCard.slots[i].slot.card == null)
             {
@@ -224,50 +259,49 @@ public class GamePlayer : MonoBehaviour
             slot[idx].card.isFixed = false;
             slot[idx].card = null;
         }
-        Global.SortCard(ref cards);
+        Util.SortCard(ref cards);
         //UIManager.instance.RenderCards(Global.initialPosition, Global.numberOfCardsForLineInSmallTichuPhase, cards);
         //버퍼에 있는 카드를 AddCard() 하고, isFixed 풀고, 정렬하고, 렌더.
     }
 
     public void SelectTrickCall()
     {
-        Global.Trick nowTrick = Global.MakeTrick(selectCardList);
+        Util.Trick nowTrick = Util.MakeTrick(selectCardList);
 
         if (GameManager.instance.isTrickValid(nowTrick))
         {
-            previousTrick = Global.GetTrickInfo(nowTrick);
+            previousTrick = Util.GetTrickInfo(nowTrick);
             UIManager.instance.RenderTrickCard(selectCardList);
             GameManager.instance.trickStack.Push(nowTrick); // 수정 필요.
             ClearSelection();
-            GameManager.instance.ClearPass();
             canDeclareSmallTichu = false;
 
             CalculateHandRunOut();
             FindNextPlayer(nowTrick);
             ProgressIfDog(nowTrick);
             CalculateIsRoundEnd();
-
+            isTrickPassed = false;
             //UIManager.instance.RenderCards(Global.initialPosition, Global.numberOfCardsForLineInSmallTichuPhase, cards);
             chooseFlag = true;
         }
         else
         {
-            UIManager.instance.Massage(Global.trickSelectErrorMsg);
+            UIManager.instance.Massage(Util.trickSelectErrorMsg);
             return;
         }
     }
 
     public void SelectBombCall()
     {
-        Global.Trick nowTrick = Global.MakeTrick(selectCardList);
+        Util.Trick nowTrick = Util.MakeTrick(selectCardList);
 
-        if(nowTrick.trickType==Global.TrickType.FourCardBomb || nowTrick.trickType==Global.TrickType.StraightFlushBomb)
+        if(nowTrick.trickType==Util.TrickType.FourCardBomb || nowTrick.trickType==Util.TrickType.StraightFlushBomb)
         {
             SelectTrickCall();
         }
         else
         {
-            UIManager.instance.Massage(Global.trickSelectErrorMsg);
+            UIManager.instance.Massage(Util.trickSelectErrorMsg);
             return;
         }
     }
@@ -275,10 +309,19 @@ public class GamePlayer : MonoBehaviour
     public void PassTrickCall()
     {
         DisableSelection();
-        GameManager.instance.AddPass();
-        previousTrick = Global.passInfo;
+        if (isFinished == false) previousTrick = Util.trickPassInfo;
+        else previousTrick = null;
         FindNextPlayer(null);
+        isTrickPassed = true;
         chooseFlag = true;
+    }
+
+    public void PassBombCall()
+    {
+        isBombPassed = true;
+        PassTrickCall();
+        if (isFinished == false) previousTrick = Util.bombPassInfo;
+        else previousTrick = null;
     }
 
     public void PassOrRandomSingleTrickCall()
@@ -317,13 +360,13 @@ public class GamePlayer : MonoBehaviour
 
     public void ChooseLargeTichu()
     {
-        Global.SortCard(ref cards);
+        Util.SortCard(ref cards);
         StartCoroutine(ChooseLargeTichuCoroutine());
     }
 
     public void ExchangeCards()
     {
-        Global.SortCard(ref cards);
+        Util.SortCard(ref cards);
         StartCoroutine(ExchangeCardsCoroutine());
     }
 
@@ -342,7 +385,7 @@ public class GamePlayer : MonoBehaviour
     public IEnumerator ChooseLargeTichuCoroutine()
     {
         UIManager.instance.RenderPlayerInfo();
-        UIManager.instance.RenderCards(Global.initialPosition, Global.numberOfCardsForLineInLargeTichuPhase, cards);
+        UIManager.instance.RenderCards(Util.initialPosition, Util.numberOfCardsForLineInLargeTichuPhase, cards);
         
         chooseFlag = false;
         
@@ -360,7 +403,7 @@ public class GamePlayer : MonoBehaviour
     public IEnumerator ExchangeCardsCoroutine()
     {
         UIManager.instance.RenderPlayerInfo();
-        UIManager.instance.RenderCards(Global.initialPosition, Global.numberOfCardsForLineInSmallTichuPhase, cards);
+        UIManager.instance.RenderCards(Util.initialPosition, Util.numberOfCardsForLineInSmallTichuPhase, cards);
         
         chooseFlag = false;
         
@@ -377,7 +420,7 @@ public class GamePlayer : MonoBehaviour
     public IEnumerator ReceiveCardCoroutine()
     {
         UIManager.instance.RenderPlayerInfo();
-        UIManager.instance.RenderCards(Global.initialPosition, Global.numberOfCardsForLineInSmallTichuPhase, cards);
+        UIManager.instance.RenderCards(Util.initialPosition, Util.numberOfCardsForLineInSmallTichuPhase, cards);
         
         chooseFlag = false;
         
@@ -393,54 +436,78 @@ public class GamePlayer : MonoBehaviour
 
     public IEnumerator SelectTrickCoroutine()
     {
-        UIManager.instance.RenderPlayerInfo();
-        UIManager.instance.RenderCards(Global.initialPosition, Global.numberOfCardsForLineInSmallTichuPhase, cards);
+        GameManager.instance.isSelectionEnabled = true;
 
         chooseFlag = false;
 
         coroutineFinishFlag = false;
-        if(GameManager.instance.IsAllDone())
+        if (GameManager.instance.IsBombAllPassed())
         {
+
+            UIManager.instance.RenderPlayerInfo();
+            UIManager.instance.RenderCards(Util.initialPosition, Util.numberOfCardsForLineInSmallTichuPhase, cards);
+
+            GameManager.instance.isSelectionEnabled = false;
             StartCoroutine(GetTrickScore());
             yield return new WaitUntil(() => getTrickScoreFlag);
             GameManager.instance.trickFinishFlag = true;
             GameManager.instance.startPlayerIdx = playerNumber;
-            GameManager.instance.ClearPass();
+            if(isFinished==true) FindNextPlayer(null);
 
             if (dragonChooseFlag)
             {
-                UIManager.instance.ShowInfo(Global.GetTrickTakeInfo(GameManager.instance.players[dragonChoosePlayerIdx % Global.numberOfPlayers].playerName));
+                UIManager.instance.ShowInfo(Util.GetTrickTakeInfo(GameManager.instance.players[dragonChoosePlayerIdx % Util.numberOfPlayers].playerName));
                 dragonChooseFlag = false;
             }
-            else UIManager.instance.ShowInfo(Global.GetTrickTakeInfo(playerName));
+            else UIManager.instance.ShowInfo(Util.GetTrickTakeInfo(playerName));
             
-            UIManager.instance.Wait(Global.trickTakeDuration);
+            UIManager.instance.Wait(Util.trickTakeDuration);
             yield return new WaitUntil(()=>UIManager.instance.IsWaitFinished());
         }
-        else if(GameManager.instance.IsAllPassed())
+        else if(GameManager.instance.IsTrickAllPassed())
         {
-            UIManager.instance.ActivateBombSelection(SelectBombCall, PassTrickCall, DeclareSmallTichuCall);
-            yield return new WaitUntil(() => chooseFlag == true || UIManager.instance.IsTimeOut());
-            if (chooseFlag == false) PassTrickCall();
-            UIManager.instance.DeactivateBombSelection();
+            if (isFinished == true)
+            {
+                PassBombCall();
+            }
+            else
+            {
+                UIManager.instance.RenderPlayerInfo();
+                UIManager.instance.RenderCards(Util.initialPosition, Util.numberOfCardsForLineInSmallTichuPhase, cards);
+
+                UIManager.instance.ActivateBombSelection(SelectBombCall, PassBombCall, DeclareSmallTichuCall);
+                yield return new WaitUntil(() => chooseFlag == true || UIManager.instance.IsTimeOut());
+                if (chooseFlag == false) PassBombCall();
+                UIManager.instance.DeactivateBombSelection();
+            }
         }
         else
         {
-            UIManager.instance.ActivateTrickSelection(SelectTrickCall, PassTrickCall, DeclareSmallTichuCall);
-            yield return new WaitUntil(() => chooseFlag == true || UIManager.instance.IsTimeOut());
-            if (chooseFlag == false) PassOrRandomSingleTrickCall();
-            UIManager.instance.DeactivateTrickSelection();
-
-            if(isDogTrick)
+            if (isFinished == true)
             {
-                isDogTrick = false;
-                UIManager.instance.ShowInfo(GameManager.instance.players[GameManager.instance.startPlayerIdx % Global.numberOfPlayers].playerName + Global.selectDogInfo);
-                UIManager.instance.Wait(Global.selectDogDuration);
-                yield return new WaitUntil(() => UIManager.instance.IsWaitFinished());
-                StartCoroutine(GetTrickScore());
-                yield return new WaitUntil(() => getTrickScoreFlag);
+                PassTrickCall();
             }
+            else
+            {
+                UIManager.instance.RenderPlayerInfo();
+                UIManager.instance.RenderCards(Util.initialPosition, Util.numberOfCardsForLineInSmallTichuPhase, cards);
 
+                UIManager.instance.ActivateTrickSelection(SelectTrickCall, PassTrickCall, DeclareSmallTichuCall);
+                yield return new WaitUntil(() => chooseFlag == true || UIManager.instance.IsTimeOut());
+                if (chooseFlag == false) PassOrRandomSingleTrickCall();
+                UIManager.instance.DeactivateTrickSelection();
+
+                if (isDogTrick)
+                {
+                    GameManager.instance.isSelectionEnabled = false;
+                    isDogTrick = false;
+                    UIManager.instance.ShowInfo(GameManager.instance.players[GameManager.instance.startPlayerIdx % Util.numberOfPlayers].playerName + Util.selectDogInfo);
+                    UIManager.instance.Wait(Util.selectDogDuration);
+                    yield return new WaitUntil(() => UIManager.instance.IsWaitFinished());
+                    StartCoroutine(GetTrickScore());
+                    yield return new WaitUntil(() => getTrickScoreFlag);
+                }
+            }
         }
 
         coroutineFinishFlag = true;

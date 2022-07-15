@@ -9,7 +9,7 @@ public class Card : SelectionHandler
     [HideInInspector]
     public int             value;
     [HideInInspector]
-    public Global.CardType type;
+    public Util.CardType type;
     [HideInInspector]
     public int             id;
     [HideInInspector]
@@ -26,9 +26,9 @@ public class Card : SelectionHandler
             if (isSelected) GameManager.instance.currentPlayer.AddSelection(this);
             else            GameManager.instance.currentPlayer.RemoveSelection(this);
             // ∫¿»≤ predict «œ∞Ì
-            Global.EstimatePhoenix(GameManager.instance.currentPlayer.selectCardList, Global.FindPhoenix(GameManager.instance.currentPlayer.selectCardList));
-            Global.SortCard(ref GameManager.instance.currentPlayer.selectCardList);
-            UIManager.instance.DisplayTrickInfo(Global.MakeTrick(GameManager.instance.currentPlayer.selectCardList));
+            Util.EstimatePhoenix(GameManager.instance.currentPlayer.selectCardList, Util.FindPhoenix(GameManager.instance.currentPlayer.selectCardList));
+            Util.SortCard(ref GameManager.instance.currentPlayer.selectCardList);
+            UIManager.instance.ShowInfo(Util.GetTrickInfo(Util.MakeTrick(GameManager.instance.currentPlayer.selectCardList)));
         }
         else
         {
@@ -43,7 +43,7 @@ public class Card : SelectionHandler
                 if (GameManager.instance.currentCard == this)         GameManager.instance.currentCard = null;
                 else {GameManager.instance.currentCard?.ToggleBase(); GameManager.instance.currentCard = this;}
             }
-            UIManager.instance.RenderCards(Global.initialPosition, Global.numberOfCardsForLineInSmallTichuPhase, GameManager.instance.currentPlayer.cards);
+            UIManager.instance.RenderCards(Util.initialPosition, Util.numberOfCardsForLineInSmallTichuPhase, GameManager.instance.currentPlayer.cards);
         }
     }
 }
