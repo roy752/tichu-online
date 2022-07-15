@@ -51,6 +51,9 @@ public class GameManager : MonoBehaviour
     [HideInInspector]
     public Card phoenix;
 
+    [HideInInspector]
+    public Card bird;
+
     /// <summary> 
     /// 첫번째 트릭인가? 첫번째 트릭은 아무거나 낼 수 있고 패스가 불가능.
     /// </summary>
@@ -73,12 +76,12 @@ public class GameManager : MonoBehaviour
     public int birdWishValue = 0;
 
     [HideInInspector]
-    public static GameManager instance;
-
-    [HideInInspector]
     public static int currentTrickSelectPlayerIdx;
 
     private int splitCardIdx;
+
+    [HideInInspector]
+    public static GameManager instance;
 
     private void Awake()
     {
@@ -320,6 +323,7 @@ public class GameManager : MonoBehaviour
                 nowCard.value = Util.specialCardsValue[idx]; nowCard.id = idNumber; nowCard.score = Util.specialCardsScore[idx];
                 cards.Add(nowCard);
                 if (nowCard.type == Util.CardType.Phoenix) phoenix = nowCard;
+                if (nowCard.type == Util.CardType.Bird) bird = nowCard;
                 idNumber++; idx++; typeNumber++;
             }
         }

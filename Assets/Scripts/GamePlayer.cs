@@ -204,6 +204,13 @@ public class GamePlayer : MonoBehaviour
         else isDogTrick = false;
     }
 
+    private bool isBirdTrick;
+    public void ProgressIfBird(Util.Trick nowTrick)
+    {
+        if (nowTrick.cards.Contains(GameManager.instance.bird)) isBirdTrick = true;
+        else isBirdTrick = false;
+    }
+
     public void DeclareLargeTichuCall()
     {
         chooseFlag = true;
@@ -279,6 +286,7 @@ public class GamePlayer : MonoBehaviour
             CalculateHandRunOut();
             FindNextPlayer(nowTrick);
             ProgressIfDog(nowTrick);
+            ProgressIfBird(nowTrick);
             CalculateIsRoundEnd();
             isTrickPassed = false;
             //UIManager.instance.RenderCards(Global.initialPosition, Global.numberOfCardsForLineInSmallTichuPhase, cards);
@@ -354,6 +362,11 @@ public class GamePlayer : MonoBehaviour
     {
         var rnd = new UnityAction[] { DragonChooseNextOpponentCall, DragonChoosePreviousOpponentCall };
         rnd[Random.Range(0, 2)]();
+    }
+
+    public void BirdWishChooseCall()
+    {
+        chooseFlag = true;
     }
 
 
@@ -506,6 +519,15 @@ public class GamePlayer : MonoBehaviour
                     yield return new WaitUntil(() => UIManager.instance.IsWaitFinished());
                     StartCoroutine(GetTrickScore());
                     yield return new WaitUntil(() => getTrickScoreFlag);
+                }
+                if(isBirdTrick) //새를 낸 경우
+                {
+                    chooseFlag = false;
+                    GameManager.instance.isSelectionEnabled = false; //카드 선택을 disable 하고
+                    isBirdTrick = false;
+                    UIManager.instance.ActivateBirdWishSelection(BirdWishChooseCall);
+                    yield return new WaitUntil(() => chooseFlag == true || UIManager.instance.IsTimeOut());
+                    UIManager.instance.DeactivateBirdWishSelection();
                 }
             }
         }

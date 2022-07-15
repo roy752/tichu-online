@@ -207,7 +207,7 @@ public static class Util
     public static float selectDragonDuration  = 15.5f;
     public static float selectDogDuration     = 3.5f;
     public static float roundResultDuration   = 8.5f;
-    public static float birdWishDuration      = 20.5f;
+    public static float birdWishDuration      = 30.5f;
     
     public static float tick      = 0.1f;
     public static float shakeTick = 1 / 60f;

@@ -391,7 +391,7 @@ public class UIManager : MonoBehaviour
     public void ActivateBirdWishSelection(UnityAction SelectionCall)
     {
         ShowInfo(Util.birdwishselectInfo);
-        AddTime(Util.birdWishDuration);
+        ActivateTimer(Util.birdWishDuration);
 
         foreach (var button in birdWishPopup.birdWishButtons)
         {
@@ -410,6 +410,7 @@ public class UIManager : MonoBehaviour
     {
         birdWishPopup.birdWishPopupObject.SetActive(false);
         DeactivateAlertPopup();
+        DeactivateTimer();
         foreach (var button in birdWishPopup.birdWishButtons) button.onClick.RemoveAllListeners();
         HideInfo();
     }
