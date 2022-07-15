@@ -104,6 +104,28 @@ public static class Util
     public static string   roundResultRoundTotalScoreTextName = "RoundTotalScore";
     public static string   roundResultPresentScoreTextName    = "PresentScore";
 
+    public static string birdWishPopupObjectName = "BirdWishPopup";
+    public static string[] birdWishButtonObjectNames = new string[]
+    {
+        "NoBirdWish",
+        "BirdWish2",
+        "BirdWish3",
+        "BirdWish4",
+        "BirdWish5",
+        "BirdWish6",
+        "BirdWish7",
+        "BirdWish8",
+        "BirdWish9",
+        "BirdWish10",
+        "BirdWishJ",
+        "BirdWishQ",
+        "BirdWishK",
+        "BirdWishA"
+    };
+
+    public static string birdWishNoticeObjectName    = "BirdWishNotice";
+    public static string birdWishNoticeValueTextName = "BirdWishValue";
+
     public static float width   = 3.5f;
     public static float offsetY = 0.75f;
     public static float offsetZ = 0.002f;
@@ -118,7 +140,7 @@ public static class Util
     public static Vector3    initialScale        = new Vector3(0.2f,0.2f, 0.2f);
     public static Quaternion initialCardRotation = Quaternion.Euler(270f, 180f, 180f);
 
-    public static Vector3 initialTrickPosition   = new Vector3(0f, 1.7f, -1f);
+    public static Vector3 initialTrickPosition   = new Vector3(0f, 1.6f, -1f);
 
     public static string largeTichuInfo       = "라지 티츄 여부를 결정하세요.";
     public static string exchangeCardInfo     = "카드를 한장씩 나눠주세요.";
@@ -129,6 +151,7 @@ public static class Util
     public static string selectDragonInfo     = "용으로 딴 트릭을 넘겨줄 사람을 선택하세요.";
     public static string selectDogInfo        = " 에게 차례를 넘깁니다.";
     public static string roundResultInfo      = "라운드가 끝났습니다.";
+    public static string birdwishselectInfo   = "참새의 소원을 정하세요.";
 
     public static string trickPassInfo            = "패스";
     public static string bombPassInfo             = "폭탄 패스";
@@ -144,6 +167,26 @@ public static class Util
     public static string straightTrickInfo        = "스트레이트";
     public static string fourCardTrickInfo        = "포카드 폭탄";
     public static string straightFlushTrickInfo   = "스트레이트 플러쉬 폭탄";
+
+    public static string[] birdWishSelectInfos = new string[]
+    {
+        "정말 참새의 소원을 정하지 않나요?",
+        "",
+        "정말 참새의 소원을 2로 정할까요?",
+        "정말 참새의 소원을 3으로 정할까요?",
+        "정말 참새의 소원을 4로 정할까요?",
+        "정말 참새의 소원을 5로 정할까요?",
+        "정말 참새의 소원을 6으로 정할까요?",
+        "정말 참새의 소원을 7로 정할까요?",
+        "정말 참새의 소원을 8로 정할까요?",
+        "정말 참새의 소원을 9로 정할까요?",
+        "정말 참새의 소원을 10으로 정할까요?",
+        "정말 참새의 소원을 J로 정할까요?",
+        "정말 참새의 소원을 Q로 정할까요?",
+        "정말 참새의 소원을 K로 정할까요?",
+        "정말 참새의 소원을 A로 정할까요?",
+    };
+
 
     public static string slotSelectErrorMsg   = "카드를 모두 나눠주지 않았습니다.";
     public static string trickSelectErrorMsg  = "이 트릭을 낼 수 없습니다.";
@@ -164,6 +207,7 @@ public static class Util
     public static float selectDragonDuration  = 15.5f;
     public static float selectDogDuration     = 3.5f;
     public static float roundResultDuration   = 8.5f;
+    public static float birdWishDuration      = 20.5f;
     
     public static float tick      = 0.1f;
     public static float shakeTick = 1 / 60f;
@@ -313,6 +357,18 @@ public static class Util
         public int oneTwoScore;
         public int tichuScore;
         public int previousScore;
+    }
+
+    public struct BirdWishNotice
+    {
+        public GameObject birdWishNoticeObject;
+        public TMP_Text   birdWishValue;
+    }
+
+    public struct BirdWishPopup
+    {
+        public GameObject   birdWishPopupObject;
+        public Button[]     birdWishButtons;
     }
 
     public enum CardType

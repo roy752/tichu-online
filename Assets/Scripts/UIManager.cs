@@ -22,7 +22,9 @@ public class UIManager : MonoBehaviour
     private Util.TrickSelection    selectTrick    = new Util.TrickSelection();
     private Util.DragonSelection   selectDragon   = new Util.DragonSelection();
     private Util.RoundResult       roundResult    = new Util.RoundResult();
-
+    private Util.BirdWishPopup     birdWishPopup  = new Util.BirdWishPopup();
+    private Util.BirdWishNotice    birdWishnotice = new Util.BirdWishNotice();
+       
     private bool isMassaging = false;
     private string originalMsg;
 
@@ -163,6 +165,22 @@ public class UIManager : MonoBehaviour
             roundResult.team[idx].presentScore    = nowObject.Find(Util.roundResultPresentScoreTextName).GetComponent<TMP_Text>();
         }
 
+        //참새의 소원 선택 관련(bird wish popup) 오브젝트
+        birdWishPopup.birdWishPopupObject = uiParent.transform.Find(Util.birdWishPopupObjectName).gameObject;
+        birdWishPopup.birdWishButtons     = new Button[Util.birdWishButtonObjectNames.Length];
+
+        var nowPopupObject = birdWishPopup.birdWishPopupObject.transform;
+
+        for(int idx = 0; idx< Util.birdWishButtonObjectNames.Length; ++idx)
+        {
+            birdWishPopup.birdWishButtons[idx] = nowPopupObject.Find(Util.birdWishButtonObjectNames[idx]).GetComponent<Button>();
+        }
+        /////////////////////////////////////
+
+
+        //참새의 소원 알림 관련(bird wish notice) 오브젝트
+        birdWishnotice.birdWishNoticeObject = uiParent.transform.Find(Util.birdWishNoticeObjectName).gameObject;
+        birdWishnotice.birdWishValue = birdWishnotice.birdWishNoticeObject.transform.Find(Util.birdWishNoticeValueTextName).GetComponent<TMP_Text>();
     }
 
     public void ActivateLargeTichu(UnityAction DeclareCall, UnityAction SkipCall)
@@ -370,6 +388,44 @@ public class UIManager : MonoBehaviour
         HideInfo();
     }
 
+    public void ActivateBirdWishSelection(UnityAction SelectionCall)
+    {
+        ShowInfo(Util.birdwishselectInfo);
+        AddTime(Util.birdWishDuration);
+
+        foreach (var button in birdWishPopup.birdWishButtons)
+        {
+            var birdWishSelection = button.gameObject.GetComponent<BirdWish>();
+            button.onClick.AddListener(
+                                () => ActivateAlertPopup(
+                                                        Util.birdWishSelectInfos[birdWishSelection.birdWishValue],
+                                                        () => { birdWishSelection.BirdWishSelection(); SelectionCall(); }
+                                                        )
+                                      );
+        }
+        birdWishPopup.birdWishPopupObject.SetActive(true);
+    }
+
+    public void DeactivateBirdWishSelection()
+    {
+        birdWishPopup.birdWishPopupObject.SetActive(false);
+        DeactivateAlertPopup();
+        foreach (var button in birdWishPopup.birdWishButtons) button.onClick.RemoveAllListeners();
+        HideInfo();
+    }
+
+    public void ActivateBirdWishNotice(int birdWishValue)
+    {
+        birdWishnotice.birdWishNoticeObject.SetActive(true);
+        birdWishnotice.birdWishValue.text = Util.valueToStrTable[birdWishValue];
+    }
+
+    public void DeactivateBirdWishNotice()
+    {
+        birdWishnotice.birdWishValue.text = null;
+        birdWishnotice.birdWishNoticeObject.SetActive(false);
+    }
+
     public void ActivateAlertPopup(string alertText, UnityAction confirmCall)
     {
         alertPopup.alertPopupObject.SetActive(true);
@@ -427,6 +483,11 @@ public class UIManager : MonoBehaviour
             timerDuration -= Util.tick;
             yield return new WaitForSeconds(Util.tick);
         }
+    }
+
+    public void AddTime(float duration)
+    {
+        timerDuration += duration;
     }
 
     public void ShowTimer(string text)

@@ -70,6 +70,9 @@ public class GameManager : MonoBehaviour
     public bool isBirdWishActivated;
 
     [HideInInspector]
+    public int birdWishValue = 0;
+
+    [HideInInspector]
     public static GameManager instance;
 
     [HideInInspector]
@@ -453,6 +456,7 @@ public class GameManager : MonoBehaviour
     {
         isFirstRound = true;
         isBirdWishActivated = false;
+        birdWishValue = 0;
         foreach (var player in players) player.ResetPerRound();
     }
     
