@@ -98,13 +98,14 @@ public class GamePlayer : MonoBehaviour
     {
         cards.AddRange(selectCardList);
         ClearSelection();
-        Util.SortCard(ref cards);
     }
 
     public void ClearSelection()
     {
         foreach (var selectedCard in selectCardList) selectedCard.ToggleBase();
         selectCardList.Clear();
+        GameManager.instance.RestorePhoenixValue();
+        Util.SortCard(ref cards);
     }
 
     public bool CalculateHandRunOut()

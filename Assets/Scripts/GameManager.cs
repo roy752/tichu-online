@@ -48,6 +48,9 @@ public class GameManager : MonoBehaviour
     [HideInInspector]
     public bool isGameEnd;
 
+    [HideInInspector]
+    public Card phoenix;
+
     /// <summary> 
     /// 첫번째 트릭인가? 첫번째 트릭은 아무거나 낼 수 있고 패스가 불가능.
     /// </summary>
@@ -120,7 +123,6 @@ public class GameManager : MonoBehaviour
 
         StartCoroutine(StartDisplayResultCoroutine());
         yield return new WaitUntil(() => phaseChangeFlag);
-
         //플레이 결과에 따른 점수 계산, 디스플레이. 다시 게임을 시작할지 아니면 게임이 끝났는지 결정.
     }
    
@@ -314,6 +316,7 @@ public class GameManager : MonoBehaviour
                 nowCard.cardName = cardName; nowCard.type = (Util.CardType)Enum.Parse(typeof(Util.CardType), cardName);
                 nowCard.value = Util.specialCardsValue[idx]; nowCard.id = idNumber; nowCard.score = Util.specialCardsScore[idx];
                 cards.Add(nowCard);
+                if (nowCard.type == Util.CardType.Phoenix) phoenix = nowCard;
                 idNumber++; idx++; typeNumber++;
             }
         }
@@ -481,5 +484,10 @@ public class GameManager : MonoBehaviour
     {
         foreach (var player in players) if (player.isFinished == false) return player;
         return null;
+    }
+
+    public void RestorePhoenixValue()
+    {
+        phoenix.value = Util.specialCardsValue[2];
     }
 }

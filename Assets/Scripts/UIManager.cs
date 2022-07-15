@@ -580,12 +580,14 @@ public class UIManager : MonoBehaviour
         }
         if (cardList != null)
         {
-            Vector3 nowPosition = Util.initialTrickPosition + new Vector3((-(cardList.Count - 1) / 2)*Util.trickCardOffset,0,0);
+            //9장까지 ok. 10장부터 14장까지는 다른 offset 써야함.
+            float interval = Util.GetTrickCardInterval(cardList.Count);
+            Vector3 nowPosition = Util.initialTrickPosition + new Vector3((-((float)cardList.Count - 1f) / 2f)*interval,0,0);
             foreach (var card in cardList)
             {
                 card.transform.position = nowPosition;
                 card.isFixed = true;
-                nowPosition += new Vector3(Util.trickCardOffset, 0, -Util.offsetZ);
+                nowPosition += new Vector3(interval, 0, -Util.offsetZ);
             }
         }
     }

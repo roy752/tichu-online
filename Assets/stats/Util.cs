@@ -110,7 +110,7 @@ public static class Util
     public static float cameraPosition = -10f;
 
 
-    public static float    trickCardOffset     = 0.4f;
+    public static float    trickCardInterval     = 0.4f;
 
     public static Vector3    frontEpsilon        = new Vector3(0, 0, -0.001f);
     public static Vector3    hiddenCardPosition  = new Vector3(-100f, -100f, -100f);
@@ -163,7 +163,7 @@ public static class Util
     public static float trickTakeDuration     = 3.5f;
     public static float selectDragonDuration  = 15.5f;
     public static float selectDogDuration     = 3.5f;
-    public static float roundResultDuration   = 6.5f;
+    public static float roundResultDuration   = 8.5f;
     
     public static float tick      = 0.1f;
     public static float shakeTick = 1 / 60f;
@@ -589,5 +589,10 @@ public static class Util
     static public string GetTeamName(GamePlayer player1, GamePlayer player2)
     {
         return player1.playerName + "," + "\n" + player2.playerName; 
+    }
+    static public float GetTrickCardInterval(int numberOfCards)
+    {
+        if (numberOfCards < 10) return trickCardInterval;
+        else return trickCardInterval * (1f - ((numberOfCards - 9) * 0.07f));
     }
 }
