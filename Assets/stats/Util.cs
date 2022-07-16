@@ -104,6 +104,28 @@ public static class Util
     public static string   roundResultRoundTotalScoreTextName = "RoundTotalScore";
     public static string   roundResultPresentScoreTextName    = "PresentScore";
 
+    public static string birdWishPopupObjectName = "BirdWishPopup";
+    public static string[] birdWishButtonObjectNames = new string[]
+    {
+        "NoBirdWish",
+        "BirdWish2",
+        "BirdWish3",
+        "BirdWish4",
+        "BirdWish5",
+        "BirdWish6",
+        "BirdWish7",
+        "BirdWish8",
+        "BirdWish9",
+        "BirdWish10",
+        "BirdWishJ",
+        "BirdWishQ",
+        "BirdWishK",
+        "BirdWishA"
+    };
+
+    public static string birdWishNoticeObjectName    = "BirdWishNotice";
+    public static string birdWishNoticeValueTextName = "BirdWishValue";
+
     public static float width   = 3.5f;
     public static float offsetY = 0.75f;
     public static float offsetZ = 0.002f;
@@ -118,7 +140,7 @@ public static class Util
     public static Vector3    initialScale        = new Vector3(0.2f,0.2f, 0.2f);
     public static Quaternion initialCardRotation = Quaternion.Euler(270f, 180f, 180f);
 
-    public static Vector3 initialTrickPosition   = new Vector3(0f, 1.7f, -1f);
+    public static Vector3 initialTrickPosition   = new Vector3(0f, 1.6f, -1f);
 
     public static string largeTichuInfo       = "라지 티츄 여부를 결정하세요.";
     public static string exchangeCardInfo     = "카드를 한장씩 나눠주세요.";
@@ -129,6 +151,7 @@ public static class Util
     public static string selectDragonInfo     = "용으로 딴 트릭을 넘겨줄 사람을 선택하세요.";
     public static string selectDogInfo        = " 에게 차례를 넘깁니다.";
     public static string roundResultInfo      = "라운드가 끝났습니다.";
+    public static string birdwishselectInfo   = "참새의 소원을 정하세요.";
 
     public static string trickPassInfo            = "패스";
     public static string bombPassInfo             = "폭탄 패스";
@@ -145,10 +168,31 @@ public static class Util
     public static string fourCardTrickInfo        = "포카드 폭탄";
     public static string straightFlushTrickInfo   = "스트레이트 플러쉬 폭탄";
 
-    public static string slotSelectErrorMsg   = "카드를 모두 나눠주지 않았습니다.";
-    public static string trickSelectErrorMsg  = "이 트릭을 낼 수 없습니다.";
-    public static string findFirstPlaceError  = "1위를 찾을 수 없습니다.";
-    public static string findLastPlaceError   = "4위를 찾을 수 없습니다.";
+    public static string[] birdWishSelectInfos = new string[]
+    {
+        "정말 참새의 소원을 정하지 않나요?",
+        "",
+        "정말 참새의 소원을 2로 정할까요?",
+        "정말 참새의 소원을 3으로 정할까요?",
+        "정말 참새의 소원을 4로 정할까요?",
+        "정말 참새의 소원을 5로 정할까요?",
+        "정말 참새의 소원을 6으로 정할까요?",
+        "정말 참새의 소원을 7로 정할까요?",
+        "정말 참새의 소원을 8로 정할까요?",
+        "정말 참새의 소원을 9로 정할까요?",
+        "정말 참새의 소원을 10으로 정할까요?",
+        "정말 참새의 소원을 J로 정할까요?",
+        "정말 참새의 소원을 Q로 정할까요?",
+        "정말 참새의 소원을 K로 정할까요?",
+        "정말 참새의 소원을 A로 정할까요?",
+    };
+
+
+    public static string slotSelectErrorMsg      = "카드를 모두 나눠주지 않았습니다.";
+    public static string trickSelectErrorMsg     = "이 트릭을 낼 수 없습니다.";
+    public static string fulfillBirdWishErrorMsg = "참새의 소원을 만족해야 합니다.";
+    public static string findFirstPlaceError     = "1위를 찾을 수 없습니다.";
+    public static string findLastPlaceError      = "4위를 찾을 수 없습니다.";
 
     public static string alertLargeTichuMsg   = "정말 라지 티츄를 선언하시겠습니까?";
     public static string alertSmallTichuMsg   = "정말 스몰 티츄를 선언하시겠습니까?";
@@ -158,12 +202,13 @@ public static class Util
     public static float massageDuration       = 1.5f;
     public static float shakeDuration         = 0.15f;
     public static float receiveCardDuration   = 15.5f;
-    public static float selectTrickDuration   = 40.5f;
+    public static float selectTrickDuration   = 45.5f;
     public static float selectBombDuration    = 5.5f;
     public static float trickTakeDuration     = 3.5f;
     public static float selectDragonDuration  = 15.5f;
     public static float selectDogDuration     = 3.5f;
     public static float roundResultDuration   = 8.5f;
+    public static float birdWishDuration      = 30.5f;
     
     public static float tick      = 0.1f;
     public static float shakeTick = 1 / 60f;
@@ -315,6 +360,31 @@ public static class Util
         public int previousScore;
     }
 
+    public struct BirdWishNotice
+    {
+        public GameObject birdWishNoticeObject;
+        public TMP_Text   birdWishValue;
+    }
+
+    public struct BirdWishPopup
+    {
+        public GameObject   birdWishPopupObject;
+        public Button[]     birdWishButtons;
+    }
+
+    public class CardValueComparer : IEqualityComparer<Card>
+    {
+        public bool Equals(Card a, Card b)
+        {
+            if (a.value == b.value) return true;
+            else return false;
+        }
+        public int GetHashCode(Card a)
+        {
+            return a.value.GetHashCode();
+        }
+    }
+
     public enum CardType
     {
         Bean,
@@ -350,7 +420,7 @@ public static class Util
     }
     static public GameObject GetHitObject(Vector3 inputPosition)
     {
-        Ray ray = new Ray(new Vector3(inputPosition.x, inputPosition.y, Util.cameraPosition), Vector3.forward);
+        Ray ray = new Ray(new Vector3(inputPosition.x, inputPosition.y, cameraPosition), Vector3.forward);
         RaycastHit hitInformation;
         Physics.Raycast(ray, out hitInformation);
         if (hitInformation.collider != null) return hitInformation.transform.gameObject;
@@ -359,7 +429,7 @@ public static class Util
 
     static public void SortCard(ref List<Card> cardList)
     {
-        cardList = cardList.OrderBy(x => x.value).ToList();
+        cardList = cardList.OrderBy(x => x.value).ThenBy(x=>x.type).ToList();
     }
 
     static public void ShuffleCards(ref List<Card> cardList)
@@ -594,5 +664,25 @@ public static class Util
     {
         if (numberOfCards < 10) return trickCardInterval;
         else return trickCardInterval * (1f - ((numberOfCards - 9) * 0.07f));
+    }
+    static public Trick IsPlayerHaveToFulfillBirdWish(GamePlayer player)
+    {
+        var evaluateCardList = player.cards.ToList();
+        evaluateCardList.AddRange(player.selectCardList);
+        Trick retTrick = null;
+
+        if (GameManager.instance.isBirdWishActivated) //참새의 소원이 활성화되어 있고,
+        {
+            if (evaluateCardList.Any(x => x.value == GameManager.instance.birdWishValue && x.type != CardType.Phoenix)) //봉황이 아닌 실제 숫자카드를 가지고 있고,
+            {
+                if ((retTrick = GameManager.instance.FindValidBirdWishFulfillTrick(evaluateCardList)) != null) //그 숫자카드를 이용해 낼 수 있는 유효한 트릭이 있다면 true.
+                {
+                    return retTrick;
+                }
+                else return retTrick;
+            }
+            else return retTrick;
+        }
+        else return retTrick; 
     }
 }

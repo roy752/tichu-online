@@ -204,6 +204,13 @@ public class GamePlayer : MonoBehaviour
         else isDogTrick = false;
     }
 
+    private bool isBirdTrick;
+    public void ProgressIfBird(Util.Trick nowTrick)
+    {
+        if (nowTrick.cards.Contains(GameManager.instance.bird)) isBirdTrick = true;
+        else isBirdTrick = false;
+    }
+
     public void DeclareLargeTichuCall()
     {
         chooseFlag = true;
@@ -267,27 +274,55 @@ public class GamePlayer : MonoBehaviour
     public void SelectTrickCall()
     {
         Util.Trick nowTrick = Util.MakeTrick(selectCardList);
-
-        if (GameManager.instance.isTrickValid(nowTrick))
+        if (Util.IsPlayerHaveToFulfillBirdWish(this)!=null)
         {
-            previousTrick = Util.GetTrickInfo(nowTrick);
-            UIManager.instance.RenderTrickCard(selectCardList);
-            GameManager.instance.trickStack.Push(nowTrick); // 수정 필요.
-            ClearSelection();
-            canDeclareSmallTichu = false;
-
-            CalculateHandRunOut();
-            FindNextPlayer(nowTrick);
-            ProgressIfDog(nowTrick);
-            CalculateIsRoundEnd();
-            isTrickPassed = false;
-            //UIManager.instance.RenderCards(Global.initialPosition, Global.numberOfCardsForLineInSmallTichuPhase, cards);
-            chooseFlag = true;
+            if(GameManager.instance.IsTrickValidAndFulfillBirdWish(nowTrick))
+            {
+                previousTrick = Util.GetTrickInfo(nowTrick);
+                UIManager.instance.RenderTrickCard(selectCardList);
+                GameManager.instance.trickStack.Push(nowTrick); // 수정 필요.
+                ClearSelection();
+                canDeclareSmallTichu = false;
+                CalculateHandRunOut();
+                FindNextPlayer(nowTrick);
+                ProgressIfDog(nowTrick);
+                ProgressIfBird(nowTrick);
+                CalculateIsRoundEnd();
+                isTrickPassed = false;
+                //UIManager.instance.RenderCards(Global.initialPosition, Global.numberOfCardsForLineInSmallTichuPhase, cards);
+                UIManager.instance.DeactivateBirdWishNotice(); // 이 부분 추가.
+                chooseFlag = true;
+            }
+            else
+            {
+                UIManager.instance.Massage(Util.fulfillBirdWishErrorMsg);
+                return;
+            }
         }
         else
         {
-            UIManager.instance.Massage(Util.trickSelectErrorMsg);
-            return;
+            if (GameManager.instance.isTrickValid(nowTrick))
+            {
+                previousTrick = Util.GetTrickInfo(nowTrick);
+                UIManager.instance.RenderTrickCard(selectCardList);
+                GameManager.instance.trickStack.Push(nowTrick); // 수정 필요.
+                ClearSelection();
+                canDeclareSmallTichu = false;
+
+                CalculateHandRunOut();
+                FindNextPlayer(nowTrick);
+                ProgressIfDog(nowTrick);
+                ProgressIfBird(nowTrick);
+                CalculateIsRoundEnd();
+                isTrickPassed = false;
+                //UIManager.instance.RenderCards(Global.initialPosition, Global.numberOfCardsForLineInSmallTichuPhase, cards);
+                chooseFlag = true;
+            }
+            else
+            {
+                UIManager.instance.Massage(Util.trickSelectErrorMsg);
+                return;
+            }
         }
     }
 
@@ -324,17 +359,28 @@ public class GamePlayer : MonoBehaviour
         else previousTrick = null;
     }
 
-    public void PassOrRandomSingleTrickCall()
+    public void PassOrPickRandomTrickCall()
     {
-        if (GameManager.instance.isFirstTrick)
+        //참새의 소원을 만족할 수 있는데 타임아웃이라면 만족하는 트릭 아무거나 낸다.
+        Util.Trick birdWishFulfillTrick = null;
+        if ((birdWishFulfillTrick = Util.IsPlayerHaveToFulfillBirdWish(this)) != null)
         {
             DisableSelection();
-            cards[Random.Range(0, cards.Count)].ToggleSelection();
+            foreach (var card in birdWishFulfillTrick.cards) card.ToggleSelection();
             SelectTrickCall();
         }
         else
         {
-            PassTrickCall();
+            if (GameManager.instance.isFirstTrick)
+            {
+                DisableSelection();
+                cards[Random.Range(0, cards.Count)].ToggleSelection();
+                SelectTrickCall();
+            }
+            else
+            {
+                PassTrickCall();
+            }
         }
     }
 
@@ -354,6 +400,11 @@ public class GamePlayer : MonoBehaviour
     {
         var rnd = new UnityAction[] { DragonChooseNextOpponentCall, DragonChoosePreviousOpponentCall };
         rnd[Random.Range(0, 2)]();
+    }
+
+    public void BirdWishChooseCall()
+    {
+        chooseFlag = true;
     }
 
 
@@ -494,7 +545,7 @@ public class GamePlayer : MonoBehaviour
 
                 UIManager.instance.ActivateTrickSelection(SelectTrickCall, PassTrickCall, DeclareSmallTichuCall);
                 yield return new WaitUntil(() => chooseFlag == true || UIManager.instance.IsTimeOut());
-                if (chooseFlag == false) PassOrRandomSingleTrickCall();
+                if (chooseFlag == false) PassOrPickRandomTrickCall();
                 UIManager.instance.DeactivateTrickSelection();
 
                 if (isDogTrick)
@@ -506,6 +557,15 @@ public class GamePlayer : MonoBehaviour
                     yield return new WaitUntil(() => UIManager.instance.IsWaitFinished());
                     StartCoroutine(GetTrickScore());
                     yield return new WaitUntil(() => getTrickScoreFlag);
+                }
+                if(isBirdTrick) //새를 낸 경우
+                {
+                    chooseFlag = false;
+                    GameManager.instance.isSelectionEnabled = false; //카드 선택을 disable 하고
+                    isBirdTrick = false;
+                    UIManager.instance.ActivateBirdWishSelection(BirdWishChooseCall);
+                    yield return new WaitUntil(() => chooseFlag == true || UIManager.instance.IsTimeOut());
+                    UIManager.instance.DeactivateBirdWishSelection();
                 }
             }
         }
