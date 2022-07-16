@@ -677,4 +677,13 @@ public class UIManager : MonoBehaviour
     {
         return isWaitFinished;
     }
+
+    public void DeactivateRenderCards()
+    {
+        foreach(var card in GameManager.instance.cards)
+        {
+            card.isFixed = false;
+            card.transform.position = Util.hiddenCardPosition;
+        }
+    }
 }

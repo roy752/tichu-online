@@ -89,7 +89,6 @@ public class GameManager : MonoBehaviour
         InitializeVariables();
         InitializePlayers();
         MakeCards();
-        //ShuffleCards(ref cards);
 
         instance = this;
     }
@@ -104,62 +103,49 @@ public class GameManager : MonoBehaviour
         HandleSelection();
     }
 
+    /*
     void TestSetup()
     {
         //52부터 새52 개53 봉54 용55
         
         List<Card> tmp = new List<Card>();
         Trick nowTrick = new Trick(tmp);
-        nowTrick.trickType = TrickType.Triple;
-        nowTrick.trickLength = 3;
-        nowTrick.trickValue = 14;
+        nowTrick.trickType = TrickType.StraightFlushBomb;
+        nowTrick.trickLength = 5;
+        nowTrick.trickValue  = 7;
         trickStack.Push(nowTrick);
 
         isBirdWishActivated = true;
-        birdWishValue = 6;
+        birdWishValue = 8;
         UIManager.instance.ActivateBirdWishNotice(birdWishValue);
-        
-        fo(0, 52); fo(0, 5);fo(0, 18); fo(0, 31); fo(0, 44);//fo(0, 26);
-        //fo(1, 20); fo(1, 21);fo(1, 22);fo(1, 23);fo(1, 24); fo(1, 37); fo(1, 50);//8910JQ 스플, 22폭탄
-        //fo(2, 5);fo(2, 18);fo(2, 31);fo(2, 44); //6 포카드 폭탄
-        //fo(3, 31);fo(3, 32);
-        //fo(1, 9); fo(1, 22); fo(1, 35);// fo(0, 54);
-        //fo(1, 3);fo(1, 4); fo(1, 5); fo(1, 6); fo(1, 54);
 
-        //fo(0,52); fo(0, 1);fo(0, 2);fo(0, 3);fo(0, 4);
-        //fo(1, 9);fo(1, 23); fo(1, 24);fo(1, 25);fo(1, 54);
-
-        //fo(0, 52);fo(0, 1);fo(0, 2);fo(0, 3);fo(0, 4);
-        //fo(1, 9); fo(1, 10); fo(1, 11); fo(1, 12); fo(1, 26);
-        //fo(2, 6); fo(2, 7); fo(2, 8); fo(2, 9); fo(2, 54);
+        fo(0, 52); fo(0, 9); fo(0, 10);fo(0, 11);fo(0, 12); fo(0, 0);
+        fo(1, 3);fo(1, 4);fo(1, 5);fo(1, 6); fo(1, 7);
+        //fo(1, 6); fo(1, 7); fo(1, 8);fo(1, 9); fo(1, 54);
     }
 
     void fo(int idx, int id)
     {
         players[idx].cards.Add(cards.Find(x => x.id == id));
     }
-
+    */
     IEnumerator StartPlay()
     {
         ResetRoundSetting();
-        /*
-        SplitCardsToPlayer(Global.numberOfCardsLargeTichuPhase);
+        ShuffleCards(ref cards);
+
+        SplitCardsToPlayer(Util.numberOfCardsLargeTichuPhase);
 
         StartCoroutine(StartLargeTichuPhaseCoroutine()); //카드 8장 나눠주고 라지 티츄 결정
         yield return new WaitUntil(() => phaseChangeFlag);
 
-        SplitCardsToPlayer(Global.numberOfCardsSmallTichuPhase);
+        SplitCardsToPlayer(Util.numberOfCardsSmallTichuPhase);
 
         StartCoroutine(StartExchangeCardPhaseCoroutine()); //카드 6장 마저 나눠주고 교환,스몰티츄 결정
         yield return new WaitUntil(() => phaseChangeFlag);
 
         StartCoroutine(StartReceiveCardPhaseCoroutine()); //교환한 카드 확인, 스몰티츄 결정
         yield return new WaitUntil(() => phaseChangeFlag);
-        */
-
-        TestSetup();
-        //SplitCardsToPlayer(numberOfCardsPlay);
-        foreach (var player in players) SortCard(ref player.cards);
 
         StartCoroutine(StartMainPlayPhaseCoroutine()); //1,2,3,4등이 나뉠 때까지 플레이
         yield return new WaitUntil(() => phaseChangeFlag);
@@ -226,6 +212,8 @@ public class GameManager : MonoBehaviour
         {
             foreach (var card in trickStack.Peek().cards) { card.isFixed = false; card.transform.position = hiddenCardPosition; }
         }
+        UIManager.instance.DeactivateRenderCards();
+        UIManager.instance.DeactivateBirdWishNotice();
 
         UIManager.instance.RenderPlayerInfo();
 
@@ -771,8 +759,8 @@ public class GameManager : MonoBehaviour
     {
         cardList = cardList.ToList();
         RestorePhoenixValue();
-        var fourCardList = (from n in cardList where cardList.Count(x => x.value == mustContainValue) == 4 select n).ToList(); //mustContainValue로 포카드를 만들 수 있는가?
-        if (fourCardList.Count == 0) return null; //포카드를 만들 수 없다면 리턴
+        var fourCardList = cardList.Where(x=>x.value==mustContainValue).ToList(); //mustContainValue로 포카드를 만들 수 있는가?
+        if (fourCardList.Count != 4) return null; //포카드를 만들 수 없다면 리턴
         //포카드를 만들 수 있다면
         if (topTrick.trickType == TrickType.StraightFlushBomb) return null; // 탑이 스플 폭탄이라면 리턴
         if (topTrick.trickType == TrickType.FourCardBomb)

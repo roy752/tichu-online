@@ -202,7 +202,7 @@ public static class Util
     public static float massageDuration       = 1.5f;
     public static float shakeDuration         = 0.15f;
     public static float receiveCardDuration   = 15.5f;
-    public static float selectTrickDuration   = 40.5f;
+    public static float selectTrickDuration   = 45.5f;
     public static float selectBombDuration    = 5.5f;
     public static float trickTakeDuration     = 3.5f;
     public static float selectDragonDuration  = 15.5f;
@@ -677,7 +677,6 @@ public static class Util
             {
                 if ((retTrick = GameManager.instance.FindValidBirdWishFulfillTrick(evaluateCardList)) != null) //그 숫자카드를 이용해 낼 수 있는 유효한 트릭이 있다면 true.
                 {
-                    Debug.Log("yes i can");
                     return retTrick;
                 }
                 else return retTrick;

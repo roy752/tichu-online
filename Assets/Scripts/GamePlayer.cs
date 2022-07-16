@@ -276,7 +276,6 @@ public class GamePlayer : MonoBehaviour
         Util.Trick nowTrick = Util.MakeTrick(selectCardList);
         if (Util.IsPlayerHaveToFulfillBirdWish(this)!=null)
         {
-            Debug.Log("예스 소원");
             if(GameManager.instance.IsTrickValidAndFulfillBirdWish(nowTrick))
             {
                 previousTrick = Util.GetTrickInfo(nowTrick);
@@ -284,7 +283,6 @@ public class GamePlayer : MonoBehaviour
                 GameManager.instance.trickStack.Push(nowTrick); // 수정 필요.
                 ClearSelection();
                 canDeclareSmallTichu = false;
-                
                 CalculateHandRunOut();
                 FindNextPlayer(nowTrick);
                 ProgressIfDog(nowTrick);
@@ -303,7 +301,6 @@ public class GamePlayer : MonoBehaviour
         }
         else
         {
-            Debug.Log("노 소원");
             if (GameManager.instance.isTrickValid(nowTrick))
             {
                 previousTrick = Util.GetTrickInfo(nowTrick);
