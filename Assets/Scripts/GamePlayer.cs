@@ -274,28 +274,58 @@ public class GamePlayer : MonoBehaviour
     public void SelectTrickCall()
     {
         Util.Trick nowTrick = Util.MakeTrick(selectCardList);
-
-        if (GameManager.instance.isTrickValid(nowTrick))
+        if (Util.IsPlayerHaveToFulfillBirdWish(this)!=null)
         {
-            previousTrick = Util.GetTrickInfo(nowTrick);
-            UIManager.instance.RenderTrickCard(selectCardList);
-            GameManager.instance.trickStack.Push(nowTrick); // 수정 필요.
-            ClearSelection();
-            canDeclareSmallTichu = false;
-
-            CalculateHandRunOut();
-            FindNextPlayer(nowTrick);
-            ProgressIfDog(nowTrick);
-            ProgressIfBird(nowTrick);
-            CalculateIsRoundEnd();
-            isTrickPassed = false;
-            //UIManager.instance.RenderCards(Global.initialPosition, Global.numberOfCardsForLineInSmallTichuPhase, cards);
-            chooseFlag = true;
+            Debug.Log("예스 소원");
+            if(GameManager.instance.IsTrickValidAndFulfillBirdWish(nowTrick))
+            {
+                previousTrick = Util.GetTrickInfo(nowTrick);
+                UIManager.instance.RenderTrickCard(selectCardList);
+                GameManager.instance.trickStack.Push(nowTrick); // 수정 필요.
+                ClearSelection();
+                canDeclareSmallTichu = false;
+                
+                CalculateHandRunOut();
+                FindNextPlayer(nowTrick);
+                ProgressIfDog(nowTrick);
+                ProgressIfBird(nowTrick);
+                CalculateIsRoundEnd();
+                isTrickPassed = false;
+                //UIManager.instance.RenderCards(Global.initialPosition, Global.numberOfCardsForLineInSmallTichuPhase, cards);
+                UIManager.instance.DeactivateBirdWishNotice(); // 이 부분 추가.
+                chooseFlag = true;
+            }
+            else
+            {
+                UIManager.instance.Massage(Util.fulfillBirdWishErrorMsg);
+                return;
+            }
         }
         else
         {
-            UIManager.instance.Massage(Util.trickSelectErrorMsg);
-            return;
+            Debug.Log("노 소원");
+            if (GameManager.instance.isTrickValid(nowTrick))
+            {
+                previousTrick = Util.GetTrickInfo(nowTrick);
+                UIManager.instance.RenderTrickCard(selectCardList);
+                GameManager.instance.trickStack.Push(nowTrick); // 수정 필요.
+                ClearSelection();
+                canDeclareSmallTichu = false;
+
+                CalculateHandRunOut();
+                FindNextPlayer(nowTrick);
+                ProgressIfDog(nowTrick);
+                ProgressIfBird(nowTrick);
+                CalculateIsRoundEnd();
+                isTrickPassed = false;
+                //UIManager.instance.RenderCards(Global.initialPosition, Global.numberOfCardsForLineInSmallTichuPhase, cards);
+                chooseFlag = true;
+            }
+            else
+            {
+                UIManager.instance.Massage(Util.trickSelectErrorMsg);
+                return;
+            }
         }
     }
 
@@ -332,17 +362,28 @@ public class GamePlayer : MonoBehaviour
         else previousTrick = null;
     }
 
-    public void PassOrRandomSingleTrickCall()
+    public void PassOrPickRandomTrickCall()
     {
-        if (GameManager.instance.isFirstTrick)
+        //참새의 소원을 만족할 수 있는데 타임아웃이라면 만족하는 트릭 아무거나 낸다.
+        Util.Trick birdWishFulfillTrick = null;
+        if ((birdWishFulfillTrick = Util.IsPlayerHaveToFulfillBirdWish(this)) != null)
         {
             DisableSelection();
-            cards[Random.Range(0, cards.Count)].ToggleSelection();
+            foreach (var card in birdWishFulfillTrick.cards) card.ToggleSelection();
             SelectTrickCall();
         }
         else
         {
-            PassTrickCall();
+            if (GameManager.instance.isFirstTrick)
+            {
+                DisableSelection();
+                cards[Random.Range(0, cards.Count)].ToggleSelection();
+                SelectTrickCall();
+            }
+            else
+            {
+                PassTrickCall();
+            }
         }
     }
 
@@ -507,7 +548,7 @@ public class GamePlayer : MonoBehaviour
 
                 UIManager.instance.ActivateTrickSelection(SelectTrickCall, PassTrickCall, DeclareSmallTichuCall);
                 yield return new WaitUntil(() => chooseFlag == true || UIManager.instance.IsTimeOut());
-                if (chooseFlag == false) PassOrRandomSingleTrickCall();
+                if (chooseFlag == false) PassOrPickRandomTrickCall();
                 UIManager.instance.DeactivateTrickSelection();
 
                 if (isDogTrick)

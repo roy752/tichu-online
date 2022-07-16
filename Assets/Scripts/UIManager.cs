@@ -286,7 +286,7 @@ public class UIManager : MonoBehaviour
                                                         );
 
         selectTrick.trickSelectionObject.SetActive(true);
-        selectTrick.passButton.gameObject.SetActive(!GameManager.instance.isFirstTrick);
+        selectTrick.passButton.gameObject.SetActive(GameManager.instance.isFirstTrick==false&&Util.IsPlayerHaveToFulfillBirdWish(GameManager.instance.currentPlayer)==null);
         selectTrick.smallTichuButton.gameObject.SetActive(GameManager.instance.currentPlayer.canDeclareSmallTichu); //수정 필요. 버튼을 enabled = false 로 하고 흐리게 만들어야함.
     }
 
@@ -423,6 +423,8 @@ public class UIManager : MonoBehaviour
 
     public void DeactivateBirdWishNotice()
     {
+        GameManager.instance.isBirdWishActivated = false;
+        GameManager.instance.birdWishValue = 0;
         birdWishnotice.birdWishValue.text = null;
         birdWishnotice.birdWishNoticeObject.SetActive(false);
     }

@@ -188,10 +188,11 @@ public static class Util
     };
 
 
-    public static string slotSelectErrorMsg   = "카드를 모두 나눠주지 않았습니다.";
-    public static string trickSelectErrorMsg  = "이 트릭을 낼 수 없습니다.";
-    public static string findFirstPlaceError  = "1위를 찾을 수 없습니다.";
-    public static string findLastPlaceError   = "4위를 찾을 수 없습니다.";
+    public static string slotSelectErrorMsg      = "카드를 모두 나눠주지 않았습니다.";
+    public static string trickSelectErrorMsg     = "이 트릭을 낼 수 없습니다.";
+    public static string fulfillBirdWishErrorMsg = "참새의 소원을 만족해야 합니다.";
+    public static string findFirstPlaceError     = "1위를 찾을 수 없습니다.";
+    public static string findLastPlaceError      = "4위를 찾을 수 없습니다.";
 
     public static string alertLargeTichuMsg   = "정말 라지 티츄를 선언하시겠습니까?";
     public static string alertSmallTichuMsg   = "정말 스몰 티츄를 선언하시겠습니까?";
@@ -371,6 +372,19 @@ public static class Util
         public Button[]     birdWishButtons;
     }
 
+    public class CardValueComparer : IEqualityComparer<Card>
+    {
+        public bool Equals(Card a, Card b)
+        {
+            if (a.value == b.value) return true;
+            else return false;
+        }
+        public int GetHashCode(Card a)
+        {
+            return a.value.GetHashCode();
+        }
+    }
+
     public enum CardType
     {
         Bean,
@@ -406,7 +420,7 @@ public static class Util
     }
     static public GameObject GetHitObject(Vector3 inputPosition)
     {
-        Ray ray = new Ray(new Vector3(inputPosition.x, inputPosition.y, Util.cameraPosition), Vector3.forward);
+        Ray ray = new Ray(new Vector3(inputPosition.x, inputPosition.y, cameraPosition), Vector3.forward);
         RaycastHit hitInformation;
         Physics.Raycast(ray, out hitInformation);
         if (hitInformation.collider != null) return hitInformation.transform.gameObject;
@@ -415,7 +429,7 @@ public static class Util
 
     static public void SortCard(ref List<Card> cardList)
     {
-        cardList = cardList.OrderBy(x => x.value).ToList();
+        cardList = cardList.OrderBy(x => x.value).ThenBy(x=>x.type).ToList();
     }
 
     static public void ShuffleCards(ref List<Card> cardList)
@@ -650,5 +664,26 @@ public static class Util
     {
         if (numberOfCards < 10) return trickCardInterval;
         else return trickCardInterval * (1f - ((numberOfCards - 9) * 0.07f));
+    }
+    static public Trick IsPlayerHaveToFulfillBirdWish(GamePlayer player)
+    {
+        var evaluateCardList = player.cards.ToList();
+        evaluateCardList.AddRange(player.selectCardList);
+        Trick retTrick = null;
+
+        if (GameManager.instance.isBirdWishActivated) //참새의 소원이 활성화되어 있고,
+        {
+            if (evaluateCardList.Any(x => x.value == GameManager.instance.birdWishValue && x.type != CardType.Phoenix)) //봉황이 아닌 실제 숫자카드를 가지고 있고,
+            {
+                if ((retTrick = GameManager.instance.FindValidBirdWishFulfillTrick(evaluateCardList)) != null) //그 숫자카드를 이용해 낼 수 있는 유효한 트릭이 있다면 true.
+                {
+                    Debug.Log("yes i can");
+                    return retTrick;
+                }
+                else return retTrick;
+            }
+            else return retTrick;
+        }
+        else return retTrick; 
     }
 }
