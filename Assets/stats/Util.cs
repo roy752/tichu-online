@@ -34,6 +34,8 @@ public static class Util
     public static int      smallTichuScore          = 100;
     public static int      largeTichuScore          = 200;
 
+    public static int smallGameOverScore            = 500;
+
 
     public static string prefabPath                 = "Prefab/Cards/";
 
@@ -64,7 +66,8 @@ public static class Util
     public static string[] playerInfoObjectNames     = new string[] { "PlayerInfo0", "PlayerInfo1", "PlayerInfo2", "PlayerInfo3" };
     public static string   playerInfoNameObjectName  = "PlayerName";
     public static string   playerInfoHandObjectName  = "PlayerHand";
-    public static string   playerInfoHandName        = "PlayerHandNumber";
+    public static string   playerInfoHandNumberName  = "PlayerHandNumber";
+    public static string   playerInfoHandIconName    = "PlayerHandIcon";
     public static string   playerInfoTichuObjectName = "PlayerTichu";
     public static string   playerInfoLargeTichuName  = "LargeTichu";
     public static string   playerInfoSmallTichuName  = "SmallTichu";
@@ -96,6 +99,7 @@ public static class Util
     public static string[] dragonSelectionOpponentTextNames   = new string[] { "PreviousOpponentName", "NextOpponentName" };
 
     public static string   roundResultPopupObjectName         = "RoundResultPopup";
+    public static string   roundResultTextName                = "RoundResultText";
     public static string[] roundResultTeamObjectNames         = new string[] { "Team0", "Team1" };
     public static string   roundResultTeamNameTextName        = "TeamName";
     public static string   roundResultTrickScoreTextName      = "TrickScore";
@@ -212,11 +216,17 @@ public static class Util
     
     public static float tick      = 0.1f;
     public static float shakeTick = 1 / 60f;
+    public static float bounceTick = 1 / 60f;
+
+    public static float bounceDelay = 2.5f;
     
-    public static float shakeSpeedX   = 47f;
-    public static float shakeSpeedY   = 26f;
+    public static float shakeSpeedX   = 97f;
+    public static float shakeSpeedY   = 79f;
     public static float shakeAmountX  = 0.05f;
     public static float shakeAmountY  = 0.01f;
+
+    public static float initialbounceSpeed = 0.30f;
+    public static float gravity = -0.78f;
 
 
     public static Color massageColor = new Color(1f, 0, 0, 1f);
@@ -258,6 +268,7 @@ public static class Util
     public struct PlayerInfo
     {
         public GameObject playerInfoObject;
+        public HandBounce handBounce;
         public TMP_Text   name;
         public TMP_Text   hand;
         public GameObject largeTichuIconObject;
@@ -349,6 +360,7 @@ public static class Util
     public struct RoundResult
     {
         public GameObject        roundResultObject;
+        public TMP_Text          roundResultText;
         public RoundResultTeam[] team;
     }
 
@@ -684,5 +696,17 @@ public static class Util
             else return retTrick;
         }
         else return retTrick; 
+    }
+
+    static public string GetWinnerInfo()
+    {
+        if(GameManager.instance.players[0].totalScore>GameManager.instance.players[1].totalScore)
+        {
+            return GameManager.instance.players[0].playerName + "," + GameManager.instance.players[2].playerName + "½Â¸®!";
+        }
+        else
+        {
+            return GameManager.instance.players[1].playerName + "," + GameManager.instance.players[3].playerName + "½Â¸®!";
+        }
     }
 }

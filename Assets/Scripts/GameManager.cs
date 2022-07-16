@@ -47,9 +47,6 @@ public class GameManager : MonoBehaviour
     public bool isRoundEnd;
 
     [HideInInspector]
-    public bool isGameEnd;
-
-    [HideInInspector]
     public Card phoenix;
 
     [HideInInspector]
@@ -77,7 +74,7 @@ public class GameManager : MonoBehaviour
     public int birdWishValue = 0;
 
     [HideInInspector]
-    public static int currentTrickSelectPlayerIdx;
+    public bool isGameOver = false;
 
     private int splitCardIdx;
 
@@ -131,28 +128,31 @@ public class GameManager : MonoBehaviour
     */
     IEnumerator StartPlay()
     {
-        ResetRoundSetting();
-        ShuffleCards(ref cards);
+        while (isGameOver == false)
+        {
+            ResetRoundSetting();
+            ShuffleCards(ref cards);
 
-        SplitCardsToPlayer(Util.numberOfCardsLargeTichuPhase);
+            SplitCardsToPlayer(Util.numberOfCardsLargeTichuPhase);
 
-        StartCoroutine(StartLargeTichuPhaseCoroutine()); //카드 8장 나눠주고 라지 티츄 결정
-        yield return new WaitUntil(() => phaseChangeFlag);
+            StartCoroutine(StartLargeTichuPhaseCoroutine()); //카드 8장 나눠주고 라지 티츄 결정
+            yield return new WaitUntil(() => phaseChangeFlag);
 
-        SplitCardsToPlayer(Util.numberOfCardsSmallTichuPhase);
+            SplitCardsToPlayer(Util.numberOfCardsSmallTichuPhase);
 
-        StartCoroutine(StartExchangeCardPhaseCoroutine()); //카드 6장 마저 나눠주고 교환,스몰티츄 결정
-        yield return new WaitUntil(() => phaseChangeFlag);
+            StartCoroutine(StartExchangeCardPhaseCoroutine()); //카드 6장 마저 나눠주고 교환,스몰티츄 결정
+            yield return new WaitUntil(() => phaseChangeFlag);
 
-        StartCoroutine(StartReceiveCardPhaseCoroutine()); //교환한 카드 확인, 스몰티츄 결정
-        yield return new WaitUntil(() => phaseChangeFlag);
+            StartCoroutine(StartReceiveCardPhaseCoroutine()); //교환한 카드 확인, 스몰티츄 결정
+            yield return new WaitUntil(() => phaseChangeFlag);
 
-        StartCoroutine(StartMainPlayPhaseCoroutine()); //1,2,3,4등이 나뉠 때까지 플레이
-        yield return new WaitUntil(() => phaseChangeFlag);
+            StartCoroutine(StartMainPlayPhaseCoroutine()); //1,2,3,4등이 나뉠 때까지 플레이
+            yield return new WaitUntil(() => phaseChangeFlag);
 
-        StartCoroutine(StartDisplayResultCoroutine());
-        yield return new WaitUntil(() => phaseChangeFlag);
-        //플레이 결과에 따른 점수 계산, 디스플레이. 다시 게임을 시작할지 아니면 게임이 끝났는지 결정.
+            StartCoroutine(StartDisplayResultCoroutine());
+            yield return new WaitUntil(() => phaseChangeFlag);
+            //플레이 결과에 따른 점수 계산, 디스플레이. 다시 게임을 시작할지 아니면 게임이 끝났는지 결정.
+        }
     }
    
     IEnumerator StartDisplayResultCoroutine()
@@ -208,12 +208,16 @@ public class GameManager : MonoBehaviour
             players[idx].roundScore = 0;
         }
 
+        if (players[0].totalScore >= 1000 && players[0].totalScore > players[1].totalScore) isGameOver = true;
+        if (players[1].totalScore >= 1000 && players[0].totalScore < players[1].totalScore) isGameOver = true;
+
         if (trickStack.Count > 0)
         {
             foreach (var card in trickStack.Peek().cards) { card.isFixed = false; card.transform.position = hiddenCardPosition; }
         }
         UIManager.instance.DeactivateRenderCards();
         UIManager.instance.DeactivateBirdWishNotice();
+        UIManager.instance.DeactivateBounceAll();
 
         UIManager.instance.RenderPlayerInfo();
 
