@@ -9,6 +9,7 @@ public class SelectionHandler : MonoBehaviour
     {
         edgeObject = transform.Find(Util.edgeObjectName).gameObject;
         edgeObject.SetActive(false);
+        isSelected = false;
     }
 
     public virtual void ToggleSelection(){ }

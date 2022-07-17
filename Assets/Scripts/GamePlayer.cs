@@ -336,7 +336,7 @@ public class GamePlayer : MonoBehaviour
         }
         else
         {
-            UIManager.instance.Massage(Util.trickSelectErrorMsg);
+            UIManager.instance.Massage(Util.bombSelectErrorMsg);
             return;
         }
     }
@@ -344,9 +344,8 @@ public class GamePlayer : MonoBehaviour
     public void PassTrickCall()
     {
         DisableSelection();
-        if (isFinished == false) previousTrick = Util.trickPassInfo;
-        else previousTrick = null;
         FindNextPlayer(null);
+        if (isFinished == false) previousTrick = Util.trickPassInfo;
         isTrickPassed = true;
         chooseFlag = true;
     }
@@ -355,8 +354,7 @@ public class GamePlayer : MonoBehaviour
     {
         isBombPassed = true;
         PassTrickCall();
-        if (isFinished == false) previousTrick = Util.bombPassInfo;
-        else previousTrick = null;
+
     }
 
     public void PassOrPickRandomTrickCall()
@@ -536,6 +534,7 @@ public class GamePlayer : MonoBehaviour
         {
             if (isFinished == true)
             {
+                previousTrick = null;
                 PassTrickCall();
             }
             else
@@ -543,7 +542,7 @@ public class GamePlayer : MonoBehaviour
                 UIManager.instance.RenderPlayerInfo();
                 UIManager.instance.RenderCards(Util.initialPosition, Util.numberOfCardsForLineInSmallTichuPhase, cards);
 
-                UIManager.instance.ActivateTrickSelection(SelectTrickCall, PassTrickCall, DeclareSmallTichuCall);
+                UIManager.instance.ActivateTrickSelection(SelectTrickCall, PassTrickCall, DeclareSmallTichuCall, SelectBombCall);
                 yield return new WaitUntil(() => chooseFlag == true || UIManager.instance.IsTimeOut());
                 if (chooseFlag == false) PassOrPickRandomTrickCall();
                 UIManager.instance.DeactivateTrickSelection();

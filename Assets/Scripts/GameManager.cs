@@ -65,9 +65,6 @@ public class GameManager : MonoBehaviour
     public int startPlayerIdx;
 
     [HideInInspector]
-    public int passCount = 0;
-
-    [HideInInspector]
     public bool isBirdWishActivated;
 
     [HideInInspector]
@@ -190,11 +187,18 @@ public class GameManager : MonoBehaviour
         {
             GamePlayer firstPlace = FindFirstPlace();
             GamePlayer lastPlace = FindLastPlace();
+            GamePlayer thirdPlace = FindThirdPlace();
             if (firstPlace == null) Debug.LogError(findFirstPlaceError);
             if (lastPlace == null) Debug.LogError(findLastPlaceError);
+            if (thirdPlace == null) Debug.LogError(findThirdPlaceError);
 
             firstPlace.roundScore += lastPlace.roundScore; lastPlace.roundScore = 0; //꼴등은 딴 트릭을 전부 1등에게 준다.
-            TeamScore[1 - lastPlace.playerNumber % 2].trickScore += lastPlace.cards.Sum(x => x.score);
+            TeamScore[1 - lastPlace.playerNumber % 2].trickScore += lastPlace.cards.Sum(x => x.score); //꼴등은 자신의 점수를 전부 상대편에게 준다.
+            while(trickStack.Count>0)
+            {
+                var nowTrick = trickStack.Pop();
+                thirdPlace.roundScore += nowTrick.cards.Sum(x => x.score); //현재 진행중이던 트릭은 전부 3등이 가진다.
+            }
 
             for (int idx = 0; idx < numberOfPlayers; ++idx) TeamScore[idx % numberOfTeam].trickScore += players[idx].roundScore;
         }
@@ -208,8 +212,8 @@ public class GameManager : MonoBehaviour
             players[idx].roundScore = 0;
         }
 
-        if (players[0].totalScore >= 1000 && players[0].totalScore > players[1].totalScore) isGameOver = true;
-        if (players[1].totalScore >= 1000 && players[0].totalScore < players[1].totalScore) isGameOver = true;
+        if (players[0].totalScore >= Util.smallGameOverScore && players[0].totalScore > players[1].totalScore) isGameOver = true;
+        if (players[1].totalScore >= Util.smallGameOverScore && players[0].totalScore < players[1].totalScore) isGameOver = true;
 
         if (trickStack.Count > 0)
         {
@@ -487,6 +491,20 @@ public class GameManager : MonoBehaviour
 
     public void ResetRoundSetting()
     {
+        ResetCardAll();
+        trickStack.Clear();
+        currentPlayer = null;
+        currentCard = null;
+        currentSlot = null;
+
+        isMultipleSelectionEnabled = false;
+        isSelectionEnabled = false;
+        isTrickEnd = false;
+        isRoundEnd = false;
+        isFirstTrick = true;
+                
+
+        splitCardIdx = 0;
         isFirstRound = true;
         isBirdWishActivated = false;
         birdWishValue = 0;
@@ -523,6 +541,12 @@ public class GameManager : MonoBehaviour
         return null;
     }
 
+    public GamePlayer FindThirdPlace()
+    {
+        foreach (var player in players) if (player.ranking == 3) return player;
+        return null;
+    }
+
     public void RestorePhoenixValue()
     {
         phoenix.value = specialCardsValue[2];
@@ -535,7 +559,7 @@ public class GameManager : MonoBehaviour
         //해당 트릭을 만들어준다.
         if (isFirstTrick) //스택이 비어있다면? 즉 지금이 처음 내는 트릭이라면
         {
-            return FindValidSingle(cardList, trickStack.Peek().trickValue, birdWishValue); //참새의 소원에 맞는 싱글을 낸다.
+            return FindValidSingle(cardList, 0, birdWishValue); //참새의 소원에 맞는 싱글을 낸다.
         }
         else //스택이 비어있지 않다면?
         {
@@ -881,5 +905,85 @@ public class GameManager : MonoBehaviour
     {
         if (isTrickValid(nowTrick) && nowTrick.cards.Any(x => x.value == birdWishValue && x.type != CardType.Phoenix)) return true;
         else return false;
+    }
+
+    public void ResetCardAll()
+    {
+        foreach(var card in cards)
+        {
+            card.ResetByToggle();
+        }
+    }
+
+    public bool IsBombExist(GamePlayer player)
+    {
+        List<Card> cards = new List<Card>();
+        cards.AddRange(player.cards);
+        cards.AddRange(player.selectCardList);
+        return (FindAnyFourCardBomb(cards) != null || FindAnyStraightFlushBomb(cards) != null);
+    }
+
+    public Trick FindAnyFourCardBomb(List<Card> cardList)
+    {
+        cardList = cardList.ToList();
+        RestorePhoenixValue();
+        var fourCardList = (from n in cardList where cardList.Count(x => x.value == n.value) == 4 select n).ToList();
+        if (fourCardList.Count == 0) return null;
+        else return MakeTrick(fourCardList.Take(4).ToList());
+    }
+
+    public Trick FindAnyStraightFlushBomb(List<Card> cardList)
+    {
+        cardList = cardList.ToList();
+        var beanCardList = cardList.Where(x => x.type == CardType.Bean).ToList();
+        var flowerCardList = cardList.Where(x => x.type == CardType.Flower).ToList();
+        var shuCardList = cardList.Where(x => x.type == CardType.Shu).ToList();
+        var moonCardList = cardList.Where(x => x.type == CardType.Moon).ToList();
+
+        SortCard(ref beanCardList);
+        SortCard(ref flowerCardList);
+        SortCard(ref shuCardList);
+        SortCard(ref moonCardList);
+
+        while (beanCardList.Count > 0)
+        {
+            var nowList = beanCardList.Take(5).ToList();
+            if (nowList.Count != 5) break;
+            var nowTrick = MakeTrick(nowList);
+            if (nowTrick.trickType == TrickType.StraightFlushBomb)
+                return nowTrick;
+            else beanCardList = beanCardList.Skip(1).ToList();
+        }
+
+        while (flowerCardList.Count > 0)
+        {
+            var nowList = flowerCardList.Take(5).ToList();
+            if (nowList.Count != 5) break;
+            var nowTrick = MakeTrick(nowList);
+            if (nowTrick.trickType == TrickType.StraightFlushBomb)
+                return nowTrick;
+            else flowerCardList = flowerCardList.Skip(1).ToList();
+        }
+
+        while (shuCardList.Count > 0)
+        {
+            var nowList = shuCardList.Take(5).ToList();
+            if (nowList.Count != 5) break;
+            var nowTrick = MakeTrick(nowList);
+            if (nowTrick.trickType == TrickType.StraightFlushBomb)
+                return nowTrick;
+            else shuCardList = shuCardList.Skip(1).ToList();
+        }
+
+        while (moonCardList.Count > 0)
+        {
+            var nowList = moonCardList.Take(5).ToList();
+            if (nowList.Count != 5) break;
+            var nowTrick = MakeTrick(nowList);
+            if (nowTrick.trickType == TrickType.StraightFlushBomb)
+                return nowTrick;
+            else moonCardList = moonCardList.Skip(1).ToList();
+        }
+        return null;
     }
 }

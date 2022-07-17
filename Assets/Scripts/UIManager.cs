@@ -271,7 +271,7 @@ public class UIManager : MonoBehaviour
         HideInfo();
     }
 
-    public void ActivateTrickSelection(UnityAction SelectTrickCall, UnityAction PassTrickCall, UnityAction SmallTichuCall)
+    public void ActivateTrickSelection(UnityAction SelectTrickCall, UnityAction PassTrickCall, UnityAction SmallTichuCall, UnityAction BombCall)
     {
         ShowInfo(Util.selectTrickInfo);
         ActivateTimer(Util.selectTrickDuration);
@@ -287,9 +287,12 @@ public class UIManager : MonoBehaviour
                                                                               )
                                                         );
 
+        selectTrick.bombButton.onClick.AddListener(BombCall);
+
         selectTrick.trickSelectionObject.SetActive(true);
         selectTrick.passButton.gameObject.SetActive(GameManager.instance.isFirstTrick==false&&Util.IsPlayerHaveToFulfillBirdWish(GameManager.instance.currentPlayer)==null);
         selectTrick.smallTichuButton.gameObject.SetActive(GameManager.instance.currentPlayer.canDeclareSmallTichu); //수정 필요. 버튼을 enabled = false 로 하고 흐리게 만들어야함.
+        selectTrick.bombButton.gameObject.SetActive(GameManager.instance.IsBombExist(GameManager.instance.currentPlayer));
     }
 
     public void DeactivateTrickSelection()
@@ -339,6 +342,7 @@ public class UIManager : MonoBehaviour
         //리스너 삽입.
         selectTrick.submitButton.onClick.AddListener(SelectBombCall);
         selectTrick.passButton.onClick.AddListener(PassCall);
+        selectTrick.bombButton.onClick.AddListener(SelectBombCall);
         selectTrick.smallTichuButton.onClick.AddListener(
                                                       () => ActivateAlertPopup(
                                                                                 Util.alertSmallTichuMsg,
@@ -348,6 +352,7 @@ public class UIManager : MonoBehaviour
 
         selectTrick.trickSelectionObject.SetActive(true);
         selectTrick.smallTichuButton.gameObject.SetActive(GameManager.instance.currentPlayer.canDeclareSmallTichu); //수정 필요. 버튼을 enabled = false 로 하고 흐리게 만들어야함.
+        selectTrick.bombButton.gameObject.SetActive(GameManager.instance.IsBombExist(GameManager.instance.currentPlayer));
     }
 
     public void DeactivateBombSelection()
@@ -366,10 +371,15 @@ public class UIManager : MonoBehaviour
 
     public void ActivateRoundResult(Util.Score[] teamScore)
     {
-        ShowInfo(Util.roundResultInfo);
+
+        if(GameManager.instance.isGameOver==true)
+        {
+            roundResult.roundResultText.text = Util.GetWinnerInfo();
+            ShowInfo(Util.gameOverInfo);
+        }
+        else ShowInfo(Util.roundResultInfo);
 
         roundResult.roundResultObject.SetActive(true);
-        if (GameManager.instance.isGameOver == true) roundResult.roundResultText.text = Util.GetWinnerInfo(); 
 
         for(int idx = 0;idx<Util.numberOfTeam; ++idx)
         {
@@ -621,8 +631,8 @@ public class UIManager : MonoBehaviour
             if (nowPlayer.isFinished) nowInfoRenderer.alpha = 0.5f;
             else nowInfoRenderer.alpha = 1f;
 
+            nowPlayerInfo.handBounce.EndBounce();
             if (nowPlayer == GameManager.instance.currentPlayer) nowPlayerInfo.handBounce.StartBounce();
-            else                                                 nowPlayerInfo.handBounce.EndBounce();
         }
     }
 

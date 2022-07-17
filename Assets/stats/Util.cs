@@ -34,7 +34,7 @@ public static class Util
     public static int      smallTichuScore          = 100;
     public static int      largeTichuScore          = 200;
 
-    public static int smallGameOverScore            = 500;
+    public static int      smallGameOverScore       = 500;
 
 
     public static string prefabPath                 = "Prefab/Cards/";
@@ -155,6 +155,7 @@ public static class Util
     public static string selectDragonInfo     = "용으로 딴 트릭을 넘겨줄 사람을 선택하세요.";
     public static string selectDogInfo        = " 에게 차례를 넘깁니다.";
     public static string roundResultInfo      = "라운드가 끝났습니다.";
+    public static string gameOverInfo         = "게임이 끝났습니다.";
     public static string birdwishselectInfo   = "참새의 소원을 정하세요.";
 
     public static string trickPassInfo            = "패스";
@@ -194,9 +195,11 @@ public static class Util
 
     public static string slotSelectErrorMsg      = "카드를 모두 나눠주지 않았습니다.";
     public static string trickSelectErrorMsg     = "이 트릭을 낼 수 없습니다.";
+    public static string bombSelectErrorMsg      = "폭탄이 아닙니다.";
     public static string fulfillBirdWishErrorMsg = "참새의 소원을 만족해야 합니다.";
     public static string findFirstPlaceError     = "1위를 찾을 수 없습니다.";
     public static string findLastPlaceError      = "4위를 찾을 수 없습니다.";
+    public static string findThirdPlaceError     = "3위를 찾을 수 없습니다.";
 
     public static string alertLargeTichuMsg   = "정말 라지 티츄를 선언하시겠습니까?";
     public static string alertSmallTichuMsg   = "정말 스몰 티츄를 선언하시겠습니까?";
@@ -225,8 +228,8 @@ public static class Util
     public static float shakeAmountX  = 0.05f;
     public static float shakeAmountY  = 0.01f;
 
-    public static float initialbounceSpeed = 0.30f;
-    public static float gravity = -0.78f;
+    public static float initialbounceSpeed = 0.50f;
+    public static float gravity = -1.98f;
 
 
     public static Color massageColor = new Color(1f, 0, 0, 1f);
@@ -702,11 +705,11 @@ public static class Util
     {
         if(GameManager.instance.players[0].totalScore>GameManager.instance.players[1].totalScore)
         {
-            return GameManager.instance.players[0].playerName + "," + GameManager.instance.players[2].playerName + "승리!";
+            return GameManager.instance.players[0].playerName + " , " + GameManager.instance.players[2].playerName + " 승리!";
         }
         else
         {
-            return GameManager.instance.players[1].playerName + "," + GameManager.instance.players[3].playerName + "승리!";
+            return GameManager.instance.players[1].playerName + " , " + GameManager.instance.players[3].playerName + " 승리!";
         }
     }
 }
