@@ -84,7 +84,8 @@ public class UIManager : MonoBehaviour
             var nowInfoObject = playerInfo.playerInfo[idx].playerInfoObject.transform;
 
             playerInfo.playerInfo[idx].name                 = nowInfoObject.Find(Util.playerInfoNameObjectName).GetComponent<TMP_Text>();
-            playerInfo.playerInfo[idx].hand                 = nowInfoObject.Find(Util.playerInfoHandObjectName).Find(Util.playerInfoHandName).GetComponent<TMP_Text>();
+            playerInfo.playerInfo[idx].hand                 = nowInfoObject.Find(Util.playerInfoHandObjectName).Find(Util.playerInfoHandNumberName).GetComponent<TMP_Text>();
+            playerInfo.playerInfo[idx].handBounce           = nowInfoObject.Find(Util.playerInfoHandObjectName).Find(Util.playerInfoHandIconName).GetComponent<HandBounce>();
             playerInfo.playerInfo[idx].smallTichuIconObject = nowInfoObject.Find(Util.playerInfoTichuObjectName).Find(Util.playerInfoSmallTichuName).gameObject;
             playerInfo.playerInfo[idx].largeTichuIconObject = nowInfoObject.Find(Util.playerInfoTichuObjectName).Find(Util.playerInfoLargeTichuName).gameObject;
             playerInfo.playerInfo[idx].roundScore           = nowInfoObject.Find(Util.playerInfoScoreObjectName).Find(Util.playerInfoRoundScoreName).GetComponent<TMP_Text>();
@@ -150,6 +151,7 @@ public class UIManager : MonoBehaviour
 
         //라운드 결과 관련(round result) 오브젝트
         roundResult.roundResultObject = uiParent.transform.Find(Util.roundResultPopupObjectName).gameObject;
+        roundResult.roundResultText = roundResult.roundResultObject.transform.Find(Util.roundResultTextName).GetComponent<TMP_Text>();
         roundResult.team = new Util.RoundResultTeam[Util.numberOfTeam];
         for(int idx = 0; idx<Util.numberOfTeam; ++idx)
         {
@@ -269,7 +271,7 @@ public class UIManager : MonoBehaviour
         HideInfo();
     }
 
-    public void ActivateTrickSelection(UnityAction SelectTrickCall, UnityAction PassTrickCall, UnityAction SmallTichuCall)
+    public void ActivateTrickSelection(UnityAction SelectTrickCall, UnityAction PassTrickCall, UnityAction SmallTichuCall, UnityAction BombCall)
     {
         ShowInfo(Util.selectTrickInfo);
         ActivateTimer(Util.selectTrickDuration);
@@ -285,9 +287,12 @@ public class UIManager : MonoBehaviour
                                                                               )
                                                         );
 
+        selectTrick.bombButton.onClick.AddListener(BombCall);
+
         selectTrick.trickSelectionObject.SetActive(true);
         selectTrick.passButton.gameObject.SetActive(GameManager.instance.isFirstTrick==false&&Util.IsPlayerHaveToFulfillBirdWish(GameManager.instance.currentPlayer)==null);
         selectTrick.smallTichuButton.gameObject.SetActive(GameManager.instance.currentPlayer.canDeclareSmallTichu); //수정 필요. 버튼을 enabled = false 로 하고 흐리게 만들어야함.
+        selectTrick.bombButton.gameObject.SetActive(GameManager.instance.IsBombExist(GameManager.instance.currentPlayer));
     }
 
     public void DeactivateTrickSelection()
@@ -337,6 +342,7 @@ public class UIManager : MonoBehaviour
         //리스너 삽입.
         selectTrick.submitButton.onClick.AddListener(SelectBombCall);
         selectTrick.passButton.onClick.AddListener(PassCall);
+        selectTrick.bombButton.onClick.AddListener(SelectBombCall);
         selectTrick.smallTichuButton.onClick.AddListener(
                                                       () => ActivateAlertPopup(
                                                                                 Util.alertSmallTichuMsg,
@@ -346,6 +352,7 @@ public class UIManager : MonoBehaviour
 
         selectTrick.trickSelectionObject.SetActive(true);
         selectTrick.smallTichuButton.gameObject.SetActive(GameManager.instance.currentPlayer.canDeclareSmallTichu); //수정 필요. 버튼을 enabled = false 로 하고 흐리게 만들어야함.
+        selectTrick.bombButton.gameObject.SetActive(GameManager.instance.IsBombExist(GameManager.instance.currentPlayer));
     }
 
     public void DeactivateBombSelection()
@@ -364,10 +371,15 @@ public class UIManager : MonoBehaviour
 
     public void ActivateRoundResult(Util.Score[] teamScore)
     {
-        ShowInfo(Util.roundResultInfo);
+
+        if(GameManager.instance.isGameOver==true)
+        {
+            roundResult.roundResultText.text = Util.GetWinnerInfo();
+            ShowInfo(Util.gameOverInfo);
+        }
+        else ShowInfo(Util.roundResultInfo);
 
         roundResult.roundResultObject.SetActive(true);
-
 
         for(int idx = 0;idx<Util.numberOfTeam; ++idx)
         {
@@ -601,11 +613,10 @@ public class UIManager : MonoBehaviour
 
     public void RenderPlayerInfo()
     {
-        for(int idx = GameManager.instance.currentPlayer.playerNumber; idx <GameManager.instance.currentPlayer.playerNumber + Util.numberOfPlayers; ++idx)
+        for(int idx = 0; idx < Util.numberOfPlayers; ++idx)
         {
-            var nowPlayerIdx         = idx % Util.numberOfPlayers;
-            var nowPlayer            = GameManager.instance.players[nowPlayerIdx];
-            var nowPlayerInfo        = playerInfo.playerInfo[idx - GameManager.instance.currentPlayer.playerNumber];
+            var nowPlayer            = GameManager.instance.players[idx];
+            var nowPlayerInfo        = playerInfo.playerInfo[idx];
 
             nowPlayerInfo.name.text       = nowPlayer.playerName;
             nowPlayerInfo.hand.text       = nowPlayer.cards.Count.ToString();
@@ -619,6 +630,9 @@ public class UIManager : MonoBehaviour
 
             if (nowPlayer.isFinished) nowInfoRenderer.alpha = 0.5f;
             else nowInfoRenderer.alpha = 1f;
+
+            nowPlayerInfo.handBounce.EndBounce();
+            if (nowPlayer == GameManager.instance.currentPlayer) nowPlayerInfo.handBounce.StartBounce();
         }
     }
 
@@ -684,6 +698,14 @@ public class UIManager : MonoBehaviour
         {
             card.isFixed = false;
             card.transform.position = Util.hiddenCardPosition;
+        }
+    }
+
+    public void DeactivateBounceAll()
+    {
+        foreach(var info in playerInfo.playerInfo)
+        {
+            info.handBounce.EndBounce();
         }
     }
 }

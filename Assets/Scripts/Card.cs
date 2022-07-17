@@ -46,4 +46,8 @@ public class Card : SelectionHandler
             UIManager.instance.RenderCards(Util.initialPosition, Util.numberOfCardsForLineInSmallTichuPhase, GameManager.instance.currentPlayer.cards);
         }
     }
+    public void ResetByToggle()
+    {
+        if (isSelected) ToggleBase();
+    }
 }
