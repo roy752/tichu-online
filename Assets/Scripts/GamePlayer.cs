@@ -4,6 +4,9 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.Events;
 using System.Linq;
+using Unity.MLAgents;
+using Unity.MLAgents.Actuators;
+using Unity.MLAgents.Policies;
 
 public class GamePlayer : MonoBehaviour
 {
@@ -30,11 +33,19 @@ public class GamePlayer : MonoBehaviour
 
     public string previousTrick = null;
 
+    public Util.PlayerType playerType;
+
     public TichuAgent agent = null;
 
     private void Awake()
     {
         agent = GetComponent<TichuAgent>();
+        if (agent == null) playerType = Util.PlayerType.Player;
+        else
+        {
+            if (GetComponent<BehaviorParameters>().BehaviorType == BehaviorType.HeuristicOnly) playerType = Util.PlayerType.Heuristic;
+            else                                                                               playerType = Util.PlayerType.Inference;
+        }
     }
 
     /// <summary>
@@ -130,11 +141,9 @@ public class GamePlayer : MonoBehaviour
             startIdx++;
             for (int i = 0; i < Util.numberOfPlayers; ++i)
             {
-                if (GameManager.instance.players[startIdx % Util.numberOfPlayers] != GameManager.instance.currentPlayer &&
-                    GameManager.instance.players[startIdx % Util.numberOfPlayers].isFinished == false) break;
+                if (GameManager.instance.players[startIdx % Util.numberOfPlayers].isFinished == false) break;
                 ++startIdx;
             }
-            GameManager.instance.trickFinishFlag = true;
         }
         GameManager.instance.startPlayerIdx = startIdx;
     }
@@ -291,7 +300,6 @@ public class GamePlayer : MonoBehaviour
                 ClearSelection();
                 canDeclareSmallTichu = false;
                 CalculateHandRunOut();
-                FindNextPlayer(nowTrick);
                 ProgressIfDog(nowTrick);
                 ProgressIfBird(nowTrick);
                 CalculateIsRoundEnd();
@@ -317,7 +325,6 @@ public class GamePlayer : MonoBehaviour
                 canDeclareSmallTichu = false;
 
                 CalculateHandRunOut();
-                FindNextPlayer(nowTrick);
                 ProgressIfDog(nowTrick);
                 ProgressIfBird(nowTrick);
                 CalculateIsRoundEnd();
@@ -339,6 +346,7 @@ public class GamePlayer : MonoBehaviour
 
         if(nowTrick.trickType==Util.TrickType.FourCardBomb || nowTrick.trickType==Util.TrickType.StraightFlushBomb)
         {
+            isBombPassed = false;
             SelectTrickCall();
         }
         else
@@ -351,7 +359,6 @@ public class GamePlayer : MonoBehaviour
     public void PassTrickCall()
     {
         DisableSelection();
-        FindNextPlayer(null);
         if (isFinished == false) previousTrick = Util.trickPassInfo;
         isTrickPassed = true;
         chooseFlag = true;
@@ -359,9 +366,9 @@ public class GamePlayer : MonoBehaviour
 
     public void PassBombCall()
     {
+        DisableSelection();
         isBombPassed = true;
-        PassTrickCall();
-
+        chooseFlag = true;
     }
 
     public void PassOrPickRandomTrickCall()
@@ -494,84 +501,140 @@ public class GamePlayer : MonoBehaviour
     {
         GameManager.instance.isSelectionEnabled = true;
 
+        //폭탄은 나부터.
         chooseFlag = false;
 
         coroutineFinishFlag = false;
-        if (GameManager.instance.IsBombAllPassed())
+
+        if(GameManager.instance.IsBombPhase()) //폭탄 페이즈
         {
-
-            UIManager.instance.RenderPlayerInfo();
-            UIManager.instance.RenderCards(Util.initialPosition, Util.numberOfCardsForLineInSmallTichuPhase, cards);
-
-            GameManager.instance.isSelectionEnabled = false;
-            StartCoroutine(GetTrickScore());
-            yield return new WaitUntil(() => getTrickScoreFlag);
-            GameManager.instance.trickFinishFlag = true;
-            GameManager.instance.startPlayerIdx = playerNumber;
-            if(isFinished==true) FindNextPlayer(null);
-
-            if (dragonChooseFlag)
+            if(GameManager.instance.IsTrickAllPassed()) //폭탄 페이즈인데 모두 패스를 한 상태라면
             {
-                UIManager.instance.ShowInfo(Util.GetTrickTakeInfo(GameManager.instance.players[dragonChoosePlayerIdx % Util.numberOfPlayers].playerName));
-                dragonChooseFlag = false;
-            }
-            else UIManager.instance.ShowInfo(Util.GetTrickTakeInfo(playerName));
-            
-            UIManager.instance.Wait(Util.trickTakeDuration);
-            yield return new WaitUntil(()=>UIManager.instance.IsWaitFinished());
-        }
-        else if(GameManager.instance.IsTrickAllPassed())
-        {
-            if (isFinished == true)
-            {
-                PassBombCall();
-            }
-            else
-            {
-                UIManager.instance.RenderPlayerInfo();
-                UIManager.instance.RenderCards(Util.initialPosition, Util.numberOfCardsForLineInSmallTichuPhase, cards);
-
-                UIManager.instance.ActivateBombSelection(SelectBombCall, PassBombCall, DeclareSmallTichuCall);
-                yield return new WaitUntil(() => chooseFlag == true || UIManager.instance.IsTimeOut());
-                if (chooseFlag == false) PassBombCall();
-                UIManager.instance.DeactivateBombSelection();
-            }
-        }
-        else
-        {
-            if (isFinished == true)
-            {
-                previousTrick = null;
-                PassTrickCall();
-            }
-            else
-            {
-                UIManager.instance.RenderPlayerInfo();
-                UIManager.instance.RenderCards(Util.initialPosition, Util.numberOfCardsForLineInSmallTichuPhase, cards);
-
-                UIManager.instance.ActivateTrickSelection(SelectTrickCall, PassTrickCall, DeclareSmallTichuCall, SelectBombCall);
-                yield return new WaitUntil(() => chooseFlag == true || UIManager.instance.IsTimeOut());
-                if (chooseFlag == false) PassOrPickRandomTrickCall();
-                UIManager.instance.DeactivateTrickSelection();
-
-                if (isDogTrick)
+                if(GameManager.instance.IsBombAllPassed()) //폭탄 페이즈이고 모두 패스를 한 상태에서 폭탄 확인까지 다 끝났다면
                 {
-                    GameManager.instance.isSelectionEnabled = false;
-                    isDogTrick = false;
-                    UIManager.instance.ShowInfo(GameManager.instance.players[GameManager.instance.startPlayerIdx % Util.numberOfPlayers].playerName + Util.selectDogInfo);
-                    UIManager.instance.Wait(Util.selectDogDuration);
-                    yield return new WaitUntil(() => UIManager.instance.IsWaitFinished());
-                    StartCoroutine(GetTrickScore());
-                    yield return new WaitUntil(() => getTrickScoreFlag);
+                    Debug.LogError("불가능한 경우");
                 }
-                if(isBirdTrick) //새를 낸 경우
+                else //모두 패스를 한 폭탄 페이즈에서 폭탄 확인이 다 끝나지 않았다면
                 {
-                    chooseFlag = false;
-                    GameManager.instance.isSelectionEnabled = false; //카드 선택을 disable 하고
-                    isBirdTrick = false;
-                    UIManager.instance.ActivateBirdWishSelection(BirdWishChooseCall);
+                    Debug.Log("폭탄, 모두 패스, 일부 폭탄 패스");
+                    if (isFinished == true)
+                    {
+                        PassBombCall();
+                        FindNextPlayer(null);
+                    }
+                    else
+                    {
+                        UIManager.instance.RenderPlayerInfo();
+                        UIManager.instance.RenderCards(Util.initialPosition, Util.numberOfCardsForLineInSmallTichuPhase, cards);
+
+                        UIManager.instance.ActivateBombSelection(SelectBombCall, PassBombCall, DeclareSmallTichuCall);
+                        yield return new WaitUntil(() => chooseFlag == true || UIManager.instance.IsTimeOut());
+                        if (chooseFlag == false) PassBombCall();
+                        UIManager.instance.DeactivateBombSelection();
+                        FindNextPlayer(null);
+                    }
+                }
+            }
+            else //폭탄 페이즈인데 모두 패스를 한 상태는 아니고
+            {
+                if (GameManager.instance.IsBombAllPassed()) //폭탄 확인은 다 끝났다면
+                {//
+                    Debug.Log("폭탄, 일부 패스, 모두 폭탄 패스");
+                    GameManager.instance.DeactivateBombPhase(); //폭탄 페이즈를 해제하고, 폭탄 패스를 모두 초기화.
+                    FindNextPlayer(null); //다음 플레이어를 찾는다.
+                }
+                else //폭탄 확인이 다 끝나지 않았다면
+                {
+                    Debug.Log("폭탄, 일부 패스, 일부 폭탄 패스");
+                    if (isFinished == true)
+                    {
+                        PassBombCall();
+                        FindNextPlayer(null);
+                    }
+                    else
+                    {
+                        UIManager.instance.RenderPlayerInfo();
+                        UIManager.instance.RenderCards(Util.initialPosition, Util.numberOfCardsForLineInSmallTichuPhase, cards);
+
+                        UIManager.instance.ActivateBombSelection(SelectBombCall, PassBombCall, DeclareSmallTichuCall);
+                        yield return new WaitUntil(() => chooseFlag == true || UIManager.instance.IsTimeOut());
+                        if (chooseFlag == false) PassBombCall();
+                        UIManager.instance.DeactivateBombSelection();
+                        FindNextPlayer(null);
+                    }
+                }
+            }
+
+        }
+        else //폭탄 페이즈가 아니다. 카드를 내는 타이밍.
+        {
+            if (GameManager.instance.IsTrickAllPassed())
+            {
+                UIManager.instance.RenderPlayerInfo();
+                UIManager.instance.RenderCards(Util.initialPosition, Util.numberOfCardsForLineInSmallTichuPhase, cards);
+
+                GameManager.instance.isSelectionEnabled = false;
+                StartCoroutine(GetTrickScore());
+                yield return new WaitUntil(() => getTrickScoreFlag);
+                GameManager.instance.trickFinishFlag = true;
+                GameManager.instance.startPlayerIdx = playerNumber;
+                if (isFinished == true) FindNextPlayer(null);
+
+                if (dragonChooseFlag)
+                {
+                    UIManager.instance.ShowInfo(Util.GetTrickTakeInfo(GameManager.instance.players[dragonChoosePlayerIdx % Util.numberOfPlayers].playerName));
+                    dragonChooseFlag = false;
+                }
+                else UIManager.instance.ShowInfo(Util.GetTrickTakeInfo(playerName));
+
+                UIManager.instance.Wait(Util.trickTakeDuration);
+                yield return new WaitUntil(() => UIManager.instance.IsWaitFinished());
+            }
+            else
+            {
+                if (isFinished == true)
+                {
+                    previousTrick = null;
+                    PassTrickCall();
+                    FindNextPlayer(null);
+                }
+                else
+                {
+                    Debug.Log("트릭");
+                    UIManager.instance.RenderPlayerInfo();
+                    UIManager.instance.RenderCards(Util.initialPosition, Util.numberOfCardsForLineInSmallTichuPhase, cards);
+
+                    UIManager.instance.ActivateTrickSelection(SelectTrickCall, PassTrickCall, DeclareSmallTichuCall, SelectBombCall);
                     yield return new WaitUntil(() => chooseFlag == true || UIManager.instance.IsTimeOut());
-                    UIManager.instance.DeactivateBirdWishSelection();
+                    if (chooseFlag == false) PassOrPickRandomTrickCall();
+                    UIManager.instance.DeactivateTrickSelection();
+
+                    if (isDogTrick) //개를 낸 경우
+                    {
+                        FindNextPlayer(GameManager.instance.trickStack.Peek());
+                        GameManager.instance.isSelectionEnabled = false;
+                        isDogTrick = false;
+                        UIManager.instance.ShowInfo(GameManager.instance.players[GameManager.instance.startPlayerIdx % Util.numberOfPlayers].playerName + Util.selectDogInfo);
+                        UIManager.instance.Wait(Util.selectDogDuration);
+                        yield return new WaitUntil(() => UIManager.instance.IsWaitFinished());
+                        StartCoroutine(GetTrickScore()); //스택 비울 용도로.
+                        yield return new WaitUntil(() => getTrickScoreFlag);
+                        GameManager.instance.trickFinishFlag = true;
+                    }
+                    else
+                    {
+                        if (isBirdTrick) //새를 낸 경우
+                        {
+                            chooseFlag = false;
+                            GameManager.instance.isSelectionEnabled = false; //카드 선택을 disable 하고
+                            isBirdTrick = false;
+                            UIManager.instance.ActivateBirdWishSelection(BirdWishChooseCall);
+                            yield return new WaitUntil(() => chooseFlag == true || UIManager.instance.IsTimeOut());
+                            UIManager.instance.DeactivateBirdWishSelection();
+                        }
+                        GameManager.instance.ActivateBombPhase();
+                        //FindNextPlayer(null);
+                    }
                 }
             }
         }

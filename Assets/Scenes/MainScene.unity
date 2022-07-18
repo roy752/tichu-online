@@ -258,6 +258,8 @@ MonoBehaviour:
   canDeclareSmallTichu: 1
   isFinished: 0
   previousTrick: 
+  playerType: 0
+  agent: {fileID: 0}
 --- !u!114 &42275122
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -298,7 +300,7 @@ MonoBehaviour:
     hasUpgradedBrainParametersWithActionSpec: 1
   m_Model: {fileID: 0}
   m_InferenceDevice: 0
-  m_BehaviorType: 0
+  m_BehaviorType: 1
   m_BehaviorName: My Behavior
   TeamId: 0
   m_UseChildSensors: 1
@@ -981,6 +983,8 @@ MonoBehaviour:
   canDeclareSmallTichu: 1
   isFinished: 0
   previousTrick: 
+  playerType: 0
+  agent: {fileID: 0}
 --- !u!114 &132319124
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1021,7 +1025,7 @@ MonoBehaviour:
     hasUpgradedBrainParametersWithActionSpec: 1
   m_Model: {fileID: 0}
   m_InferenceDevice: 0
-  m_BehaviorType: 0
+  m_BehaviorType: 1
   m_BehaviorName: My Behavior
   TeamId: 0
   m_UseChildSensors: 1
@@ -4245,6 +4249,8 @@ MonoBehaviour:
   isBirdWishActivated: 0
   birdWishValue: 0
   isGameOver: 0
+  isBombPhase: 0
+  isAllDone: 0
   trickFinishFlag: 0
 --- !u!1 &418011308
 GameObject:
@@ -11992,6 +11998,8 @@ MonoBehaviour:
   canDeclareSmallTichu: 1
   isFinished: 0
   previousTrick: 
+  playerType: 0
+  agent: {fileID: 0}
 --- !u!114 &1214989477
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -12025,14 +12033,14 @@ MonoBehaviour:
     NumStackedVectorObservations: 1
     m_ActionSpec:
       m_NumContinuousActions: 0
-      BranchSizes: 01000000
-    VectorActionSize: 01000000
+      BranchSizes: 030000000300000003000000
+    VectorActionSize: 030000000300000003000000
     VectorActionDescriptions: []
     VectorActionSpaceType: 0
     hasUpgradedBrainParametersWithActionSpec: 1
   m_Model: {fileID: 0}
   m_InferenceDevice: 0
-  m_BehaviorType: 0
+  m_BehaviorType: 1
   m_BehaviorName: My Behavior
   TeamId: 0
   m_UseChildSensors: 1
@@ -16527,6 +16535,8 @@ MonoBehaviour:
   canDeclareSmallTichu: 1
   isFinished: 0
   previousTrick: 
+  playerType: 0
+  agent: {fileID: 0}
 --- !u!114 &1682067124
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -16560,14 +16570,14 @@ MonoBehaviour:
     NumStackedVectorObservations: 1
     m_ActionSpec:
       m_NumContinuousActions: 0
-      BranchSizes: 01000000
-    VectorActionSize: 01000000
+      BranchSizes: 030000000300000003000000
+    VectorActionSize: 030000000300000003000000
     VectorActionDescriptions: []
     VectorActionSpaceType: 0
     hasUpgradedBrainParametersWithActionSpec: 1
   m_Model: {fileID: 0}
   m_InferenceDevice: 0
-  m_BehaviorType: 0
+  m_BehaviorType: 1
   m_BehaviorName: My Behavior
   TeamId: 0
   m_UseChildSensors: 1

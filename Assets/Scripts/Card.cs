@@ -9,7 +9,7 @@ public class Card : SelectionHandler
     [HideInInspector]
     public int             value;
     [HideInInspector]
-    public Util.CardType type;
+    public Util.CardType   type;
     [HideInInspector]
     public int             id;
     [HideInInspector]

@@ -28,6 +28,8 @@ public class TichuAgent : Agent
 
     public override void WriteDiscreteActionMask(IDiscreteActionMask actionMask)
     {
+        Debug.Log("¸¶½ºÅ·");
+        actionMask.SetActionEnabled(2, 1, false);
     }
 
     public override void Heuristic(in ActionBuffers actionsOut)

@@ -427,6 +427,13 @@ public static class Util
         StraightFlushBomb
     }
 
+    public enum PlayerType
+    {
+        Player,
+        Heuristic,
+        Inference
+    }
+
     static public int Next(RNGCryptoServiceProvider random)
     {
         byte[] randomInt = new byte[4];
