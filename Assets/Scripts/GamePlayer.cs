@@ -30,6 +30,13 @@ public class GamePlayer : MonoBehaviour
 
     public string previousTrick = null;
 
+    public TichuAgent agent = null;
+
+    private void Awake()
+    {
+        agent = GetComponent<TichuAgent>();
+    }
+
     /// <summary>
     /// 트릭이 끝날때마다 리셋할 변수들.
     /// </summary>

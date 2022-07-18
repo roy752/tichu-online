@@ -195,7 +195,7 @@ public class UIManager : MonoBehaviour
 
         largeTichu.declareButton.onClick.AddListener(() => ActivateAlertPopup(Util.alertLargeTichuMsg, DeclareCall)); // 람다식, 델리게이트 알아볼 것.
         largeTichu.skipButton.onClick.AddListener(SkipCall);
-        
+
         // btn.onClick.AddListener(() => { Function(param); OtherFunction(param); }); //이런 코드도 동작함.
         // largeTichu.declareButton.onClick.AddListener(delegate{ ActivateAlertPopup(Global.alertLargeTichuMsg, DeclareCall); }); //이런 코드도 동작함.
     }
