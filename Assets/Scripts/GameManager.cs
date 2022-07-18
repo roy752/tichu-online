@@ -73,6 +73,12 @@ public class GameManager : MonoBehaviour
     [HideInInspector]
     public bool isGameOver = false;
 
+    [HideInInspector]
+    public bool isBombPhase;
+
+    [HideInInspector]
+    public bool isAllDone;
+
     private int splitCardIdx;
 
     [HideInInspector]
@@ -129,7 +135,7 @@ public class GameManager : MonoBehaviour
         {
             ResetRoundSetting();
             ShuffleCards(ref cards);
-
+            /*
             SplitCardsToPlayer(Util.numberOfCardsLargeTichuPhase);
 
             StartCoroutine(StartLargeTichuPhaseCoroutine()); //카드 8장 나눠주고 라지 티츄 결정
@@ -142,6 +148,9 @@ public class GameManager : MonoBehaviour
 
             StartCoroutine(StartReceiveCardPhaseCoroutine()); //교환한 카드 확인, 스몰티츄 결정
             yield return new WaitUntil(() => phaseChangeFlag);
+            */
+            SplitCardsToPlayer(Util.numberOfCardsForLineInPlayPhase); //  디버그용
+            foreach (var player in players) SortCard(ref player.cards); //디버그용
 
             StartCoroutine(StartMainPlayPhaseCoroutine()); //1,2,3,4등이 나뉠 때까지 플레이
             yield return new WaitUntil(() => phaseChangeFlag);
@@ -483,6 +492,8 @@ public class GameManager : MonoBehaviour
 
     public void ResetTrickSetting()
     {
+        isAllDone = false;
+        isBombPhase = false;
         trickFinishFlag = false;
         isFirstTrick = true;
         foreach (var player in players) player.ResetPerTrick();
@@ -985,5 +996,28 @@ public class GameManager : MonoBehaviour
             else moonCardList = moonCardList.Skip(1).ToList();
         }
         return null;
+    }
+    public void DeactivateBombPhase()
+    {
+        foreach(var player in players)
+        {
+            player.isBombPassed = false;
+        }
+        isBombPhase = false;
+    }
+
+    public void ActivateBombPhase()
+    {
+        isBombPhase = true;
+    }
+
+    public bool IsBombPhase()
+    {
+        return isBombPhase;
+    }
+
+    public bool IsAllDone()
+    {
+        return isAllDone;
     }
 }

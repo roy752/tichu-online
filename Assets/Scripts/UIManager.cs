@@ -195,7 +195,8 @@ public class UIManager : MonoBehaviour
 
         largeTichu.declareButton.onClick.AddListener(() => ActivateAlertPopup(Util.alertLargeTichuMsg, DeclareCall)); // 람다식, 델리게이트 알아볼 것.
         largeTichu.skipButton.onClick.AddListener(SkipCall);
-        
+
+        //if (GameManager.instance.currentPlayer.agent != null) GameManager.instance.currentPlayer.agent.RequestDecision();
         // btn.onClick.AddListener(() => { Function(param); OtherFunction(param); }); //이런 코드도 동작함.
         // largeTichu.declareButton.onClick.AddListener(delegate{ ActivateAlertPopup(Global.alertLargeTichuMsg, DeclareCall); }); //이런 코드도 동작함.
     }
@@ -351,6 +352,7 @@ public class UIManager : MonoBehaviour
                                                         );
 
         selectTrick.trickSelectionObject.SetActive(true);
+        selectTrick.passButton.gameObject.SetActive(true);
         selectTrick.smallTichuButton.gameObject.SetActive(GameManager.instance.currentPlayer.canDeclareSmallTichu); //수정 필요. 버튼을 enabled = false 로 하고 흐리게 만들어야함.
         selectTrick.bombButton.gameObject.SetActive(GameManager.instance.IsBombExist(GameManager.instance.currentPlayer));
     }

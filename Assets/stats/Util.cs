@@ -229,7 +229,7 @@ public static class Util
     public static float shakeAmountY  = 0.01f;
 
     public static float initialbounceSpeed = 0.50f;
-    public static float gravity = -1.98f;
+    public static float gravity = -2.98f;
 
 
     public static Color massageColor = new Color(1f, 0, 0, 1f);
@@ -425,6 +425,13 @@ public static class Util
         Straight,
         FourCardBomb,
         StraightFlushBomb
+    }
+
+    public enum PlayerType
+    {
+        Player,
+        Heuristic,
+        Inference
     }
 
     static public int Next(RNGCryptoServiceProvider random)
