@@ -485,7 +485,7 @@ public class GamePlayer : MonoBehaviour
         coroutineFinishFlag = false;
 
 
-        if(playerType == Util.PlayerType.Inference)
+        if(playerType == Util.PlayerType.Inference||playerType == Util.PlayerType.Heuristic)
         {
             GameManager.instance.currentPhase = Util.PhaseType.LargeTichuSelectionPhase;
             agent.RequestDecision();
@@ -511,7 +511,7 @@ public class GamePlayer : MonoBehaviour
 
         coroutineFinishFlag = false;
 
-        if (playerType == Util.PlayerType.Inference && canDeclareSmallTichu)
+        if ((playerType == Util.PlayerType.Inference || playerType == Util.PlayerType.Heuristic) && canDeclareSmallTichu)
         {
             GameManager.instance.currentPhase = Util.PhaseType.SmallTichuSelectionPhase;
             agent.RequestDecision();
@@ -527,7 +527,7 @@ public class GamePlayer : MonoBehaviour
         
         coroutineFinishFlag = false;
 
-        if (playerType == Util.PlayerType.Inference)
+        if (playerType == Util.PlayerType.Inference || playerType == Util.PlayerType.Heuristic)
         {
             GameManager.instance.currentPhase = Util.PhaseType.ExchangeSelection1Phase;
             agent.RequestDecision();
@@ -604,7 +604,7 @@ public class GamePlayer : MonoBehaviour
                 {
                     UIManager.instance.RenderPlayerInfo();
 
-                    if (playerType == Util.PlayerType.Inference)
+                    if (playerType == Util.PlayerType.Inference || playerType == Util.PlayerType.Heuristic)
                     {
                         if (hasBomb)
                         {
@@ -671,7 +671,7 @@ public class GamePlayer : MonoBehaviour
 
                     UIManager.instance.RenderPlayerInfo();
 
-                    if (playerType == Util.PlayerType.Inference)
+                    if (playerType == Util.PlayerType.Inference || playerType == Util.PlayerType.Heuristic)
                     {
                         if (GameManager.instance.isFirstTrick) GameManager.instance.currentPhase = Util.PhaseType.FirstTrickSelectionPhase;
                         else GameManager.instance.currentPhase = Util.PhaseType.TrickSelectionPhase;
@@ -711,7 +711,7 @@ public class GamePlayer : MonoBehaviour
                             chooseFlag = false;
                             isBirdTrick = false;
 
-                            if (playerType == Util.PlayerType.Inference)
+                            if (playerType == Util.PlayerType.Inference || playerType == Util.PlayerType.Heuristic)
                             {
                                 GameManager.instance.currentPhase = Util.PhaseType.BirdWishSelectionPhase;
                                 agent.RequestDecision();

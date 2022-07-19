@@ -237,6 +237,15 @@ public static class Util
     public static float gravity = -2.98f;
 
 
+    public static int phoenixSingleTrickOffset = 15;
+    public static int dragonTrickOffset = 29;
+    public static int dogTrickOffset = 30;
+    public static int pairTrickOffset = 31;
+    public static int tripleTrickOffset = 44;
+    public static int fullHouseTrickOffset = 57;
+    public static int[] straightTrickOffset = new int[] { 213, 223, 232, 240, 247, 253, 258, 262, 265, 267 };
+
+
     public static Color massageColor = new Color(1f, 0, 0, 1f);
 
     public struct LargeTichu
@@ -601,7 +610,7 @@ public static class Util
         nowTrick.trickValue = value;
         return nowTrick;
     }
-    static bool IsStraight(List<Card> cardList)
+    static public bool IsStraight(List<Card> cardList)
     {
         int val = cardList[0].value;
         bool flag = true;
@@ -739,5 +748,10 @@ public static class Util
         {
             return GameManager.instance.players[1].playerName + " , " + GameManager.instance.players[3].playerName + " ½Â¸®!";
         }
+    }
+
+    static public int GetStraightOffset(int length)
+    {
+        return straightTrickOffset[length - 5];
     }
 }

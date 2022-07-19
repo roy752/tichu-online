@@ -254,10 +254,12 @@ MonoBehaviour:
   smallTichuFlag: 0
   isTrickPassed: 0
   isBombPassed: 0
+  isTrickSelected: 0
   ranking: 0
   canDeclareSmallTichu: 1
   isFinished: 0
   previousTrick: 
+  hasBomb: 0
   playerType: 0
   agent: {fileID: 0}
 --- !u!114 &42275122
@@ -276,6 +278,8 @@ MonoBehaviour:
     maxStep: 0
   hasUpgradedFromAgentParameters: 1
   MaxStep: 0
+  isActionEnd: 0
+  player: {fileID: 0}
 --- !u!114 &42275123
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -979,10 +983,12 @@ MonoBehaviour:
   smallTichuFlag: 0
   isTrickPassed: 0
   isBombPassed: 0
+  isTrickSelected: 0
   ranking: 0
   canDeclareSmallTichu: 1
   isFinished: 0
   previousTrick: 
+  hasBomb: 0
   playerType: 0
   agent: {fileID: 0}
 --- !u!114 &132319124
@@ -1001,6 +1007,8 @@ MonoBehaviour:
     maxStep: 0
   hasUpgradedFromAgentParameters: 1
   MaxStep: 0
+  isActionEnd: 0
+  player: {fileID: 0}
 --- !u!114 &132319125
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4226,6 +4234,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   cards: []
+  cardMarking: 0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
   cardsObjectPool: []
   players:
   - {fileID: 0}
@@ -4251,6 +4260,8 @@ MonoBehaviour:
   isGameOver: 0
   isBombPhase: 0
   isAllDone: 0
+  currentTrickPlayerIdx: 0
+  currentPhase: 0
   trickFinishFlag: 0
 --- !u!1 &418011308
 GameObject:
@@ -11994,10 +12005,12 @@ MonoBehaviour:
   smallTichuFlag: 0
   isTrickPassed: 0
   isBombPassed: 0
+  isTrickSelected: 0
   ranking: 0
   canDeclareSmallTichu: 1
   isFinished: 0
   previousTrick: 
+  hasBomb: 0
   playerType: 0
   agent: {fileID: 0}
 --- !u!114 &1214989477
@@ -12016,6 +12029,8 @@ MonoBehaviour:
     maxStep: 0
   hasUpgradedFromAgentParameters: 1
   MaxStep: 0
+  isActionEnd: 0
+  player: {fileID: 0}
 --- !u!114 &1214989478
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -16531,10 +16546,12 @@ MonoBehaviour:
   smallTichuFlag: 0
   isTrickPassed: 0
   isBombPassed: 0
+  isTrickSelected: 0
   ranking: 0
   canDeclareSmallTichu: 1
   isFinished: 0
   previousTrick: 
+  hasBomb: 0
   playerType: 0
   agent: {fileID: 0}
 --- !u!114 &1682067124
@@ -16553,6 +16570,8 @@ MonoBehaviour:
     maxStep: 0
   hasUpgradedFromAgentParameters: 1
   MaxStep: 0
+  isActionEnd: 0
+  player: {fileID: 0}
 --- !u!114 &1682067125
 MonoBehaviour:
   m_ObjectHideFlags: 0
