@@ -192,6 +192,7 @@ public class GamePlayer : MonoBehaviour
                 GameManager.instance.currentPhase = Util.PhaseType.DragonSelectionPhase;
                 agent.RequestDecision();
                 yield return new WaitUntil(() => agent.isActionEnd);
+                agent.isActionEnd = false;
             }
             var trickTaker = GameManager.instance.players[dragonChoosePlayerIdx % Util.numberOfPlayers];
             foreach (var trick in GameManager.instance.trickStack)
@@ -489,6 +490,7 @@ public class GamePlayer : MonoBehaviour
             GameManager.instance.currentPhase = Util.PhaseType.LargeTichuSelectionPhase;
             agent.RequestDecision();
             yield return new WaitUntil(() => agent.isActionEnd);
+            agent.isActionEnd = false;
         }
         else
         {
@@ -514,6 +516,7 @@ public class GamePlayer : MonoBehaviour
             GameManager.instance.currentPhase = Util.PhaseType.SmallTichuSelectionPhase;
             agent.RequestDecision();
             yield return new WaitUntil(() => agent.isActionEnd);
+            agent.isActionEnd = false;
         }
         coroutineFinishFlag = true;
     }
@@ -526,9 +529,18 @@ public class GamePlayer : MonoBehaviour
 
         if (playerType == Util.PlayerType.Inference)
         {
-            GameManager.instance.currentPhase = Util.PhaseType.ExchangeSelectionPhase;
+            GameManager.instance.currentPhase = Util.PhaseType.ExchangeSelection1Phase;
             agent.RequestDecision();
             yield return new WaitUntil(() => agent.isActionEnd);
+            agent.isActionEnd = false;
+            GameManager.instance.currentPhase = Util.PhaseType.ExchangeSelection2Phase;
+            agent.RequestDecision();
+            yield return new WaitUntil(() => agent.isActionEnd);
+            agent.isActionEnd = false;
+            GameManager.instance.currentPhase = Util.PhaseType.ExchangeSelection3Phase;
+            agent.RequestDecision();
+            yield return new WaitUntil(() => agent.isActionEnd);
+            agent.isActionEnd = false;
         }
         else
         {
@@ -576,93 +588,47 @@ public class GamePlayer : MonoBehaviour
 
         if(GameManager.instance.IsBombPhase()) //폭탄 페이즈
         {
-            if(GameManager.instance.IsTrickAllPassed()) //폭탄 페이즈인데 모두 패스를 한 상태라면
+            if (GameManager.instance.IsBombAllPassed()) //폭탄 확인은 다 끝났다면
+            {//
+                GameManager.instance.DeactivateBombPhase(); //폭탄 페이즈를 해제하고, 폭탄 패스를 모두 초기화.
+                FindNextPlayer(null); //다음 플레이어를 찾는다.
+            }
+            else //폭탄 확인이 다 끝나지 않았다면
             {
-                if(GameManager.instance.IsBombAllPassed()) //폭탄 페이즈이고 모두 패스를 한 상태에서 폭탄 확인까지 다 끝났다면
+                if (isFinished == true)
                 {
-                    Debug.LogError("불가능한 경우");
+                    PassBombCall();
+                    FindNextPlayer(null);
                 }
-                else //모두 패스를 한 폭탄 페이즈에서 폭탄 확인이 다 끝나지 않았다면
+                else
                 {
-                    if (isFinished == true)
-                    {
-                        PassBombCall();
-                        FindNextPlayer(null);
-                    }
-                    else
-                    {
-                        UIManager.instance.RenderPlayerInfo();
+                    UIManager.instance.RenderPlayerInfo();
 
-                        if (playerType == Util.PlayerType.Inference)
+                    if (playerType == Util.PlayerType.Inference)
+                    {
+                        if (hasBomb)
                         {
-                            if (hasBomb)
-                            {
-                                GameManager.instance.currentPhase = Util.PhaseType.BombSelectionPhase;
-                                agent.RequestAction(); //여기서 SelectBombCall() 같은 메소드를 호출해야한다.
-                                yield return new WaitUntil(() => agent.isActionEnd);
-                            }
-                            else
-                            {
-                                PassBombCall();
-                            }
+                            GameManager.instance.currentPhase = Util.PhaseType.BombSelectionPhase;
+                            agent.RequestAction(); //여기서 SelectBombCall() 같은 메소드를 호출해야한다.
+                            yield return new WaitUntil(() => agent.isActionEnd);
+                            agent.isActionEnd = false;
                         }
                         else
                         {
-                            UIManager.instance.RenderCards(Util.initialPosition, Util.numberOfCardsForLineInSmallTichuPhase, cards);
-                            UIManager.instance.ActivateBombSelection(SelectBombCall, PassBombCall, DeclareSmallTichuCall);
-                            yield return new WaitUntil(() => chooseFlag == true || UIManager.instance.IsTimeOut());
-                            if (chooseFlag == false) PassBombCall();
-                            UIManager.instance.DeactivateBombSelection();
+                            PassBombCall();
                         }
-                        FindNextPlayer(null);
-                        
-                    }
-                }
-            }
-            else //폭탄 페이즈인데 모두 패스를 한 상태는 아니고
-            {
-                if (GameManager.instance.IsBombAllPassed()) //폭탄 확인은 다 끝났다면
-                {//
-                    GameManager.instance.DeactivateBombPhase(); //폭탄 페이즈를 해제하고, 폭탄 패스를 모두 초기화.
-                    FindNextPlayer(null); //다음 플레이어를 찾는다.
-                }
-                else //폭탄 확인이 다 끝나지 않았다면
-                {
-                    if (isFinished == true)
-                    {
-                        PassBombCall();
-                        FindNextPlayer(null);
                     }
                     else
                     {
-                        UIManager.instance.RenderPlayerInfo();
-
-                        if (playerType == Util.PlayerType.Inference)
-                        {
-                            if (hasBomb)
-                            {
-                                GameManager.instance.currentPhase = Util.PhaseType.BombSelectionPhase;
-                                agent.RequestAction(); //여기서 SelectBombCall() 같은 메소드를 호출해야한다.
-                                yield return new WaitUntil(() => agent.isActionEnd);
-                            }
-                            else
-                            {
-                                PassBombCall();
-                            }
-                        }
-                        else
-                        {
-                            UIManager.instance.RenderCards(Util.initialPosition, Util.numberOfCardsForLineInSmallTichuPhase, cards);
-                            UIManager.instance.ActivateBombSelection(SelectBombCall, PassBombCall, DeclareSmallTichuCall);
-                            yield return new WaitUntil(() => chooseFlag == true || UIManager.instance.IsTimeOut());
-                            if (chooseFlag == false) PassBombCall();
-                            UIManager.instance.DeactivateBombSelection();
-                        }
-                        FindNextPlayer(null);
+                        UIManager.instance.RenderCards(Util.initialPosition, Util.numberOfCardsForLineInSmallTichuPhase, cards);
+                        UIManager.instance.ActivateBombSelection(SelectBombCall, PassBombCall, DeclareSmallTichuCall);
+                        yield return new WaitUntil(() => chooseFlag == true || UIManager.instance.IsTimeOut());
+                        if (chooseFlag == false) PassBombCall();
+                        UIManager.instance.DeactivateBombSelection();
                     }
+                    FindNextPlayer(null);
                 }
             }
-
         }
         else //폭탄 페이즈가 아니다. 카드를 내는 타이밍.
         {
@@ -712,6 +678,7 @@ public class GamePlayer : MonoBehaviour
 
                         agent.RequestAction(); //여기서 SelectTrickCall() 같은 메소드를 호출해야한다.
                         yield return new WaitUntil(() => agent.isActionEnd);
+                        agent.isActionEnd = false;
                     }
                     else
                     {
@@ -749,6 +716,7 @@ public class GamePlayer : MonoBehaviour
                                 GameManager.instance.currentPhase = Util.PhaseType.BirdWishSelectionPhase;
                                 agent.RequestDecision();
                                 yield return new WaitUntil(() => agent.isActionEnd);
+                                agent.isActionEnd = false;
                             }
                             else
                             {

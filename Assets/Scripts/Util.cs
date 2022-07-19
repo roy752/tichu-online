@@ -19,6 +19,7 @@ public static class Util
     public static int numberOfTeam                  = 2;
     public static int numberOfCards                 = 56;
     public static int numberOfBirdWish              = 15;
+    public static int numberOfTrickType             = 383;
 
     public static int numberOfCardsForLineInLargeTichuPhase = 4;
     public static int numberOfCardsForLineInSmallTichuPhase = 5;
@@ -442,7 +443,9 @@ public static class Util
     public enum PhaseType
     {
         LargeTichuSelectionPhase,
-        ExchangeSelectionPhase,
+        ExchangeSelection1Phase,
+        ExchangeSelection2Phase,
+        ExchangeSelection3Phase,
         SmallTichuSelectionPhase,
         FirstTrickSelectionPhase,
         TrickSelectionPhase,

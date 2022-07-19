@@ -30,7 +30,7 @@ public class TichuAgent : Agent
 
     public override void CollectObservations(VectorSensor sensor)
     {
-        //현재 어떤 상태인가? 1 of 8.
+        //현재 어떤 상태인가? 1 of 10.
         sensor.AddOneHotObservation((int)GameManager.instance.currentPhase, (int)Util.PhaseType.NumberOfPhase);
 
         // 현재 패스했는가 안했는가? each of 4.
@@ -119,7 +119,87 @@ public class TichuAgent : Agent
 
     public override void WriteDiscreteActionMask(IDiscreteActionMask actionMask)
     {
-        Debug.Log("마스킹");
-        actionMask.SetActionEnabled(2, 1, false);
+        // 액션을 일단은 모두 prohibit.
+        //
+        // 1. 라지 티츄, 사이즈 3 (라지 티츄 패스, 라지 티츄 선언, 선택 없음)
+        // 2. 스몰 티츄, 사이즈 3 (스몰 티츄 패스, 스몰 티츄 선언, 선택 없음)
+        // 3. 나눠줄 카드, 사이즈 57. (카드 선택, 선택 없음)
+        // 4. 선택할 트릭, 사이즈 384. (트릭 선택, 선택 없음) 
+        // 5. 소원 선택, 사이즈 16. (소원 선택, 선택 없음)
+        // 6. 용 트릭 전달 선택, 사이즈 3. (전달 선택, 선택 없음)
+        
+        // 1.
+        int actionIdx = 0;
+        for (int idx = 0; idx < 2; ++idx) actionMask.SetActionEnabled(actionIdx, idx, false); //라지 티츄 액션 
+
+        // 2.
+        actionIdx++;
+        for (int idx = 0; idx < 2; ++idx) actionMask.SetActionEnabled(actionIdx, idx, false); //스몰 티츄 액션
+
+        // 3.
+        actionIdx++;
+        for (int idx = 0; idx < Util.numberOfCards; ++idx) actionMask.SetActionEnabled(actionIdx, idx, false); //카드 나눠주는 액션
+
+        // 4.
+        actionIdx++;
+        for (int idx = 0; idx < Util.numberOfTrickType; ++idx) actionMask.SetActionEnabled(actionIdx, idx, false); //트릭 선택 액션
+
+        // 5.
+        actionIdx++;
+        for (int idx = 0; idx < Util.numberOfBirdWish; ++idx) actionMask.SetActionEnabled(actionIdx, idx, false); //참새의 소원 선택 액션
+
+        // 6.
+        actionIdx++;
+        for (int idx = 0; idx < 2; ++idx) actionMask.SetActionEnabled(actionIdx, actionIdx, false); //용 트릭 전달 선택 액션 
+
+
+        switch (GameManager.instance.currentPhase)
+        {
+            case Util.PhaseType.LargeTichuSelectionPhase:
+                actionIdx = 0;
+                actionMask.SetActionEnabled(actionIdx, 0, true); //라지 티츄 패스 활성화
+                actionMask.SetActionEnabled(actionIdx, 1, true); //라지 티츄 선택 활성화
+                actionMask.SetActionEnabled(actionIdx, 2, false);
+                break;
+            
+            case Util.PhaseType.SmallTichuSelectionPhase: //스몰 티츄 선택 페이즈의 RequestDecision 은 canDeclareSmallTichu 가 true 임이 보장됨.
+                actionIdx = 1;
+                actionMask.SetActionEnabled(actionIdx, 0, true); // 스몰 티츄 패스 활성화
+                actionMask.SetActionEnabled(actionIdx, 1, true); // 스몰 티츄 선택 활성화
+                actionMask.SetActionEnabled(actionIdx, 2, false);
+                break;
+            
+            case Util.PhaseType.ExchangeSelection1Phase:
+            case Util.PhaseType.ExchangeSelection2Phase:
+            case Util.PhaseType.ExchangeSelection3Phase: // 다음 3개는 phase 의 관측으로 구분된다.
+                actionIdx = 2;
+                foreach (var card in player.cards) actionMask.SetActionEnabled(actionIdx, card.id, true);
+                actionMask.SetActionEnabled(actionIdx, Util.numberOfCards, false); // 56은 선택 없음. 이를 비활성화.
+                break;
+            
+            case Util.PhaseType.FirstTrickSelectionPhase:
+            case Util.PhaseType.TrickSelectionPhase:
+            case Util.PhaseType.BombSelectionPhase:
+                actionIdx = 3;
+                actionMask.SetActionEnabled(actionIdx, Util.numberOfTrickType, false);
+                // 추가 필요.
+                break;
+
+            case Util.PhaseType.BirdWishSelectionPhase:
+                actionIdx = 4;
+                for(int idx = 0; idx<Util.numberOfBirdWish; ++idx) // 0 부터 14 까지
+                {
+                    if (idx != 1) actionMask.SetActionEnabled(actionIdx, idx, true);
+                }
+                actionMask.SetActionEnabled(actionIdx, Util.numberOfBirdWish, false);
+                break;
+
+            case Util.PhaseType.DragonSelectionPhase:
+                actionIdx = 5;
+                actionMask.SetActionEnabled(actionIdx, 0, true);
+                actionMask.SetActionEnabled(actionIdx, 1, true);
+                actionMask.SetActionEnabled(actionIdx, 2, false);
+                break;
+        }
     }
 }
