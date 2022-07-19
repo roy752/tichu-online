@@ -25,6 +25,7 @@ public class GamePlayer : MonoBehaviour
     public bool smallTichuFlag      = false;
     public bool isTrickPassed       = false;
     public bool isBombPassed        = false;
+    public bool isTrickSelected     = false;
     public int  ranking;
 
     public bool canDeclareSmallTichu = true;
@@ -32,6 +33,8 @@ public class GamePlayer : MonoBehaviour
     public bool isFinished = false;
 
     public string previousTrick = null;
+
+    public bool hasBomb = false;
 
     public Util.PlayerType playerType;
 
@@ -53,8 +56,10 @@ public class GamePlayer : MonoBehaviour
     /// </summary>
     public void ResetPerTrick()
     {
+        
         isBombPassed  = false;
         isTrickPassed = false;
+        isTrickSelected = false;
         previousTrick = null;
         isDogTrick = false;
         dragonChooseFlag = false;
@@ -66,6 +71,7 @@ public class GamePlayer : MonoBehaviour
     /// </summary>
     public void ResetPerRound()
     {
+        hasBomb = false;
         roundScore = 0;
         chooseFlag = false;
         coroutineFinishFlag = false;
@@ -174,11 +180,19 @@ public class GamePlayer : MonoBehaviour
         if (GameManager.instance.IsDragonOnTop())
         {
             // 용으로 딴 트릭은 줄 사람을 정하는 팝업 띄우고,
-            UIManager.instance.ActivateDragonSelection(DragonChooseNextOpponentCall,DragonChoosePreviousOpponentCall);
-            yield return new WaitUntil(() => dragonChooseFlag || UIManager.instance.IsTimeOut());
-            UIManager.instance.DeactivateDragonSelection();
-            if (dragonChooseFlag == false) RandomDragonChooseCall();
-
+            if (playerType == Util.PlayerType.Player)
+            {
+                UIManager.instance.ActivateDragonSelection(DragonChooseNextOpponentCall, DragonChoosePreviousOpponentCall);
+                yield return new WaitUntil(() => dragonChooseFlag || UIManager.instance.IsTimeOut());
+                UIManager.instance.DeactivateDragonSelection();
+                if (dragonChooseFlag == false) RandomDragonChooseCall();
+            }
+            else
+            {
+                GameManager.instance.currentPhase = Util.PhaseType.DragonSelectionPhase;
+                agent.RequestDecision();
+                yield return new WaitUntil(() => agent.isActionEnd);
+            }
             var trickTaker = GameManager.instance.players[dragonChoosePlayerIdx % Util.numberOfPlayers];
             foreach (var trick in GameManager.instance.trickStack)
             {
@@ -275,7 +289,6 @@ public class GamePlayer : MonoBehaviour
 
     public void ReceiveCardCall()
     {
-        chooseFlag = true;
         for (int idx = 0; idx < slot.Length; ++idx)// var cardSlot in slot)
         {
             AddCard(slot[idx].card);
@@ -283,6 +296,8 @@ public class GamePlayer : MonoBehaviour
             slot[idx].card = null;
         }
         Util.SortCard(ref cards);
+        hasBomb = GameManager.instance.IsBombExist(this);
+        chooseFlag = true;
         //UIManager.instance.RenderCards(Global.initialPosition, Global.numberOfCardsForLineInSmallTichuPhase, cards);
         //버퍼에 있는 카드를 AddCard() 하고, isFixed 풀고, 정렬하고, 렌더.
     }
@@ -296,7 +311,9 @@ public class GamePlayer : MonoBehaviour
             {
                 previousTrick = Util.GetTrickInfo(nowTrick);
                 UIManager.instance.RenderTrickCard(selectCardList);
+                nowTrick.playerIdx = playerNumber;
                 GameManager.instance.trickStack.Push(nowTrick); // 수정 필요.
+                GameManager.instance.AddCardMarking(selectCardList);
                 ClearSelection();
                 canDeclareSmallTichu = false;
                 CalculateHandRunOut();
@@ -304,8 +321,12 @@ public class GamePlayer : MonoBehaviour
                 ProgressIfBird(nowTrick);
                 CalculateIsRoundEnd();
                 isTrickPassed = false;
+                isTrickSelected = true;
                 //UIManager.instance.RenderCards(Global.initialPosition, Global.numberOfCardsForLineInSmallTichuPhase, cards);
                 UIManager.instance.DeactivateBirdWishNotice(); // 이 부분 추가.
+
+                hasBomb = GameManager.instance.IsBombExist(this);
+                
                 chooseFlag = true;
             }
             else
@@ -320,6 +341,8 @@ public class GamePlayer : MonoBehaviour
             {
                 previousTrick = Util.GetTrickInfo(nowTrick);
                 UIManager.instance.RenderTrickCard(selectCardList);
+                nowTrick.playerIdx = playerNumber;
+                GameManager.instance.AddCardMarking(selectCardList);
                 GameManager.instance.trickStack.Push(nowTrick); // 수정 필요.
                 ClearSelection();
                 canDeclareSmallTichu = false;
@@ -329,6 +352,9 @@ public class GamePlayer : MonoBehaviour
                 ProgressIfBird(nowTrick);
                 CalculateIsRoundEnd();
                 isTrickPassed = false;
+                isTrickSelected = true;
+
+                hasBomb = GameManager.instance.IsBombExist(this);
                 //UIManager.instance.RenderCards(Global.initialPosition, Global.numberOfCardsForLineInSmallTichuPhase, cards);
                 chooseFlag = true;
             }
@@ -361,6 +387,7 @@ public class GamePlayer : MonoBehaviour
         DisableSelection();
         if (isFinished == false) previousTrick = Util.trickPassInfo;
         isTrickPassed = true;
+        isTrickSelected = false;
         chooseFlag = true;
     }
 
@@ -427,6 +454,11 @@ public class GamePlayer : MonoBehaviour
         StartCoroutine(ChooseLargeTichuCoroutine());
     }
 
+    public void ChooseSmallTichu() //강화학습 전용 함수
+    {
+        StartCoroutine(ChooseSmallTichuCoroutine());
+    }
+
     public void ExchangeCards()
     {
         Util.SortCard(ref cards);
@@ -448,52 +480,88 @@ public class GamePlayer : MonoBehaviour
     public IEnumerator ChooseLargeTichuCoroutine()
     {
         UIManager.instance.RenderPlayerInfo();
-        UIManager.instance.RenderCards(Util.initialPosition, Util.numberOfCardsForLineInLargeTichuPhase, cards);
-        
-        chooseFlag = false;
         
         coroutineFinishFlag = false;
-        
-        UIManager.instance.ActivateLargeTichu(DeclareLargeTichuCall, SkipLargeTichuCall);
-        yield return new WaitUntil(()=>chooseFlag == true || UIManager.instance.IsTimeOut());
-        if (chooseFlag == false) SkipLargeTichuCall();
-        UIManager.instance.DeactivateLargeTichu();
 
 
+        if(playerType == Util.PlayerType.Inference)
+        {
+            GameManager.instance.currentPhase = Util.PhaseType.LargeTichuSelectionPhase;
+            agent.RequestDecision();
+            yield return new WaitUntil(() => agent.isActionEnd);
+        }
+        else
+        {
+            UIManager.instance.RenderCards(Util.initialPosition, Util.numberOfCardsForLineInLargeTichuPhase, cards);
+            chooseFlag = false;
+            UIManager.instance.ActivateLargeTichu(DeclareLargeTichuCall, SkipLargeTichuCall);
+            yield return new WaitUntil(() => chooseFlag == true || UIManager.instance.IsTimeOut());
+            if (chooseFlag == false) SkipLargeTichuCall();
+            UIManager.instance.DeactivateLargeTichu();
+        }
+
+        coroutineFinishFlag = true;
+    }
+
+    public IEnumerator ChooseSmallTichuCoroutine() //강화학습 전용 코루틴
+    {
+        UIManager.instance.RenderPlayerInfo();
+
+        coroutineFinishFlag = false;
+
+        if (playerType == Util.PlayerType.Inference && canDeclareSmallTichu)
+        {
+            GameManager.instance.currentPhase = Util.PhaseType.SmallTichuSelectionPhase;
+            agent.RequestDecision();
+            yield return new WaitUntil(() => agent.isActionEnd);
+        }
         coroutineFinishFlag = true;
     }
 
     public IEnumerator ExchangeCardsCoroutine()
     {
         UIManager.instance.RenderPlayerInfo();
-        UIManager.instance.RenderCards(Util.initialPosition, Util.numberOfCardsForLineInSmallTichuPhase, cards);
-        
-        chooseFlag = false;
         
         coroutineFinishFlag = false;
 
-        UIManager.instance.ActivateExchangeCardsPopup(ExchangeCardCall, DeclareSmallTichuCall);
-        yield return new WaitUntil(() => chooseFlag == true || UIManager.instance.IsTimeOut());
-        if (chooseFlag == false) RandomExchangeCardCall();
-        UIManager.instance.DeactivateExchangeCardsPopup();
-
+        if (playerType == Util.PlayerType.Inference)
+        {
+            GameManager.instance.currentPhase = Util.PhaseType.ExchangeSelectionPhase;
+            agent.RequestDecision();
+            yield return new WaitUntil(() => agent.isActionEnd);
+        }
+        else
+        {
+            UIManager.instance.RenderCards(Util.initialPosition, Util.numberOfCardsForLineInSmallTichuPhase, cards);
+            chooseFlag = false;
+            UIManager.instance.ActivateExchangeCardsPopup(ExchangeCardCall, DeclareSmallTichuCall);
+            yield return new WaitUntil(() => chooseFlag == true || UIManager.instance.IsTimeOut());
+            if (chooseFlag == false) RandomExchangeCardCall();
+            UIManager.instance.DeactivateExchangeCardsPopup();
+        }
         coroutineFinishFlag = true;
     }
 
     public IEnumerator ReceiveCardCoroutine()
     {
         UIManager.instance.RenderPlayerInfo();
-        UIManager.instance.RenderCards(Util.initialPosition, Util.numberOfCardsForLineInSmallTichuPhase, cards);
         
         chooseFlag = false;
         
         coroutineFinishFlag = false;
 
-        UIManager.instance.ActivateReceiveCardPopup(ReceiveCardCall, DeclareSmallTichuCall);
-        yield return new WaitUntil(() => chooseFlag == true || UIManager.instance.IsTimeOut());
-        if (chooseFlag == false) ReceiveCardCall();
-        UIManager.instance.DeactivateReceiveCardPopup();
-
+        if (playerType == Util.PlayerType.Player)
+        {
+            UIManager.instance.ActivateReceiveCardPopup(ReceiveCardCall, DeclareSmallTichuCall);
+            UIManager.instance.RenderCards(Util.initialPosition, Util.numberOfCardsForLineInSmallTichuPhase, cards);
+            yield return new WaitUntil(() => chooseFlag == true || UIManager.instance.IsTimeOut());
+            if (chooseFlag == false) ReceiveCardCall();
+            UIManager.instance.DeactivateReceiveCardPopup();
+        }
+        else
+        {
+            ReceiveCardCall();
+        }
         coroutineFinishFlag = true;
     }
 
@@ -516,7 +584,6 @@ public class GamePlayer : MonoBehaviour
                 }
                 else //모두 패스를 한 폭탄 페이즈에서 폭탄 확인이 다 끝나지 않았다면
                 {
-                    Debug.Log("폭탄, 모두 패스, 일부 폭탄 패스");
                     if (isFinished == true)
                     {
                         PassBombCall();
@@ -525,13 +592,30 @@ public class GamePlayer : MonoBehaviour
                     else
                     {
                         UIManager.instance.RenderPlayerInfo();
-                        UIManager.instance.RenderCards(Util.initialPosition, Util.numberOfCardsForLineInSmallTichuPhase, cards);
 
-                        UIManager.instance.ActivateBombSelection(SelectBombCall, PassBombCall, DeclareSmallTichuCall);
-                        yield return new WaitUntil(() => chooseFlag == true || UIManager.instance.IsTimeOut());
-                        if (chooseFlag == false) PassBombCall();
-                        UIManager.instance.DeactivateBombSelection();
+                        if (playerType == Util.PlayerType.Inference)
+                        {
+                            if (hasBomb)
+                            {
+                                GameManager.instance.currentPhase = Util.PhaseType.BombSelectionPhase;
+                                agent.RequestAction(); //여기서 SelectBombCall() 같은 메소드를 호출해야한다.
+                                yield return new WaitUntil(() => agent.isActionEnd);
+                            }
+                            else
+                            {
+                                PassBombCall();
+                            }
+                        }
+                        else
+                        {
+                            UIManager.instance.RenderCards(Util.initialPosition, Util.numberOfCardsForLineInSmallTichuPhase, cards);
+                            UIManager.instance.ActivateBombSelection(SelectBombCall, PassBombCall, DeclareSmallTichuCall);
+                            yield return new WaitUntil(() => chooseFlag == true || UIManager.instance.IsTimeOut());
+                            if (chooseFlag == false) PassBombCall();
+                            UIManager.instance.DeactivateBombSelection();
+                        }
                         FindNextPlayer(null);
+                        
                     }
                 }
             }
@@ -539,13 +623,11 @@ public class GamePlayer : MonoBehaviour
             {
                 if (GameManager.instance.IsBombAllPassed()) //폭탄 확인은 다 끝났다면
                 {//
-                    Debug.Log("폭탄, 일부 패스, 모두 폭탄 패스");
                     GameManager.instance.DeactivateBombPhase(); //폭탄 페이즈를 해제하고, 폭탄 패스를 모두 초기화.
                     FindNextPlayer(null); //다음 플레이어를 찾는다.
                 }
                 else //폭탄 확인이 다 끝나지 않았다면
                 {
-                    Debug.Log("폭탄, 일부 패스, 일부 폭탄 패스");
                     if (isFinished == true)
                     {
                         PassBombCall();
@@ -554,12 +636,28 @@ public class GamePlayer : MonoBehaviour
                     else
                     {
                         UIManager.instance.RenderPlayerInfo();
-                        UIManager.instance.RenderCards(Util.initialPosition, Util.numberOfCardsForLineInSmallTichuPhase, cards);
 
-                        UIManager.instance.ActivateBombSelection(SelectBombCall, PassBombCall, DeclareSmallTichuCall);
-                        yield return new WaitUntil(() => chooseFlag == true || UIManager.instance.IsTimeOut());
-                        if (chooseFlag == false) PassBombCall();
-                        UIManager.instance.DeactivateBombSelection();
+                        if (playerType == Util.PlayerType.Inference)
+                        {
+                            if (hasBomb)
+                            {
+                                GameManager.instance.currentPhase = Util.PhaseType.BombSelectionPhase;
+                                agent.RequestAction(); //여기서 SelectBombCall() 같은 메소드를 호출해야한다.
+                                yield return new WaitUntil(() => agent.isActionEnd);
+                            }
+                            else
+                            {
+                                PassBombCall();
+                            }
+                        }
+                        else
+                        {
+                            UIManager.instance.RenderCards(Util.initialPosition, Util.numberOfCardsForLineInSmallTichuPhase, cards);
+                            UIManager.instance.ActivateBombSelection(SelectBombCall, PassBombCall, DeclareSmallTichuCall);
+                            yield return new WaitUntil(() => chooseFlag == true || UIManager.instance.IsTimeOut());
+                            if (chooseFlag == false) PassBombCall();
+                            UIManager.instance.DeactivateBombSelection();
+                        }
                         FindNextPlayer(null);
                     }
                 }
@@ -568,7 +666,7 @@ public class GamePlayer : MonoBehaviour
         }
         else //폭탄 페이즈가 아니다. 카드를 내는 타이밍.
         {
-            if (GameManager.instance.IsTrickAllPassed())
+            if (GameManager.instance.IsTrickAllPassed()) //모두 패스를 했다면 끝. 렌더링 후 다시 내 차례.
             {
                 UIManager.instance.RenderPlayerInfo();
                 UIManager.instance.RenderCards(Util.initialPosition, Util.numberOfCardsForLineInSmallTichuPhase, cards);
@@ -587,8 +685,11 @@ public class GamePlayer : MonoBehaviour
                 }
                 else UIManager.instance.ShowInfo(Util.GetTrickTakeInfo(playerName));
 
-                UIManager.instance.Wait(Util.trickTakeDuration);
-                yield return new WaitUntil(() => UIManager.instance.IsWaitFinished());
+                if (playerType == Util.PlayerType.Player)
+                {
+                    UIManager.instance.Wait(Util.trickTakeDuration);
+                    yield return new WaitUntil(() => UIManager.instance.IsWaitFinished());
+                }
             }
             else
             {
@@ -600,23 +701,38 @@ public class GamePlayer : MonoBehaviour
                 }
                 else
                 {
-                    Debug.Log("트릭");
-                    UIManager.instance.RenderPlayerInfo();
-                    UIManager.instance.RenderCards(Util.initialPosition, Util.numberOfCardsForLineInSmallTichuPhase, cards);
+                    GameManager.instance.currentTrickPlayerIdx = playerNumber;
 
-                    UIManager.instance.ActivateTrickSelection(SelectTrickCall, PassTrickCall, DeclareSmallTichuCall, SelectBombCall);
-                    yield return new WaitUntil(() => chooseFlag == true || UIManager.instance.IsTimeOut());
-                    if (chooseFlag == false) PassOrPickRandomTrickCall();
-                    UIManager.instance.DeactivateTrickSelection();
+                    UIManager.instance.RenderPlayerInfo();
+
+                    if (playerType == Util.PlayerType.Inference)
+                    {
+                        if (GameManager.instance.isFirstTrick) GameManager.instance.currentPhase = Util.PhaseType.FirstTrickSelectionPhase;
+                        else GameManager.instance.currentPhase = Util.PhaseType.TrickSelectionPhase;
+
+                        agent.RequestAction(); //여기서 SelectTrickCall() 같은 메소드를 호출해야한다.
+                        yield return new WaitUntil(() => agent.isActionEnd);
+                    }
+                    else
+                    {
+                        UIManager.instance.RenderCards(Util.initialPosition, Util.numberOfCardsForLineInSmallTichuPhase, cards);
+                        UIManager.instance.ActivateTrickSelection(SelectTrickCall, PassTrickCall, DeclareSmallTichuCall, SelectBombCall);
+                        yield return new WaitUntil(() => chooseFlag == true || UIManager.instance.IsTimeOut());
+                        if (chooseFlag == false) PassOrPickRandomTrickCall();
+                        UIManager.instance.DeactivateTrickSelection();
+                    }
 
                     if (isDogTrick) //개를 낸 경우
                     {
                         FindNextPlayer(GameManager.instance.trickStack.Peek());
                         GameManager.instance.isSelectionEnabled = false;
                         isDogTrick = false;
-                        UIManager.instance.ShowInfo(GameManager.instance.players[GameManager.instance.startPlayerIdx % Util.numberOfPlayers].playerName + Util.selectDogInfo);
-                        UIManager.instance.Wait(Util.selectDogDuration);
-                        yield return new WaitUntil(() => UIManager.instance.IsWaitFinished());
+                        if (playerType == Util.PlayerType.Player) // inference 중에는 필요 없는 부분.
+                        {
+                            UIManager.instance.ShowInfo(GameManager.instance.players[GameManager.instance.startPlayerIdx % Util.numberOfPlayers].playerName + Util.selectDogInfo);
+                            UIManager.instance.Wait(Util.selectDogDuration);
+                            yield return new WaitUntil(() => UIManager.instance.IsWaitFinished());
+                        }
                         StartCoroutine(GetTrickScore()); //스택 비울 용도로.
                         yield return new WaitUntil(() => getTrickScoreFlag);
                         GameManager.instance.trickFinishFlag = true;
@@ -626,14 +742,23 @@ public class GamePlayer : MonoBehaviour
                         if (isBirdTrick) //새를 낸 경우
                         {
                             chooseFlag = false;
-                            GameManager.instance.isSelectionEnabled = false; //카드 선택을 disable 하고
                             isBirdTrick = false;
-                            UIManager.instance.ActivateBirdWishSelection(BirdWishChooseCall);
-                            yield return new WaitUntil(() => chooseFlag == true || UIManager.instance.IsTimeOut());
-                            UIManager.instance.DeactivateBirdWishSelection();
+
+                            if (playerType == Util.PlayerType.Inference)
+                            {
+                                GameManager.instance.currentPhase = Util.PhaseType.BirdWishSelectionPhase;
+                                agent.RequestDecision();
+                                yield return new WaitUntil(() => agent.isActionEnd);
+                            }
+                            else
+                            {
+                                GameManager.instance.isSelectionEnabled = false; //카드 선택을 disable 하고
+                                UIManager.instance.ActivateBirdWishSelection(BirdWishChooseCall);
+                                yield return new WaitUntil(() => chooseFlag == true || UIManager.instance.IsTimeOut());
+                                UIManager.instance.DeactivateBirdWishSelection();
+                            }
                         }
                         GameManager.instance.ActivateBombPhase();
-                        //FindNextPlayer(null);
                     }
                 }
             }

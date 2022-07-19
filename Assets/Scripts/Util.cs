@@ -17,6 +17,8 @@ public static class Util
     public static int numberOfPlayers               = 4;
     public static int numberOfSlots                 = 3;
     public static int numberOfTeam                  = 2;
+    public static int numberOfCards                 = 56;
+    public static int numberOfBirdWish              = 15;
 
     public static int numberOfCardsForLineInLargeTichuPhase = 4;
     public static int numberOfCardsForLineInSmallTichuPhase = 5;
@@ -36,6 +38,8 @@ public static class Util
 
     public static int      smallGameOverScore       = 500;
 
+    public static float    maximumRoundScore        = 100;
+    public static float    maximumTotalScore        = 1000;
 
     public static string prefabPath                 = "Prefab/Cards/";
 
@@ -331,6 +335,7 @@ public static class Util
         public int trickLength;
         public int trickValue;
         public TrickType trickType;
+        public int playerIdx;
 
         public Trick(List<Card> inputCards)
         {
@@ -432,6 +437,19 @@ public static class Util
         Player,
         Heuristic,
         Inference
+    }
+
+    public enum PhaseType
+    {
+        LargeTichuSelectionPhase,
+        ExchangeSelectionPhase,
+        SmallTichuSelectionPhase,
+        FirstTrickSelectionPhase,
+        TrickSelectionPhase,
+        BombSelectionPhase,
+        BirdWishSelectionPhase,
+        DragonSelectionPhase,
+        NumberOfPhase
     }
 
     static public int Next(RNGCryptoServiceProvider random)

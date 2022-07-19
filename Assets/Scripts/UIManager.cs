@@ -293,7 +293,7 @@ public class UIManager : MonoBehaviour
         selectTrick.trickSelectionObject.SetActive(true);
         selectTrick.passButton.gameObject.SetActive(GameManager.instance.isFirstTrick==false&&Util.IsPlayerHaveToFulfillBirdWish(GameManager.instance.currentPlayer)==null);
         selectTrick.smallTichuButton.gameObject.SetActive(GameManager.instance.currentPlayer.canDeclareSmallTichu); //수정 필요. 버튼을 enabled = false 로 하고 흐리게 만들어야함.
-        selectTrick.bombButton.gameObject.SetActive(GameManager.instance.IsBombExist(GameManager.instance.currentPlayer));
+        selectTrick.bombButton.gameObject.SetActive(GameManager.instance.currentPlayer.hasBomb);
     }
 
     public void DeactivateTrickSelection()
@@ -354,7 +354,7 @@ public class UIManager : MonoBehaviour
         selectTrick.trickSelectionObject.SetActive(true);
         selectTrick.passButton.gameObject.SetActive(true);
         selectTrick.smallTichuButton.gameObject.SetActive(GameManager.instance.currentPlayer.canDeclareSmallTichu); //수정 필요. 버튼을 enabled = false 로 하고 흐리게 만들어야함.
-        selectTrick.bombButton.gameObject.SetActive(GameManager.instance.IsBombExist(GameManager.instance.currentPlayer));
+        selectTrick.bombButton.gameObject.SetActive(GameManager.instance.currentPlayer.hasBomb);
     }
 
     public void DeactivateBombSelection()
