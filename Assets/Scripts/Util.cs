@@ -244,7 +244,9 @@ public static class Util
     public static int tripleTrickOffset = 44;
     public static int fullHouseTrickOffset = 57;
     public static int[] straightTrickOffset = new int[] { 213, 223, 232, 240, 247, 253, 258, 262, 265, 267 };
-
+    public static int[] consecutivePairTrickOffset = new int[] { 268, 280, 291, 301, 310, 318 };
+    public static int fourCardTrickOffset = 325;
+    public static int[] straightFlushTrickOffset = new int[] {338,347, 355, 362, 368, 373, 377, 380, 382 };
 
     public static Color massageColor = new Color(1f, 0, 0, 1f);
 
@@ -753,5 +755,85 @@ public static class Util
     static public int GetStraightOffset(int length)
     {
         return straightTrickOffset[length - 5];
+    }
+
+    static public int GetConsecutivePairOffset(int length)
+    {
+        return consecutivePairTrickOffset[length / 2 - 2];
+    }
+
+    static public int GetStraightFlushTrickOffset(int length)
+    {
+        return straightFlushTrickOffset[length - 5];
+    }
+
+    static public int GetRelativePlayerIdx(int targetIndex, int myIndex)
+    {
+        return (targetIndex + numberOfPlayers - myIndex) % numberOfPlayers;
+    }
+
+    static public int GetFullHousePairOffset(int tripleValue, int pairValue)
+    {
+        if (tripleValue > pairValue) return pairValue - 2;
+        else return pairValue - 3;
+    }
+
+    static public int GetFullHousePairValue(int pairCode, int tripleValue)
+    {
+        int tripleCode = tripleValue - 2;
+        if (tripleCode > pairCode) return pairCode + 2;
+        else return pairCode + 3;
+    }
+    static public int GetStraightLength(int straightCode)
+    {
+        int length = 4;
+        foreach(var offset in straightTrickOffset)
+        {
+            if (straightCode < offset) break;
+            ++length;
+        }
+        return length;
+    }
+
+    static public int GetStraightValue(int straightCode)
+    {
+        int length = GetStraightLength(straightCode);
+        int offset = GetStraightOffset(length);
+        return straightCode - offset + length;
+    }
+
+    static public int GetConsecutivePairLength(int consecutivePairCode)
+    {
+        int length = 2;
+        foreach (var offset in consecutivePairTrickOffset)
+        {
+            if (consecutivePairCode < offset) break;
+            length+=2;
+        }
+        return length;
+    }
+    static public int GetConsecutivePairValue(int consecutivePairCode)
+    {
+        int length = GetConsecutivePairLength(consecutivePairCode);
+        int offset = GetConsecutivePairOffset(length);
+        return consecutivePairCode - offset + length / 2 + 1;
+    }
+
+    static public int GetStraightFlushLength(int straightFlushCode)
+    {
+        int length = 4;
+        foreach (var offset in straightFlushTrickOffset)
+        {
+            if (straightFlushCode < offset) break;
+            length++;
+        }
+        return length;
+    }
+
+    static public int GetStraightFlushValue(int straightFlushCode)
+    {
+        int length = GetStraightFlushLength(straightFlushCode);
+        int offset = GetStraightFlushTrickOffset(length);
+        return straightFlushCode - offset + length + 1;
     }
 }

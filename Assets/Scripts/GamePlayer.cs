@@ -332,6 +332,7 @@ public class GamePlayer : MonoBehaviour
             }
             else
             {
+                Debug.LogError("불가능한 상황."); //강화학습용 세팅.
                 UIManager.instance.Massage(Util.fulfillBirdWishErrorMsg);
                 return;
             }
@@ -361,6 +362,7 @@ public class GamePlayer : MonoBehaviour
             }
             else
             {
+                Debug.LogError("불가능한 상황."); //강화학습용 세팅.
                 UIManager.instance.Massage(Util.trickSelectErrorMsg);
                 return;
             }

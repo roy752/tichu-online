@@ -974,6 +974,7 @@ public class GameManager : MonoBehaviour
         cardList = cardList.ToList();
         RestorePhoenixValue();
         var fourCardList = (from n in cardList where cardList.Count(x => x.value == n.value) == 4 select n).ToList();
+        SortCard(ref fourCardList);
         if (fourCardList.Count == 0) return null;
         else return MakeTrick(fourCardList.Take(4).ToList());
     }
