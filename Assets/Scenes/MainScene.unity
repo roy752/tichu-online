@@ -304,8 +304,8 @@ MonoBehaviour:
     hasUpgradedBrainParametersWithActionSpec: 1
   m_Model: {fileID: 0}
   m_InferenceDevice: 0
-  m_BehaviorType: 2
-  m_BehaviorName: My Behavior
+  m_BehaviorType: 0
+  m_BehaviorName: TichuAgent
   TeamId: 0
   m_UseChildSensors: 1
   m_UseChildActuators: 1
@@ -1033,8 +1033,8 @@ MonoBehaviour:
     hasUpgradedBrainParametersWithActionSpec: 1
   m_Model: {fileID: 0}
   m_InferenceDevice: 0
-  m_BehaviorType: 2
-  m_BehaviorName: My Behavior
+  m_BehaviorType: 0
+  m_BehaviorName: TichuAgent
   TeamId: 1
   m_UseChildSensors: 1
   m_UseChildActuators: 1
@@ -4259,7 +4259,6 @@ MonoBehaviour:
   birdWishValue: 0
   isGameOver: 0
   isBombPhase: 0
-  isAllDone: 0
   currentTrickPlayerIdx: 0
   currentPhase: 0
   trickFinishFlag: 0
@@ -12055,8 +12054,8 @@ MonoBehaviour:
     hasUpgradedBrainParametersWithActionSpec: 1
   m_Model: {fileID: 0}
   m_InferenceDevice: 0
-  m_BehaviorType: 2
-  m_BehaviorName: My Behavior
+  m_BehaviorType: 0
+  m_BehaviorName: TichuAgent
   TeamId: 0
   m_UseChildSensors: 1
   m_UseChildActuators: 1
@@ -16596,8 +16595,8 @@ MonoBehaviour:
     hasUpgradedBrainParametersWithActionSpec: 1
   m_Model: {fileID: 0}
   m_InferenceDevice: 0
-  m_BehaviorType: 2
-  m_BehaviorName: My Behavior
+  m_BehaviorType: 0
+  m_BehaviorName: TichuAgent
   TeamId: 1
   m_UseChildSensors: 1
   m_UseChildActuators: 1
