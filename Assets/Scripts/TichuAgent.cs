@@ -99,6 +99,7 @@ public class TichuAgent : Agent
                 nowAction = actions.DiscreteActions[3];
 
                 if (nowAction == 0) Debug.LogError("에러. 첫 트릭에서 패스할 수 없음.");
+                if (nowAction == numberOfTrickType) Debug.LogError("에러. 트릭 선택 없음은 불가능함.");
 
                 var cardList = DecodeNumberToTrick(nowAction);
 
@@ -115,6 +116,8 @@ public class TichuAgent : Agent
                 //0은 패스. 1~382 트릭 선택.
                 nowAction = actions.DiscreteActions[3];
 
+                if (nowAction == numberOfTrickType) Debug.LogError("에러. 트릭 선택 없음은 불가능함.");
+
                 if (nowAction == 0) player.PassTrickCall();
                 else
                 {
@@ -130,8 +133,10 @@ public class TichuAgent : Agent
                 break;
 
             case PhaseType.BombSelectionPhase:
-                //0~382 트릭 선택.
+                //0은 패스. 1~382 트릭 선택.
                 nowAction = actions.DiscreteActions[3];
+
+                if (nowAction == numberOfTrickType) Debug.LogError("에러. 트릭 선택 없음은 불가능함.");
 
                 if (nowAction == 0) player.PassBombCall();
                 else
@@ -335,7 +340,7 @@ public class TichuAgent : Agent
 
         // 6.
         actionIdx++;
-        for (int idx = 0; idx < 2; ++idx) actionMask.SetActionEnabled(actionIdx, actionIdx, false); //용 트릭 전달 선택 액션 
+        for (int idx = 0; idx < 2; ++idx) actionMask.SetActionEnabled(actionIdx, idx, false); //용 트릭 전달 선택 액션 
 
 
         switch (GameManager.instance.currentPhase)

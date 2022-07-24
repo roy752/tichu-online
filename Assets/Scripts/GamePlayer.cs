@@ -43,12 +43,13 @@ public class GamePlayer : MonoBehaviour
     private void Awake()
     {
         agent = GetComponent<TichuAgent>();
-        if (agent == null) playerType = Util.PlayerType.Player;
+        if (agent.enabled == false) playerType = Util.PlayerType.Player;
         else
         {
             if (GetComponent<BehaviorParameters>().BehaviorType == BehaviorType.HeuristicOnly) playerType = Util.PlayerType.Heuristic;
             else                                                                               playerType = Util.PlayerType.Inference;
         }
+        Debug.Log(playerType);
     }
 
     /// <summary>
@@ -332,7 +333,7 @@ public class GamePlayer : MonoBehaviour
             }
             else
             {
-                Debug.LogError("불가능한 상황."); //강화학습용 세팅.
+                Debug.LogError("불가능한 트릭 선택."); //강화학습용 세팅.
                 UIManager.instance.Massage(Util.fulfillBirdWishErrorMsg);
                 return;
             }
@@ -362,7 +363,7 @@ public class GamePlayer : MonoBehaviour
             }
             else
             {
-                Debug.LogError("불가능한 상황."); //강화학습용 세팅.
+                Debug.LogError("불가능한 트릭 선택."); //강화학습용 세팅.
                 UIManager.instance.Massage(Util.trickSelectErrorMsg);
                 return;
             }
@@ -611,7 +612,7 @@ public class GamePlayer : MonoBehaviour
                         if (hasBomb)
                         {
                             GameManager.instance.currentPhase = Util.PhaseType.BombSelectionPhase;
-                            agent.RequestAction(); //여기서 SelectBombCall() 같은 메소드를 호출해야한다.
+                            agent.RequestDecision(); //여기서 SelectBombCall() 같은 메소드를 호출해야한다.
                             yield return new WaitUntil(() => agent.isActionEnd);
                             agent.isActionEnd = false;
                         }
@@ -678,7 +679,7 @@ public class GamePlayer : MonoBehaviour
                         if (GameManager.instance.isFirstTrick) GameManager.instance.currentPhase = Util.PhaseType.FirstTrickSelectionPhase;
                         else GameManager.instance.currentPhase = Util.PhaseType.TrickSelectionPhase;
 
-                        agent.RequestAction(); //여기서 SelectTrickCall() 같은 메소드를 호출해야한다.
+                        agent.RequestDecision(); //여기서 SelectTrickCall() 같은 메소드를 호출해야한다.
                         yield return new WaitUntil(() => agent.isActionEnd);
                         agent.isActionEnd = false;
                     }

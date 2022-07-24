@@ -79,9 +79,6 @@ public class GameManager : MonoBehaviour
     [HideInInspector]
     public bool isBombPhase;
 
-    [HideInInspector]
-    public bool isAllDone;
-
     public int currentTrickPlayerIdx;
     
     [HideInInspector]
@@ -140,37 +137,41 @@ public class GameManager : MonoBehaviour
         players[idx].cards.Add(cards.Find(x => x.id == id));
     }
     */
-    
+
 
     IEnumerator StartPlay()
     {
-        while (true)
+        while(true)
         {
-            ResetRoundSetting();
-            ShuffleCards(ref cards);
-            
-            SplitCardsToPlayer(Util.numberOfCardsLargeTichuPhase);
+            ResetGameSetting();
+            while (isGameOver==false)
+            {
+                ResetRoundSetting();
+                ShuffleCards(ref cards);
 
-            StartCoroutine(StartLargeTichuPhaseCoroutine()); //카드 8장 나눠주고 라지 티츄 결정
-            yield return new WaitUntil(() => phaseChangeFlag);
+                SplitCardsToPlayer(Util.numberOfCardsLargeTichuPhase);
 
-            SplitCardsToPlayer(Util.numberOfCardsSmallTichuPhase);
+                StartCoroutine(StartLargeTichuPhaseCoroutine()); //카드 8장 나눠주고 라지 티츄 결정
+                yield return new WaitUntil(() => phaseChangeFlag);
 
-            StartCoroutine(StartExchangeCardPhaseCoroutine()); //카드 6장 마저 나눠주고 교환,스몰티츄 결정
-            yield return new WaitUntil(() => phaseChangeFlag);
+                SplitCardsToPlayer(Util.numberOfCardsSmallTichuPhase);
 
-            StartCoroutine(StartReceiveCardPhaseCoroutine()); //교환한 카드 확인, 스몰티츄 결정
-            yield return new WaitUntil(() => phaseChangeFlag);
-            
-            //SplitCardsToPlayer(Util.numberOfCardsForLineInPlayPhase); //  디버그용
-            //foreach (var player in players) SortCard(ref player.cards); //디버그용
+                StartCoroutine(StartExchangeCardPhaseCoroutine()); //카드 6장 마저 나눠주고 교환,스몰티츄 결정
+                yield return new WaitUntil(() => phaseChangeFlag);
 
-            StartCoroutine(StartMainPlayPhaseCoroutine()); //1,2,3,4등이 나뉠 때까지 플레이
-            yield return new WaitUntil(() => phaseChangeFlag);
+                StartCoroutine(StartReceiveCardPhaseCoroutine()); //교환한 카드 확인, 스몰티츄 결정
+                yield return new WaitUntil(() => phaseChangeFlag);
 
-            StartCoroutine(StartDisplayResultCoroutine());
-            yield return new WaitUntil(() => phaseChangeFlag);
-            //플레이 결과에 따른 점수 계산, 디스플레이. 다시 게임을 시작할지 아니면 게임이 끝났는지 결정.
+                //SplitCardsToPlayer(Util.numberOfCardsForLineInPlayPhase); //  디버그용
+                //foreach (var player in players) SortCard(ref player.cards); //디버그용
+
+                StartCoroutine(StartMainPlayPhaseCoroutine()); //1,2,3,4등이 나뉠 때까지 플레이
+                yield return new WaitUntil(() => phaseChangeFlag);
+
+                StartCoroutine(StartDisplayResultCoroutine());
+                yield return new WaitUntil(() => phaseChangeFlag);
+                //플레이 결과에 따른 점수 계산, 디스플레이. 다시 게임을 시작할지 아니면 게임이 끝났는지 결정.
+            }
         }
     }
    
@@ -251,6 +252,10 @@ public class GameManager : MonoBehaviour
         UIManager.instance.Wait(roundResultDuration);
         yield return new WaitUntil(() => UIManager.instance.IsWaitFinished());
         UIManager.instance.DeactivateRoundResult();
+
+        AgentManager.instance.Evaluate(TeamScore);
+
+        if (isGameOver) AgentManager.instance.EndGroupEpisode(TeamScore);
 
         phaseChangeFlag = true;
     }
@@ -525,7 +530,6 @@ public class GameManager : MonoBehaviour
 
     public void ResetTrickSetting()
     {
-        isAllDone = false;
         isBombPhase = false;
         trickFinishFlag = false;
         isFirstTrick = true;
@@ -1052,11 +1056,6 @@ public class GameManager : MonoBehaviour
         return isBombPhase;
     }
 
-    public bool IsAllDone()
-    {
-        return isAllDone;
-    }
-
     public void ResetCardMarking()
     {
         for(int idx = 0; idx<Util.numberOfCards; ++idx)
@@ -1071,5 +1070,10 @@ public class GameManager : MonoBehaviour
         {
             cardMarking[card.id] = true;
         }
+    }
+
+    public void ResetGameSetting()
+    {
+        foreach (var player in players) player.totalScore = 0;
     }
 }
