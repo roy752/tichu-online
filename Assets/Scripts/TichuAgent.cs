@@ -584,6 +584,7 @@ public class TichuAgent : Agent
             for(int len = 4; len<=14; len+=2) ReleaseValidConsecutivePair(actionIdx, actionMask, 0, len);
             ReleaseValidFourCardBomb(actionIdx, actionMask, 0);
             ReleaseValidStraightFlushBomb(actionIdx, actionMask, 0, 5);
+            int forDebug = 1;
         }
     }
 
@@ -727,8 +728,8 @@ public class TichuAgent : Agent
                     if (IsStraight(nowList) && nowList.Last().value > topValue) //스트레이트이고 topValue 보다 크다면
                     {
                         actionMask.SetActionEnabled(actionIdx, nowOffset + nowList.Last().value - topLength, true);
-                        cardList = cardList.Skip(1).ToList(); // 맨 앞에 하나 짜른다.
                     }
+                    cardList = cardList.Skip(1).ToList(); // 맨 앞에 하나 짜른다.
                 }
             }
         }
@@ -744,8 +745,8 @@ public class TichuAgent : Agent
                 if(IsStraight(nowList)&&nowList.Last().value>topValue) //스트레이트이고 topValue 보다 크다면
                 {
                     actionMask.SetActionEnabled(actionIdx, nowOffset + nowList.Last().value - topLength, true);
-                    cardList = cardList.Skip(1).ToList(); // 맨 앞에 하나 짜른다.
                 }
+                cardList = cardList.Skip(1).ToList(); // 맨 앞에 하나 짜른다.
             }
         }
     }
@@ -901,6 +902,7 @@ public class TichuAgent : Agent
                 }
                 skipIdx++;
             }
+            ++length;
         }
     }
 
@@ -1230,6 +1232,7 @@ public class TichuAgent : Agent
                 }
                 skipIdx++;
             }
+            ++length;
         }
     }
 
