@@ -688,7 +688,7 @@ public static class Util
                 {
                     case CardType.Bird:    retInfo = birdTrickInfo;   break;
                     case CardType.Dragon:  retInfo = dragonTrickInfo; break;
-                    case CardType.Phoenix: retInfo = valueToStrTable[trick.cards[0].value] + ".5 " + singleTrickInfo; break;
+                    case CardType.Phoenix: retInfo = valueToStrTable[trick.trickValue/2] + ".5 " + singleTrickInfo; break;
                     default:               retInfo = valueToStrTable[trick.trickValue / 2] + " " + singleTrickInfo;   break;
                 }
                 break;

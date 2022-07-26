@@ -255,8 +255,6 @@ public class GameManager : MonoBehaviour
 
         AgentManager.instance.Evaluate(TeamScore);
 
-        if (isGameOver) AgentManager.instance.EndGroupEpisode(TeamScore);
-
         phaseChangeFlag = true;
     }
 
@@ -1074,6 +1072,7 @@ public class GameManager : MonoBehaviour
 
     public void ResetGameSetting()
     {
+        isGameOver = false;
         foreach (var player in players) player.totalScore = 0;
     }
 }

@@ -12,6 +12,9 @@ using static Util;
 public class TichuAgent : Agent 
 {
     public bool isActionEnd = false;
+
+    public int decodeNumberForDebug;
+    
     public GamePlayer player;
     public override void Initialize()
     {
@@ -97,6 +100,7 @@ public class TichuAgent : Agent
             case PhaseType.FirstTrickSelectionPhase:
                 //1~382 트릭 선택.
                 nowAction = actions.DiscreteActions[3];
+                decodeNumberForDebug = nowAction;
 
                 if (nowAction == 0) Debug.LogError("에러. 첫 트릭에서 패스할 수 없음.");
                 if (nowAction == numberOfTrickType) Debug.LogError("에러. 트릭 선택 없음은 불가능함.");
@@ -115,6 +119,7 @@ public class TichuAgent : Agent
             case PhaseType.TrickSelectionPhase:
                 //0은 패스. 1~382 트릭 선택.
                 nowAction = actions.DiscreteActions[3];
+                decodeNumberForDebug = nowAction;
 
                 if (nowAction == numberOfTrickType) Debug.LogError("에러. 트릭 선택 없음은 불가능함.");
 
@@ -135,6 +140,7 @@ public class TichuAgent : Agent
             case PhaseType.BombSelectionPhase:
                 //0은 패스. 1~382 트릭 선택.
                 nowAction = actions.DiscreteActions[3];
+                decodeNumberForDebug = nowAction;
 
                 if (nowAction == numberOfTrickType) Debug.LogError("에러. 트릭 선택 없음은 불가능함.");
 
@@ -573,7 +579,8 @@ public class TichuAgent : Agent
         }
         else
         {
-            actionMask.SetActionEnabled(actionIdx, dogTrickOffset, true); // 참새 안걸리고 첫 트릭이면 개를 낼 수 있음이 보장됨.
+            if(player.cards.Any(x=>x.type == CardType.Dog))
+                actionMask.SetActionEnabled(actionIdx, dogTrickOffset, true); // 참새 안걸리고 첫 트릭이면 개를 낼 수 있음이 보장됨.
 
             // 가능한 싱글, 페어, 트리플, 연속 페어, 스트레이트, 풀하우스, 포카드 폭탄, 스플 폭탄을 release 해준다.
             ReleaseValidSingle(actionIdx, actionMask, 0);
@@ -584,7 +591,6 @@ public class TichuAgent : Agent
             for(int len = 4; len<=14; len+=2) ReleaseValidConsecutivePair(actionIdx, actionMask, 0, len);
             ReleaseValidFourCardBomb(actionIdx, actionMask, 0);
             ReleaseValidStraightFlushBomb(actionIdx, actionMask, 0, 5);
-            int forDebug = 1;
         }
     }
 
@@ -596,8 +602,22 @@ public class TichuAgent : Agent
 
         actionMask.SetActionEnabled(actionIdx, 0, true); // 패스를 할 수 있음이 보장됨.
 
-        ReleaseValidFourCardBomb(actionIdx, actionMask, 0); // topValue 를 0으로 넘겨줘 모든 포카드 폭탄을 release.
-        ReleaseValidStraightFlushBomb(actionIdx, actionMask, 0, 5); // topValue 를 0으로 넘겨주고 길이를 최하인 5로 설정. 가능한 모든 포카드 폭탄을 release. 
+        var nowStack = GameManager.instance.trickStack.Peek();
+
+        if(nowStack.trickType==TrickType.StraightFlushBomb)
+        {
+            ReleaseValidStraightFlushBomb(actionIdx, actionMask, nowStack.trickValue, nowStack.trickLength);
+        }
+        else if(nowStack.trickType == TrickType.FourCardBomb)
+        {
+            ReleaseValidFourCardBomb(actionIdx, actionMask, nowStack.trickValue);
+            ReleaseValidStraightFlushBomb(actionIdx, actionMask, 0, 5); // topValue 를 0으로 넘겨주고 길이를 최하인 5로 설정. 가능한 모든 포카드 폭탄을 release. 
+        }
+        else
+        {
+            ReleaseValidFourCardBomb(actionIdx, actionMask, 0); // topValue 를 0으로 넘겨줘 모든 포카드 폭탄을 release.
+            ReleaseValidStraightFlushBomb(actionIdx, actionMask, 0, 5); // topValue 를 0으로 넘겨주고 길이를 최하인 5로 설정. 가능한 모든 포카드 폭탄을 release. 
+        }
     }
 
     public void ReleaseValidSingle(int actionIdx, IDiscreteActionMask actionMask, int topValue)
@@ -622,7 +642,7 @@ public class TichuAgent : Agent
                     actionMask.SetActionEnabled(actionIdx, phoenixSingleTrickOffset + GameManager.instance.trickStack.Peek().cards[0].value - 1, true);
             }
         }
-        if(player.cards.Any(x=>x.value == specialCardsValue[3])) //용 관련 예외처리. 용의 값은 specialCardsValue[3] = 18. 이걸 가지고 있다면 용 선택 가능하게 세팅.
+        if(player.cards.Any(x=>x.type == CardType.Dragon)) //용 관련 예외처리. 용의 값은 specialCardsValue[3] = 18. 이걸 가지고 있다면 용 선택 가능하게 세팅.
         {
             actionMask.SetActionEnabled(actionIdx, dragonTrickOffset, true);
         }
@@ -1620,7 +1640,9 @@ public class TichuAgent : Agent
                 int restIdx = -1;
                 for(int idx = bottomValue; idx<=topValue; ++idx) if(checkArr[idx]==false) { restIdx = idx; break; }
 
-                if (GameManager.instance.birdWishValue == restIdx) //하나 비었어도 그게 참새의 소원이면 봉황으로 대체 불가능. 스플 깨서 넣는다.
+                if (GameManager.instance.birdWishValue == restIdx&& 
+                    (nowList.Any(x=>x.value == GameManager.instance.birdWishValue||straightFlushCards.Any(y=>y.value == GameManager.instance.birdWishValue)))) 
+                    //하나 비었어도 그게 참새의 소원이고 그걸 가지고 있다면 봉황으로 대체 불가능. 스플 깨서 넣는다.
                 {
 
                     foreach (var card in straightFlushCards)
@@ -1699,14 +1721,14 @@ public class TichuAgent : Agent
             int bottomValue = topValue - length / 2 + 1;
 
             int[] checkArr = new int[15];
-            for (int i = 0; i <= checkArr.Length; ++i) checkArr[i] = 0;
+            for (int i = 0; i < checkArr.Length; ++i) checkArr[i] = 0;
             for (int i = bottomValue; i <= topValue; ++i) checkArr[i] = 2;
 
             for(int i=bottomValue; i<=topValue; ++i)
             {
                 foreach(var card in nowList)
                 {
-                    if(card.value == i)
+                    if(card.value == i&&checkArr[i]>0)
                     {
                         --checkArr[i];
                         ret.Add(card);
@@ -1717,7 +1739,11 @@ public class TichuAgent : Agent
 
             int restCnt = checkArr.Sum();
 
-            if(restCnt == 1 && havePhoenix) // 하나 비는데 봉황이 있다면
+            if(restCnt==0) //만족.
+            {
+
+            }
+            else if(restCnt == 1 && havePhoenix) // 하나 비는데 봉황이 있다면
             {
                 ret.Add(GameManager.instance.phoenix);
                 for(int i = bottomValue; i<=topValue; ++i)
@@ -1737,7 +1763,7 @@ public class TichuAgent : Agent
                     {
                         foreach(var card in straightFlushCards)
                         {
-                            if(card.value == i)
+                            if(card.value == i&&checkArr[i]>0)
                             {
                                 --checkArr[i];
                                 ret.Add(card);
@@ -1748,7 +1774,11 @@ public class TichuAgent : Agent
                 }
 
                 restCnt = checkArr.Sum();
-                if (restCnt == 1 && havePhoenix)
+                if(restCnt == 0)
+                {
+
+                }
+                else if (restCnt == 1 && havePhoenix)
                 {
                     ret.Add(GameManager.instance.phoenix);
                     for (int i = bottomValue; i <= topValue; ++i)
@@ -1806,12 +1836,16 @@ public class TichuAgent : Agent
             {
                 if(checkArr[i]==false)
                 {
-                    foreach(var card in beanCardList)
+                    foreach (var card in beanCardList)
                     {
-                        checkArr[i] = true;
-                        ret.Add(card);
-                        break;
+                        if (card.value == i)
+                        {
+                            checkArr[i] = true;
+                            ret.Add(card);
+                            break;
+                        }
                     }
+                    
                 }
             }
 
@@ -1827,9 +1861,12 @@ public class TichuAgent : Agent
                 {
                     foreach (var card in flowerCardList)
                     {
-                        checkArr[i] = true;
-                        ret.Add(card);
-                        break;
+                        if (card.value == i)
+                        {
+                            checkArr[i] = true;
+                            ret.Add(card);
+                            break;
+                        }
                     }
                 }
             }
@@ -1846,9 +1883,12 @@ public class TichuAgent : Agent
                 {
                     foreach (var card in shuCardList)
                     {
-                        checkArr[i] = true;
-                        ret.Add(card);
-                        break;
+                        if (card.value == i)
+                        {
+                            checkArr[i] = true;
+                            ret.Add(card);
+                            break;
+                        }
                     }
                 }
             }
@@ -1865,10 +1905,12 @@ public class TichuAgent : Agent
                 {
                     foreach (var card in moonCardList)
                     {
-                        checkArr[i] = true;
-                        ret.Add(card);
-                        break;
-                    }
+                        if (card.value == i)
+                        {
+                            checkArr[i] = true;
+                            ret.Add(card);
+                            break;
+                        }                   }
                 }
             }
 

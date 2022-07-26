@@ -307,7 +307,7 @@ public class GamePlayer : MonoBehaviour
     public void SelectTrickCall()
     {
         Util.Trick nowTrick = Util.MakeTrick(selectCardList);
-        if (Util.IsPlayerHaveToFulfillBirdWish(this)!=null)
+        if (GameManager.instance.currentPhase != Util.PhaseType.BombSelectionPhase&&Util.IsPlayerHaveToFulfillBirdWish(this)!=null)
         {
             if(GameManager.instance.IsTrickValidAndFulfillBirdWish(nowTrick))
             {
@@ -333,7 +333,7 @@ public class GamePlayer : MonoBehaviour
             }
             else
             {
-                Debug.LogError("불가능한 트릭 선택."); //강화학습용 세팅.
+                DebugSelection(nowTrick); //강화학습용 세팅.
                 UIManager.instance.Massage(Util.fulfillBirdWishErrorMsg);
                 return;
             }
@@ -363,7 +363,7 @@ public class GamePlayer : MonoBehaviour
             }
             else
             {
-                Debug.LogError("불가능한 트릭 선택."); //강화학습용 세팅.
+                DebugSelection(nowTrick); //강화학습용 세팅.
                 UIManager.instance.Massage(Util.trickSelectErrorMsg);
                 return;
             }
@@ -736,5 +736,41 @@ public class GamePlayer : MonoBehaviour
         }
 
         coroutineFinishFlag = true;
+    }
+
+
+    public void DebugSelection(Util.Trick nowTrick)
+    {
+        Debug.Log("현재 페이즈: " + GameManager.instance.currentPhase);
+        if (GameManager.instance.trickStack.Count > 0)
+        {
+            var nowStack = GameManager.instance.trickStack.Peek();
+
+
+            Debug.Log("현재 스택의 탑 - 타입: " + nowStack.trickType + " 밸류: " + nowStack.trickValue + " 길이: " + nowStack.trickLength);
+            Debug.Log("현재 스택의 카드: ");
+
+            foreach (var card in nowStack.cards) Debug.Log(card);
+        }
+        else Debug.Log("현재 스택은 비어있음.");
+        
+        if (GameManager.instance.isBirdWishActivated)
+        {
+            Debug.Log("현재 참새의 소원 활성화되어있음. 값: " + GameManager.instance.birdWishValue);
+        }
+        else Debug.Log("현재 참새의 소원 비활성화");
+
+        Debug.Log("현재 보유한 카드: ");
+        foreach (var card in cards) Debug.Log(card);
+        foreach (var card in nowTrick.cards) Debug.Log(card);
+
+
+        Debug.Log("현재 받은 Decision: " + agent.decodeNumberForDebug);
+        Debug.Log("현재 선택한 카드 ");
+        foreach (var card in nowTrick.cards) Debug.Log(card);
+
+        Debug.Log("현재 선택 트릭의 - 타입: " + nowTrick.trickType + " 밸류: " + nowTrick.trickValue + " 길이: " + nowTrick.trickLength);
+        
+        Debug.LogError("에러 리스트 종료.");
     }
 }
