@@ -11,6 +11,9 @@ public class GameManager : MonoBehaviour
     public List<Card> cards = new List<Card>();
 
     [HideInInspector]
+    public bool[] cardMarking = new bool[Util.numberOfCards];
+
+    [HideInInspector]
     public List<Card> cardsObjectPool = new List<Card>();
 
     [HideInInspector]
@@ -76,10 +79,15 @@ public class GameManager : MonoBehaviour
     [HideInInspector]
     public bool isBombPhase;
 
+    public int currentTrickPlayerIdx;
+    
     [HideInInspector]
-    public bool isAllDone;
+    public Util.PhaseType currentPhase;
 
     private int splitCardIdx;
+
+
+
 
     [HideInInspector]
     public static GameManager instance;
@@ -129,35 +137,41 @@ public class GameManager : MonoBehaviour
         players[idx].cards.Add(cards.Find(x => x.id == id));
     }
     */
+
+
     IEnumerator StartPlay()
     {
-        while (isGameOver == false)
+        while(true)
         {
-            ResetRoundSetting();
-            ShuffleCards(ref cards);
-            /*
-            SplitCardsToPlayer(Util.numberOfCardsLargeTichuPhase);
+            ResetGameSetting();
+            while (isGameOver==false)
+            {
+                ResetRoundSetting();
+                ShuffleCards(ref cards);
 
-            StartCoroutine(StartLargeTichuPhaseCoroutine()); //카드 8장 나눠주고 라지 티츄 결정
-            yield return new WaitUntil(() => phaseChangeFlag);
+                SplitCardsToPlayer(Util.numberOfCardsLargeTichuPhase);
 
-            SplitCardsToPlayer(Util.numberOfCardsSmallTichuPhase);
+                StartCoroutine(StartLargeTichuPhaseCoroutine()); //카드 8장 나눠주고 라지 티츄 결정
+                yield return new WaitUntil(() => phaseChangeFlag);
 
-            StartCoroutine(StartExchangeCardPhaseCoroutine()); //카드 6장 마저 나눠주고 교환,스몰티츄 결정
-            yield return new WaitUntil(() => phaseChangeFlag);
+                SplitCardsToPlayer(Util.numberOfCardsSmallTichuPhase);
 
-            StartCoroutine(StartReceiveCardPhaseCoroutine()); //교환한 카드 확인, 스몰티츄 결정
-            yield return new WaitUntil(() => phaseChangeFlag);
-            */
-            SplitCardsToPlayer(Util.numberOfCardsForLineInPlayPhase); //  디버그용
-            foreach (var player in players) SortCard(ref player.cards); //디버그용
+                StartCoroutine(StartExchangeCardPhaseCoroutine()); //카드 6장 마저 나눠주고 교환,스몰티츄 결정
+                yield return new WaitUntil(() => phaseChangeFlag);
 
-            StartCoroutine(StartMainPlayPhaseCoroutine()); //1,2,3,4등이 나뉠 때까지 플레이
-            yield return new WaitUntil(() => phaseChangeFlag);
+                StartCoroutine(StartReceiveCardPhaseCoroutine()); //교환한 카드 확인, 스몰티츄 결정
+                yield return new WaitUntil(() => phaseChangeFlag);
 
-            StartCoroutine(StartDisplayResultCoroutine());
-            yield return new WaitUntil(() => phaseChangeFlag);
-            //플레이 결과에 따른 점수 계산, 디스플레이. 다시 게임을 시작할지 아니면 게임이 끝났는지 결정.
+                //SplitCardsToPlayer(Util.numberOfCardsForLineInPlayPhase); //  디버그용
+                //foreach (var player in players) SortCard(ref player.cards); //디버그용
+
+                StartCoroutine(StartMainPlayPhaseCoroutine()); //1,2,3,4등이 나뉠 때까지 플레이
+                yield return new WaitUntil(() => phaseChangeFlag);
+
+                StartCoroutine(StartDisplayResultCoroutine());
+                yield return new WaitUntil(() => phaseChangeFlag);
+                //플레이 결과에 따른 점수 계산, 디스플레이. 다시 게임을 시작할지 아니면 게임이 끝났는지 결정.
+            }
         }
     }
    
@@ -239,6 +253,8 @@ public class GameManager : MonoBehaviour
         yield return new WaitUntil(() => UIManager.instance.IsWaitFinished());
         UIManager.instance.DeactivateRoundResult();
 
+        AgentManager.instance.Evaluate(TeamScore);
+
         phaseChangeFlag = true;
     }
 
@@ -273,8 +289,12 @@ public class GameManager : MonoBehaviour
         while(trickFinishFlag==false)
         {
             currentPlayer = players[startPlayerIdx % numberOfPlayers];
+
+            currentPlayer.ChooseSmallTichu();
+            yield return new WaitUntil(() => currentPlayer.coroutineFinishFlag); //강화학습 전용 스몰티츄 물음.
+
             currentPlayer.SelectTrick();
-            yield return new WaitUntil(() => currentPlayer.coroutineFinishFlag); //폭탄 구현은 어떻게?
+            yield return new WaitUntil(() => currentPlayer.coroutineFinishFlag);
         }
 
         isTrickEnd = true;
@@ -289,6 +309,13 @@ public class GameManager : MonoBehaviour
         {
             currentPlayer = player;
             player.ReceiveCard();
+            yield return new WaitUntil(() => player.coroutineFinishFlag);
+        }
+
+        foreach (var player in players) //강화학습 전용 루프.
+        {
+            currentPlayer = player;
+            player.ChooseSmallTichu();
             yield return new WaitUntil(() => player.coroutineFinishFlag);
         }
 
@@ -312,7 +339,16 @@ public class GameManager : MonoBehaviour
         phaseChangeFlag = false;
 
         isSelectionEnabled = true;
-        foreach(var player in players)
+
+        foreach (var player in players) //강화학습 전용 루프.
+        {
+            currentPlayer = player;
+            SortCard(ref player.cards);
+            player.ChooseSmallTichu();
+            yield return new WaitUntil(() => player.coroutineFinishFlag);
+        }
+
+        foreach (var player in players)
         {
             currentPlayer = player;
             player.ExchangeCards();
@@ -492,7 +528,6 @@ public class GameManager : MonoBehaviour
 
     public void ResetTrickSetting()
     {
-        isAllDone = false;
         isBombPhase = false;
         trickFinishFlag = false;
         isFirstTrick = true;
@@ -503,7 +538,9 @@ public class GameManager : MonoBehaviour
     public void ResetRoundSetting()
     {
         ResetCardAll();
+        ResetCardMarking();
         trickStack.Clear();
+        currentTrickPlayerIdx = -1;
         currentPlayer = null;
         currentCard = null;
         currentSlot = null;
@@ -939,6 +976,7 @@ public class GameManager : MonoBehaviour
         cardList = cardList.ToList();
         RestorePhoenixValue();
         var fourCardList = (from n in cardList where cardList.Count(x => x.value == n.value) == 4 select n).ToList();
+        SortCard(ref fourCardList);
         if (fourCardList.Count == 0) return null;
         else return MakeTrick(fourCardList.Take(4).ToList());
     }
@@ -1016,8 +1054,25 @@ public class GameManager : MonoBehaviour
         return isBombPhase;
     }
 
-    public bool IsAllDone()
+    public void ResetCardMarking()
     {
-        return isAllDone;
+        for(int idx = 0; idx<Util.numberOfCards; ++idx)
+        {
+            cardMarking[idx] = false;
+        }
+    }
+
+    public void AddCardMarking(List<Card> cardList)
+    {
+        foreach(var card in cardList)
+        {
+            cardMarking[card.id] = true;
+        }
+    }
+
+    public void ResetGameSetting()
+    {
+        isGameOver = false;
+        foreach (var player in players) player.totalScore = 0;
     }
 }

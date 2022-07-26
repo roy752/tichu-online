@@ -254,10 +254,12 @@ MonoBehaviour:
   smallTichuFlag: 0
   isTrickPassed: 0
   isBombPassed: 0
+  isTrickSelected: 0
   ranking: 0
   canDeclareSmallTichu: 1
   isFinished: 0
   previousTrick: 
+  hasBomb: 0
   playerType: 0
   agent: {fileID: 0}
 --- !u!114 &42275122
@@ -276,6 +278,9 @@ MonoBehaviour:
     maxStep: 0
   hasUpgradedFromAgentParameters: 1
   MaxStep: 0
+  isActionEnd: 0
+  decodeNumberForDebug: 0
+  player: {fileID: 0}
 --- !u!114 &42275123
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -289,19 +294,19 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_BrainParameters:
-    VectorObservationSize: 1
+    VectorObservationSize: 556
     NumStackedVectorObservations: 1
     m_ActionSpec:
       m_NumContinuousActions: 0
-      BranchSizes: 01000000
-    VectorActionSize: 01000000
+      BranchSizes: 030000000300000039000000800100001000000003000000
+    VectorActionSize: 030000000300000039000000800100001000000003000000
     VectorActionDescriptions: []
     VectorActionSpaceType: 0
     hasUpgradedBrainParametersWithActionSpec: 1
   m_Model: {fileID: 0}
   m_InferenceDevice: 0
-  m_BehaviorType: 1
-  m_BehaviorName: My Behavior
+  m_BehaviorType: 0
+  m_BehaviorName: TichuAgent
   TeamId: 0
   m_UseChildSensors: 1
   m_UseChildActuators: 1
@@ -979,10 +984,12 @@ MonoBehaviour:
   smallTichuFlag: 0
   isTrickPassed: 0
   isBombPassed: 0
+  isTrickSelected: 0
   ranking: 0
   canDeclareSmallTichu: 1
   isFinished: 0
   previousTrick: 
+  hasBomb: 0
   playerType: 0
   agent: {fileID: 0}
 --- !u!114 &132319124
@@ -1001,6 +1008,9 @@ MonoBehaviour:
     maxStep: 0
   hasUpgradedFromAgentParameters: 1
   MaxStep: 0
+  isActionEnd: 0
+  decodeNumberForDebug: 0
+  player: {fileID: 0}
 --- !u!114 &132319125
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1014,20 +1024,20 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_BrainParameters:
-    VectorObservationSize: 1
+    VectorObservationSize: 556
     NumStackedVectorObservations: 1
     m_ActionSpec:
       m_NumContinuousActions: 0
-      BranchSizes: 01000000
-    VectorActionSize: 01000000
+      BranchSizes: 030000000300000039000000800100001000000003000000
+    VectorActionSize: 030000000300000039000000800100001000000003000000
     VectorActionDescriptions: []
     VectorActionSpaceType: 0
     hasUpgradedBrainParametersWithActionSpec: 1
   m_Model: {fileID: 0}
   m_InferenceDevice: 0
-  m_BehaviorType: 1
-  m_BehaviorName: My Behavior
-  TeamId: 0
+  m_BehaviorType: 0
+  m_BehaviorName: TichuAgent
+  TeamId: 1
   m_UseChildSensors: 1
   m_UseChildActuators: 1
   m_DeterministicInference: 0
@@ -4190,6 +4200,7 @@ GameObject:
   m_Component:
   - component: {fileID: 415409403}
   - component: {fileID: 415409404}
+  - component: {fileID: 415409405}
   m_Layer: 0
   m_Name: GameManager
   m_TagString: Untagged
@@ -4226,6 +4237,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   cards: []
+  cardMarking: 0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
   cardsObjectPool: []
   players:
   - {fileID: 0}
@@ -4250,8 +4262,21 @@ MonoBehaviour:
   birdWishValue: 0
   isGameOver: 0
   isBombPhase: 0
-  isAllDone: 0
+  currentTrickPlayerIdx: 0
+  currentPhase: 0
   trickFinishFlag: 0
+--- !u!114 &415409405
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 415409402}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4bcd8bb3dc97c1d47953e79315f36d77, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &418011308
 GameObject:
   m_ObjectHideFlags: 0
@@ -11994,10 +12019,12 @@ MonoBehaviour:
   smallTichuFlag: 0
   isTrickPassed: 0
   isBombPassed: 0
+  isTrickSelected: 0
   ranking: 0
   canDeclareSmallTichu: 1
   isFinished: 0
   previousTrick: 
+  hasBomb: 0
   playerType: 0
   agent: {fileID: 0}
 --- !u!114 &1214989477
@@ -12016,6 +12043,9 @@ MonoBehaviour:
     maxStep: 0
   hasUpgradedFromAgentParameters: 1
   MaxStep: 0
+  isActionEnd: 0
+  decodeNumberForDebug: 0
+  player: {fileID: 0}
 --- !u!114 &1214989478
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -12029,19 +12059,19 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_BrainParameters:
-    VectorObservationSize: 1
+    VectorObservationSize: 556
     NumStackedVectorObservations: 1
     m_ActionSpec:
       m_NumContinuousActions: 0
-      BranchSizes: 030000000300000003000000
-    VectorActionSize: 030000000300000003000000
+      BranchSizes: 030000000300000039000000800100001000000003000000
+    VectorActionSize: 030000000300000039000000800100001000000003000000
     VectorActionDescriptions: []
     VectorActionSpaceType: 0
     hasUpgradedBrainParametersWithActionSpec: 1
   m_Model: {fileID: 0}
   m_InferenceDevice: 0
-  m_BehaviorType: 1
-  m_BehaviorName: My Behavior
+  m_BehaviorType: 0
+  m_BehaviorName: TichuAgent
   TeamId: 0
   m_UseChildSensors: 1
   m_UseChildActuators: 1
@@ -16531,10 +16561,12 @@ MonoBehaviour:
   smallTichuFlag: 0
   isTrickPassed: 0
   isBombPassed: 0
+  isTrickSelected: 0
   ranking: 0
   canDeclareSmallTichu: 1
   isFinished: 0
   previousTrick: 
+  hasBomb: 0
   playerType: 0
   agent: {fileID: 0}
 --- !u!114 &1682067124
@@ -16553,6 +16585,9 @@ MonoBehaviour:
     maxStep: 0
   hasUpgradedFromAgentParameters: 1
   MaxStep: 0
+  isActionEnd: 0
+  decodeNumberForDebug: 0
+  player: {fileID: 0}
 --- !u!114 &1682067125
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -16566,20 +16601,20 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_BrainParameters:
-    VectorObservationSize: 1
+    VectorObservationSize: 556
     NumStackedVectorObservations: 1
     m_ActionSpec:
       m_NumContinuousActions: 0
-      BranchSizes: 030000000300000003000000
-    VectorActionSize: 030000000300000003000000
+      BranchSizes: 030000000300000039000000800100001000000003000000
+    VectorActionSize: 030000000300000039000000800100001000000003000000
     VectorActionDescriptions: []
     VectorActionSpaceType: 0
     hasUpgradedBrainParametersWithActionSpec: 1
   m_Model: {fileID: 0}
   m_InferenceDevice: 0
-  m_BehaviorType: 1
-  m_BehaviorName: My Behavior
-  TeamId: 0
+  m_BehaviorType: 0
+  m_BehaviorName: TichuAgent
+  TeamId: 1
   m_UseChildSensors: 1
   m_UseChildActuators: 1
   m_DeterministicInference: 0

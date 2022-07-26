@@ -17,6 +17,9 @@ public static class Util
     public static int numberOfPlayers               = 4;
     public static int numberOfSlots                 = 3;
     public static int numberOfTeam                  = 2;
+    public static int numberOfCards                 = 56;
+    public static int numberOfBirdWish              = 15;
+    public static int numberOfTrickType             = 383;
 
     public static int numberOfCardsForLineInLargeTichuPhase = 4;
     public static int numberOfCardsForLineInSmallTichuPhase = 5;
@@ -36,6 +39,8 @@ public static class Util
 
     public static int      smallGameOverScore       = 500;
 
+    public static float    maximumRoundScore        = 100;
+    public static float    maximumTotalScore        = 1000;
 
     public static string prefabPath                 = "Prefab/Cards/";
 
@@ -232,6 +237,17 @@ public static class Util
     public static float gravity = -2.98f;
 
 
+    public static int phoenixSingleTrickOffset = 15;
+    public static int dragonTrickOffset = 29;
+    public static int dogTrickOffset = 30;
+    public static int pairTrickOffset = 31;
+    public static int tripleTrickOffset = 44;
+    public static int fullHouseTrickOffset = 57;
+    public static int[] straightTrickOffset = new int[] { 213, 223, 232, 240, 247, 253, 258, 262, 265, 267 };
+    public static int[] consecutivePairTrickOffset = new int[] { 268, 280, 291, 301, 310, 318 };
+    public static int fourCardTrickOffset = 325;
+    public static int[] straightFlushTrickOffset = new int[] {338,347, 355, 362, 368, 373, 377, 380, 382 };
+
     public static Color massageColor = new Color(1f, 0, 0, 1f);
 
     public struct LargeTichu
@@ -331,6 +347,7 @@ public static class Util
         public int trickLength;
         public int trickValue;
         public TrickType trickType;
+        public int playerIdx;
 
         public Trick(List<Card> inputCards)
         {
@@ -432,6 +449,21 @@ public static class Util
         Player,
         Heuristic,
         Inference
+    }
+
+    public enum PhaseType
+    {
+        LargeTichuSelectionPhase,
+        ExchangeSelection1Phase,
+        ExchangeSelection2Phase,
+        ExchangeSelection3Phase,
+        SmallTichuSelectionPhase,
+        FirstTrickSelectionPhase,
+        TrickSelectionPhase,
+        BombSelectionPhase,
+        BirdWishSelectionPhase,
+        DragonSelectionPhase,
+        NumberOfPhase
     }
 
     static public int Next(RNGCryptoServiceProvider random)
@@ -580,7 +612,7 @@ public static class Util
         nowTrick.trickValue = value;
         return nowTrick;
     }
-    static bool IsStraight(List<Card> cardList)
+    static public bool IsStraight(List<Card> cardList)
     {
         int val = cardList[0].value;
         bool flag = true;
@@ -656,7 +688,7 @@ public static class Util
                 {
                     case CardType.Bird:    retInfo = birdTrickInfo;   break;
                     case CardType.Dragon:  retInfo = dragonTrickInfo; break;
-                    case CardType.Phoenix: retInfo = valueToStrTable[trick.cards[0].value] + ".5 " + singleTrickInfo; break;
+                    case CardType.Phoenix: retInfo = valueToStrTable[trick.trickValue/2] + ".5 " + singleTrickInfo; break;
                     default:               retInfo = valueToStrTable[trick.trickValue / 2] + " " + singleTrickInfo;   break;
                 }
                 break;
@@ -718,5 +750,90 @@ public static class Util
         {
             return GameManager.instance.players[1].playerName + " , " + GameManager.instance.players[3].playerName + " ½Â¸®!";
         }
+    }
+
+    static public int GetStraightOffset(int length)
+    {
+        return straightTrickOffset[length - 5];
+    }
+
+    static public int GetConsecutivePairOffset(int length)
+    {
+        return consecutivePairTrickOffset[length / 2 - 2];
+    }
+
+    static public int GetStraightFlushTrickOffset(int length)
+    {
+        return straightFlushTrickOffset[length - 5];
+    }
+
+    static public int GetRelativePlayerIdx(int targetIndex, int myIndex)
+    {
+        return (targetIndex + numberOfPlayers - myIndex) % numberOfPlayers;
+    }
+
+    static public int GetFullHousePairOffset(int tripleValue, int pairValue)
+    {
+        if (tripleValue > pairValue) return pairValue - 2;
+        else return pairValue - 3;
+    }
+
+    static public int GetFullHousePairValue(int pairCode, int tripleValue)
+    {
+        int tripleCode = tripleValue - 2;
+        if (tripleCode > pairCode) return pairCode + 2;
+        else return pairCode + 3;
+    }
+    static public int GetStraightLength(int straightCode)
+    {
+        int length = 4;
+        foreach(var offset in straightTrickOffset)
+        {
+            if (straightCode < offset) break;
+            ++length;
+        }
+        return length;
+    }
+
+    static public int GetStraightValue(int straightCode)
+    {
+        int length = GetStraightLength(straightCode);
+        int offset = GetStraightOffset(length);
+        return straightCode - offset + length;
+    }
+
+    static public int GetConsecutivePairLength(int consecutivePairCode)
+    {
+        int length = 2;
+        foreach (var offset in consecutivePairTrickOffset)
+        {
+            if (consecutivePairCode < offset) break;
+            length+=2;
+        }
+        return length;
+    }
+    static public int GetConsecutivePairValue(int consecutivePairCode)
+    {
+        int length = GetConsecutivePairLength(consecutivePairCode);
+        int offset = GetConsecutivePairOffset(length);
+        return consecutivePairCode - offset + length / 2 + 1;
+    }
+
+    static public int GetStraightFlushLength(int straightFlushCode)
+    {
+        int length = 4;
+        foreach (var offset in straightFlushTrickOffset)
+        {
+            if (straightFlushCode < offset) break;
+            length++;
+        }
+        return length;
+    }
+
+    static public int GetStraightFlushValue(int straightFlushCode)
+    {
+        int length = GetStraightFlushLength(straightFlushCode);
+        int offset = GetStraightFlushTrickOffset(length);
+        return straightFlushCode - offset + length + 1;
     }
 }
