@@ -234,6 +234,9 @@ public static class Util
     public static float agentExchangeCardWaitDuration = 10f;
     public static float agentExchangeCardRandomFactor = 10f;
 
+    public static float agentReceiveCardWaitDuration = 3f;
+    public static float agentReceiveCardRandomFactor = 3f;
+
     public static float tick      = 0.1f;
     public static float shakeTick = 1 / 60f;
     public static float bounceTick = 1 / 60f;

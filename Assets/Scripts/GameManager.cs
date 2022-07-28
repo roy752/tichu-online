@@ -300,27 +300,6 @@ public class GameManager : MonoBehaviour
         isTrickEnd = true;
     }
 
-    IEnumerator StartReceiveCardPhaseCoroutine()
-    {
-        phaseChangeFlag = false;
-
-        isSelectionEnabled = false;
-        foreach(var player in players)
-        {
-            currentPlayer = player;
-            player.ReceiveCard();
-            yield return new WaitUntil(() => player.coroutineFinishFlag);
-        }
-
-        foreach (var player in players) //강화학습 전용 루프.
-        {
-            currentPlayer = player;
-            //player.ChooseSmallTichu();
-            yield return new WaitUntil(() => player.coroutineFinishFlag);
-        }
-
-        phaseChangeFlag = true;
-    }
     IEnumerator StartLargeTichuPhaseCoroutine()
     {
         ResetPhaseFlag();
@@ -342,6 +321,20 @@ public class GameManager : MonoBehaviour
         isSelectionEnabled = true;
 
         foreach (var player in players) player.ExchangeCards();
+        yield return new WaitUntil(() => IsPhaseFinished());
+
+        phaseChangeFlag = true;
+    }
+
+    IEnumerator StartReceiveCardPhaseCoroutine()
+    {
+        ResetPhaseFlag();
+        UIManager.instance.RenderPlayerInfo();
+        phaseChangeFlag = false;
+
+        isSelectionEnabled = false;
+
+        foreach(var player in players) player.ReceiveCard();
         yield return new WaitUntil(() => IsPhaseFinished());
 
         phaseChangeFlag = true;

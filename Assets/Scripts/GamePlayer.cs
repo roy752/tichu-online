@@ -489,8 +489,9 @@ public class GamePlayer : MonoBehaviour
         }
         else
         {
-            UIManager.instance.RenderCards(Util.initialPosition, Util.numberOfCardsForLineInLargeTichuPhase, cards);
             chooseFlag = false;
+            UIManager.instance.RenderCards(Util.initialPosition, Util.numberOfCardsForLineInLargeTichuPhase, cards);
+
             UIManager.instance.ActivateLargeTichu(DeclareLargeTichuCall, SkipLargeTichuCall);
             yield return new WaitUntil(() => chooseFlag == true || UIManager.instance.IsTimeOut());
             if (chooseFlag == false) SkipLargeTichuCall();
@@ -538,8 +539,9 @@ public class GamePlayer : MonoBehaviour
         }
         else
         {
-            UIManager.instance.RenderCards(Util.initialPosition, Util.numberOfCardsForLineInSmallTichuPhase, cards);
             chooseFlag = false;
+            UIManager.instance.RenderCards(Util.initialPosition, Util.numberOfCardsForLineInSmallTichuPhase, cards);
+
             UIManager.instance.ActivateExchangeCardsPopup(ExchangeCardCall, DeclareSmallTichuCall);
             yield return new WaitUntil(() => chooseFlag == true || UIManager.instance.IsTimeOut());
             if (chooseFlag == false) RandomExchangeCardCall();
@@ -554,25 +556,40 @@ public class GamePlayer : MonoBehaviour
 
     public IEnumerator ReceiveCardCoroutine()
     {
-        UIManager.instance.RenderPlayerInfo();
-        
-        chooseFlag = false;
         
         coroutineFinishFlag = false;
 
-        if (playerType == Util.PlayerType.Player)
+        if (playerType != Util.PlayerType.Player)
         {
-            UIManager.instance.ActivateReceiveCardPopup(ReceiveCardCall, DeclareSmallTichuCall);
-            UIManager.instance.RenderCards(Util.initialPosition, Util.numberOfCardsForLineInSmallTichuPhase, cards);
-            yield return new WaitUntil(() => chooseFlag == true || UIManager.instance.IsTimeOut());
-            if (chooseFlag == false) ReceiveCardCall();
-            UIManager.instance.DeactivateReceiveCardPopup();
+            yield return new WaitForSeconds(Util.GetAgentWaitDuration(Util.agentReceiveCardWaitDuration, Util.agentReceiveCardRandomFactor));
+            ReceiveCardCall();
+
+            yield return new WaitForSeconds(Util.GetAgentWaitDuration(Util.agentSmallTichuWaitDuration, Util.agentSmallTichuRandomFactor));
+
+            if (canDeclareSmallTichu)
+            {
+                agent.currentPhase = Util.PhaseType.SmallTichuSelectionPhase;
+                agent.RequestDecision();
+                yield return new WaitUntil(() => agent.isActionEnd);
+                agent.isActionEnd = false;
+            }
         }
         else
         {
-            ReceiveCardCall();
+            chooseFlag = false;
+            UIManager.instance.RenderCards(Util.initialPosition, Util.numberOfCardsForLineInSmallTichuPhase, cards);
+
+            UIManager.instance.ActivateReceiveCardPopup(ReceiveCardCall, DeclareSmallTichuCall);
+            yield return new WaitUntil(() => chooseFlag == true || UIManager.instance.IsTimeOut());
+            if (chooseFlag == false) ReceiveCardCall();
+            UIManager.instance.DeactivateReceiveCardPopup();
+
+            UIManager.instance.RenderCards(Util.initialPosition, Util.numberOfCardsForLineInSmallTichuPhase, cards);
+            UIManager.instance.ActivateWaitingInfo();
         }
+
         coroutineFinishFlag = true;
+        UIManager.instance.RenderPlayerInfo();
     }
 
     public IEnumerator SelectTrickCoroutine()
