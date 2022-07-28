@@ -34,6 +34,7 @@ public class AgentManager : MonoBehaviour
 
     public void Evaluate(Score[] score)
     {
+        /*
         int idx = 0;
         foreach (var nowScore in score)
         {
@@ -41,25 +42,38 @@ public class AgentManager : MonoBehaviour
             agentGroup[idx].AddGroupReward(reward);
             idx++;
         }
+        */
         if (GameManager.instance.isGameOver) //1000 점 달성해서 게임이 끝났을 경우 에피소드 종료.
         {
             if (score[0].previousScore + score[0].oneTwoScore + score[0].tichuScore + score[0].trickScore >
                 score[1].previousScore + score[1].oneTwoScore + score[1].tichuScore + score[1].trickScore)
             {
-                agentGroup[0].AddGroupReward(0.2f);
-                agentGroup[1].AddGroupReward(-0.2f);
+                agentGroup[0].AddGroupReward(1f);
+                agentGroup[1].AddGroupReward(-1f);
             }
 
             else
             {
-                agentGroup[0].AddGroupReward(-0.2f);
-                agentGroup[1].AddGroupReward(0.2f);
+                agentGroup[0].AddGroupReward(-1f);
+                agentGroup[1].AddGroupReward(1f);
             }
             foreach (var group in agentGroup) group.EndGroupEpisode();
         }
-        else if(score[0].previousScore + score[0].oneTwoScore + score[0].tichuScore + score[0].trickScore<-1000 ||
-            score[1].previousScore + score[1].oneTwoScore + score[1].tichuScore + score[1].trickScore<-1000) //-1000 점 이하로 떨어졌을 경우 에피소드 종료.
+        else if (score[0].previousScore + score[0].oneTwoScore + score[0].tichuScore + score[0].trickScore < -1000)
         {
+            agentGroup[0].AddGroupReward(-1f);
+            var nowScore = score[1];
+            float reward = (float)(nowScore.tichuScore + nowScore.oneTwoScore + nowScore.trickScore + nowScore.previousScore) / (float)maximumTotalScore;
+            agentGroup[1].AddGroupReward(reward);
+            GameManager.instance.isGameOver = true;
+            foreach (var group in agentGroup) group.EndGroupEpisode();
+        }
+        else if (score[1].previousScore + score[1].oneTwoScore + score[1].tichuScore + score[1].trickScore < -1000)
+        {
+            agentGroup[1].AddGroupReward(-1f);
+            var nowScore = score[0];
+            float reward = (float)(nowScore.tichuScore + nowScore.oneTwoScore + nowScore.trickScore + nowScore.previousScore) / (float)maximumTotalScore;
+            agentGroup[0].AddGroupReward(reward);
             GameManager.instance.isGameOver = true;
             foreach (var group in agentGroup) group.EndGroupEpisode();
         }
