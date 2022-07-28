@@ -148,7 +148,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6047282202607180306, guid: 86cf692ae4091d8479735f43eff52d40, type: 3}
       propertyPath: m_LocalScale.z
-      value: 160
+      value: 151
       objectReference: {fileID: 0}
     - target: {fileID: 6047282202607180306, guid: 86cf692ae4091d8479735f43eff52d40, type: 3}
       propertyPath: m_LocalPosition.x
@@ -1341,7 +1341,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -900, y: 300}
+  m_AnchoredPosition: {x: -900, y: 200}
   m_SizeDelta: {x: 100, y: 100}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &157395461
@@ -2304,7 +2304,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 900, y: 300}
+  m_AnchoredPosition: {x: 900, y: 200}
   m_SizeDelta: {x: 100, y: 100}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &226908260
@@ -5865,7 +5865,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0, y: 300}
+  m_AnchoredPosition: {x: 0, y: 200}
   m_SizeDelta: {x: 100, y: 100}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &580585845
@@ -7760,7 +7760,7 @@ RectTransform:
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 800, y: 1400}
+  m_SizeDelta: {x: 800, y: 1300}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &702260619
 MonoBehaviour:
@@ -10390,7 +10390,7 @@ RectTransform:
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 800, y: 1400}
+  m_SizeDelta: {x: 800, y: 1300}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1062063863
 MonoBehaviour:
@@ -11346,8 +11346,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0, y: 1400}
-  m_SizeDelta: {x: 3000, y: 2500}
+  m_AnchoredPosition: {x: 0, y: 940}
+  m_SizeDelta: {x: 3000, y: 2000}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1121331539
 MonoBehaviour:
@@ -13895,8 +13895,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -499.99997, y: -800}
-  m_SizeDelta: {x: 800, y: 350}
+  m_AnchoredPosition: {x: -499.99997, y: -670}
+  m_SizeDelta: {x: 700, y: 300}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1412719684
 MonoBehaviour:
@@ -14146,7 +14146,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6047282202607180306, guid: 86cf692ae4091d8479735f43eff52d40, type: 3}
       propertyPath: m_LocalScale.z
-      value: 160
+      value: 151
       objectReference: {fileID: 0}
     - target: {fileID: 6047282202607180306, guid: 86cf692ae4091d8479735f43eff52d40, type: 3}
       propertyPath: m_LocalPosition.x
@@ -16894,7 +16894,7 @@ RectTransform:
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 800, y: 1400}
+  m_SizeDelta: {x: 800, y: 1300}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1701092308
 MonoBehaviour:
@@ -20845,8 +20845,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 500, y: -800}
-  m_SizeDelta: {x: 800, y: 350}
+  m_AnchoredPosition: {x: 500, y: -670}
+  m_SizeDelta: {x: 700, y: 300}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &2132236383
 MonoBehaviour:
@@ -20959,7 +20959,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6047282202607180306, guid: 86cf692ae4091d8479735f43eff52d40, type: 3}
       propertyPath: m_LocalScale.z
-      value: 160
+      value: 151
       objectReference: {fileID: 0}
     - target: {fileID: 6047282202607180306, guid: 86cf692ae4091d8479735f43eff52d40, type: 3}
       propertyPath: m_LocalPosition.x

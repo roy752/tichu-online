@@ -7,31 +7,41 @@ public class HandBounce : MonoBehaviour
     Vector3 originalPosition;
     float elapseTime;
     public bool stopFlag;
+    public bool isDone;
 
     private void Awake()
     {
         originalPosition = gameObject.transform.position;
+        isDone = true;
     }
 
+    IEnumerator t;
     public void StartBounce()
     {
-        StartCoroutine(BounceCoroutine());
+        if (t == null)
+        {
+            t = BounceCoroutine();
+            StartCoroutine(t);
+        }
     }
 
     public void EndBounce()
     {
-            stopFlag = false;
+        if (t != null)
+        {
+            StopCoroutine(t);
+            t = null;
+        }
     }
-
-    IEnumerator t;
 
     public IEnumerator BounceCoroutine()
     {
-        stopFlag = true;
         do 
         {
             elapseTime = 0;
-            gameObject.transform.position = originalPosition;
+            if (gameObject.transform.position.y < originalPosition.y - Util.offsetZ)
+                gameObject.transform.position = originalPosition;
+
             while (gameObject.transform.position.y >= originalPosition.y - Util.offsetZ)
             {
                 //v0: util.initialbouncespeed = 초기속도
@@ -43,6 +53,6 @@ public class HandBounce : MonoBehaviour
                 elapseTime += Util.bounceTick;
                 yield return new WaitForSeconds(Util.bounceTick);
             }
-        } while (stopFlag);
+        } while (true);
     }
 }

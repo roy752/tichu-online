@@ -457,11 +457,6 @@ public class GamePlayer : MonoBehaviour
         StartCoroutine(ChooseLargeTichuCoroutine());
     }
 
-    public void ChooseSmallTichu() //강화학습 전용 함수
-    {
-        StartCoroutine(ChooseSmallTichuCoroutine());
-    }
-
     public void ExchangeCards()
     {
         Util.SortCard(ref cards);
@@ -508,39 +503,35 @@ public class GamePlayer : MonoBehaviour
         UIManager.instance.RenderPlayerInfo();
     }
 
-    public IEnumerator ChooseSmallTichuCoroutine() //강화학습 전용 코루틴
-    {
-        UIManager.instance.RenderPlayerInfo();
-
-        coroutineFinishFlag = false;
-
-        if ((playerType == Util.PlayerType.Inference || playerType == Util.PlayerType.Heuristic) && canDeclareSmallTichu)
-        {
-            GameManager.instance.currentPhase = Util.PhaseType.SmallTichuSelectionPhase;
-            agent.RequestDecision();
-            yield return new WaitUntil(() => agent.isActionEnd);
-            agent.isActionEnd = false;
-        }
-        coroutineFinishFlag = true;
-    }
-
     public IEnumerator ExchangeCardsCoroutine()
     {
-        UIManager.instance.RenderPlayerInfo();
-        
         coroutineFinishFlag = false;
 
-        if (playerType == Util.PlayerType.Inference || playerType == Util.PlayerType.Heuristic)
+        if (playerType != Util.PlayerType.Player)
         {
-            GameManager.instance.currentPhase = Util.PhaseType.ExchangeSelection1Phase;
+            yield return new WaitForSeconds(Util.GetAgentWaitDuration(Util.agentSmallTichuWaitDuration, Util.agentSmallTichuRandomFactor));
+
+            if (canDeclareSmallTichu)
+            {
+                agent.currentPhase = Util.PhaseType.SmallTichuSelectionPhase;
+                agent.RequestDecision();
+                yield return new WaitUntil(() => agent.isActionEnd);
+                agent.isActionEnd = false;
+            }
+
+            yield return new WaitForSeconds(Util.GetAgentWaitDuration(Util.agentExchangeCardWaitDuration, Util.agentExchangeCardRandomFactor));
+
+            agent.currentPhase = Util.PhaseType.ExchangeSelection1Phase;
             agent.RequestDecision();
             yield return new WaitUntil(() => agent.isActionEnd);
             agent.isActionEnd = false;
-            GameManager.instance.currentPhase = Util.PhaseType.ExchangeSelection2Phase;
+
+            agent.currentPhase = Util.PhaseType.ExchangeSelection2Phase;
             agent.RequestDecision();
             yield return new WaitUntil(() => agent.isActionEnd);
             agent.isActionEnd = false;
-            GameManager.instance.currentPhase = Util.PhaseType.ExchangeSelection3Phase;
+
+            agent.currentPhase = Util.PhaseType.ExchangeSelection3Phase;
             agent.RequestDecision();
             yield return new WaitUntil(() => agent.isActionEnd);
             agent.isActionEnd = false;
@@ -553,8 +544,12 @@ public class GamePlayer : MonoBehaviour
             yield return new WaitUntil(() => chooseFlag == true || UIManager.instance.IsTimeOut());
             if (chooseFlag == false) RandomExchangeCardCall();
             UIManager.instance.DeactivateExchangeCardsPopup();
+
+            UIManager.instance.ActivateWaitingInfo();
         }
+
         coroutineFinishFlag = true;
+        UIManager.instance.RenderPlayerInfo();
     }
 
     public IEnumerator ReceiveCardCoroutine()

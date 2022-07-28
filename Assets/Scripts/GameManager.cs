@@ -290,7 +290,7 @@ public class GameManager : MonoBehaviour
         {
             currentPlayer = players[startPlayerIdx % numberOfPlayers];
 
-            currentPlayer.ChooseSmallTichu();
+            //currentPlayer.ChooseSmallTichu(); 강화학습 전용 스몰티츄. 없애버려야함.
             yield return new WaitUntil(() => currentPlayer.coroutineFinishFlag); //강화학습 전용 스몰티츄 물음.
 
             currentPlayer.SelectTrick();
@@ -315,7 +315,7 @@ public class GameManager : MonoBehaviour
         foreach (var player in players) //강화학습 전용 루프.
         {
             currentPlayer = player;
-            player.ChooseSmallTichu();
+            //player.ChooseSmallTichu();
             yield return new WaitUntil(() => player.coroutineFinishFlag);
         }
 
@@ -335,24 +335,15 @@ public class GameManager : MonoBehaviour
     
     IEnumerator StartExchangeCardPhaseCoroutine()
     {
+        ResetPhaseFlag();
+        UIManager.instance.RenderPlayerInfo();
         phaseChangeFlag = false;
 
         isSelectionEnabled = true;
 
-        foreach (var player in players) //강화학습 전용 루프.
-        {
-            currentPlayer = player;
-            SortCard(ref player.cards);
-            player.ChooseSmallTichu();
-            yield return new WaitUntil(() => player.coroutineFinishFlag);
-        }
+        foreach (var player in players) player.ExchangeCards();
+        yield return new WaitUntil(() => IsPhaseFinished());
 
-        foreach (var player in players)
-        {
-            currentPlayer = player;
-            player.ExchangeCards();
-            yield return new WaitUntil(() => player.coroutineFinishFlag);
-        }
         phaseChangeFlag = true;
     }
 
@@ -416,6 +407,7 @@ public class GameManager : MonoBehaviour
             players[idx].playerNumber = idx;
             players[idx].playerName   = playerNames[idx];
         }
+        currentPlayer = players[0];
     }
 
     void InitializeVariables()
@@ -540,7 +532,6 @@ public class GameManager : MonoBehaviour
         ResetCardMarking();
         trickStack.Clear();
         currentTrickPlayerIdx = -1;
-        currentPlayer = null;
         currentCard = null;
         currentSlot = null;
 

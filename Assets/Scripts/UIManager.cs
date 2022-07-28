@@ -519,12 +519,10 @@ public class UIManager : MonoBehaviour
 
     public void WritePlayerNameToSlot()
     {
-        for(int idx = GameManager.instance.currentPlayer.playerNumber + 1; idx < GameManager.instance.currentPlayer.playerNumber + 1 + Util.numberOfSlots; ++idx)
+        for(int idx = 1; idx<Util.numberOfPlayers; ++idx)
         {
-            int nowSlotIdx = idx - (GameManager.instance.currentPlayer.playerNumber + 1);
-            int nowPlayerIdx = idx % Util.numberOfPlayers;
-            exchangeCard.slots[nowSlotIdx].player = GameManager.instance.players[nowPlayerIdx];
-            exchangeCard.slots[nowSlotIdx].playerText.text = exchangeCard.slots[nowSlotIdx].player.playerName;
+            exchangeCard.slots[idx-1].player = GameManager.instance.players[idx];
+            exchangeCard.slots[idx-1].playerText.text = exchangeCard.slots[idx-1].player.playerName;
         }
     }
 
@@ -634,10 +632,7 @@ public class UIManager : MonoBehaviour
             else nowInfoRenderer.alpha = 1f;
 
             if (nowPlayer.coroutineFinishFlag == true) nowPlayerInfo.handBounce.EndBounce();
-            else
-            {
-                if(nowPlayerInfo.handBounce.stopFlag==false) nowPlayerInfo.handBounce.StartBounce();
-            }
+            else                                       nowPlayerInfo.handBounce.StartBounce();
         }
     }
 

@@ -212,8 +212,8 @@ public static class Util
     public static string alertLargeTichuMsg   = "정말 라지 티츄를 선언하시겠습니까?";
     public static string alertSmallTichuMsg   = "정말 스몰 티츄를 선언하시겠습니까?";
 
-    public static float largeTichuDuration    = 20.5f;
-    public static float exchangeCardsDuration = 30.5f;
+    public static float largeTichuDuration    = 25.5f;
+    public static float exchangeCardsDuration = 35.5f;
     public static float massageDuration       = 1.5f;
     public static float shakeDuration         = 0.15f;
     public static float receiveCardDuration   = 15.5f;
@@ -226,7 +226,13 @@ public static class Util
     public static float birdWishDuration      = 30.5f;
 
     public static float agentLargeTichuWaitDuration = 5f;
-    public static float agentLargeTichuRandomFactor = 5f;
+    public static float agentLargeTichuRandomFactor = 10f;
+
+    public static float agentSmallTichuWaitDuration = 5f;
+    public static float agentSmallTichuRandomFactor = 5f;
+
+    public static float agentExchangeCardWaitDuration = 10f;
+    public static float agentExchangeCardRandomFactor = 10f;
 
     public static float tick      = 0.1f;
     public static float shakeTick = 1 / 60f;
