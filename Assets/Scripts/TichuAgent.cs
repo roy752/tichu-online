@@ -32,7 +32,7 @@ public class TichuAgent : Agent
     public override void OnActionReceived(ActionBuffers actions)
     {
         int nowAction = 0;
-        switch(GameManager.instance.currentPhase)
+        switch(currentPhase)
         {
             case PhaseType.LargeTichuSelectionPhase:
                 
@@ -196,7 +196,7 @@ public class TichuAgent : Agent
     public override void CollectObservations(VectorSensor sensor)
     {
         //현재 어떤 상태인가? 1 of 10.
-        sensor.AddOneHotObservation((int)GameManager.instance.currentPhase, (int)Util.PhaseType.NumberOfPhase);
+        sensor.AddOneHotObservation((int)currentPhase, (int)Util.PhaseType.NumberOfPhase);
 
         // 현재 패스했는가 안했는가? each of 4.
         for(int idx = player.playerNumber; idx<player.playerNumber + Util.numberOfPlayers; ++idx)
@@ -351,7 +351,7 @@ public class TichuAgent : Agent
         for (int idx = 0; idx < 2; ++idx) actionMask.SetActionEnabled(actionIdx, idx, false); //용 트릭 전달 선택 액션 
 
 
-        switch (GameManager.instance.currentPhase)
+        switch (currentPhase)
         {
             case Util.PhaseType.LargeTichuSelectionPhase:
                 actionIdx = 0;

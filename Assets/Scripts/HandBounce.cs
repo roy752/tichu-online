@@ -6,6 +6,7 @@ public class HandBounce : MonoBehaviour
 {
     Vector3 originalPosition;
     float elapseTime;
+    public bool stopFlag;
 
     private void Awake()
     {
@@ -14,24 +15,19 @@ public class HandBounce : MonoBehaviour
 
     public void StartBounce()
     {
-        t = BounceCoroutine();
-        StartCoroutine(t);
+        StartCoroutine(BounceCoroutine());
     }
 
     public void EndBounce()
     {
-        if (t != null)
-        {
-            gameObject.transform.position = originalPosition;
-            StopCoroutine(t);
-            t = null;
-        }
+            stopFlag = false;
     }
 
     IEnumerator t;
 
     public IEnumerator BounceCoroutine()
     {
+        stopFlag = true;
         do 
         {
             elapseTime = 0;
@@ -47,6 +43,6 @@ public class HandBounce : MonoBehaviour
                 elapseTime += Util.bounceTick;
                 yield return new WaitForSeconds(Util.bounceTick);
             }
-        } while (true);
+        } while (stopFlag);
     }
 }

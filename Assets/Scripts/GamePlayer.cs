@@ -49,7 +49,6 @@ public class GamePlayer : MonoBehaviour
             if (GetComponent<BehaviorParameters>().BehaviorType == BehaviorType.HeuristicOnly) playerType = Util.PlayerType.Heuristic;
             else                                                                               playerType = Util.PlayerType.Inference;
         }
-        Debug.Log(playerType);
     }
 
     /// <summary>
@@ -487,8 +486,8 @@ public class GamePlayer : MonoBehaviour
 
         if(playerType != Util.PlayerType.Player)
         {
-            agent.currentPhase = Util.PhaseType.LargeTichuSelectionPhase;
             yield return new WaitForSeconds(Util.GetAgentWaitDuration(Util.agentLargeTichuWaitDuration, Util.agentLargeTichuRandomFactor));
+            agent.currentPhase = Util.PhaseType.LargeTichuSelectionPhase;
             agent.RequestDecision();
             yield return new WaitUntil(() => agent.isActionEnd);
             agent.isActionEnd = false;
@@ -501,9 +500,12 @@ public class GamePlayer : MonoBehaviour
             yield return new WaitUntil(() => chooseFlag == true || UIManager.instance.IsTimeOut());
             if (chooseFlag == false) SkipLargeTichuCall();
             UIManager.instance.DeactivateLargeTichu();
+
+            UIManager.instance.ActivateWaitingInfo();
         }
 
         coroutineFinishFlag = true;
+        UIManager.instance.RenderPlayerInfo();
     }
 
     public IEnumerator ChooseSmallTichuCoroutine() //강화학습 전용 코루틴

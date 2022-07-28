@@ -324,6 +324,7 @@ public class GameManager : MonoBehaviour
     IEnumerator StartLargeTichuPhaseCoroutine()
     {
         ResetPhaseFlag();
+        UIManager.instance.RenderPlayerInfo();
         phaseChangeFlag = false;
 
         foreach (var player in players) player.ChooseLargeTichu();

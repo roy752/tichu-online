@@ -164,6 +164,8 @@ public static class Util
     public static string gameOverInfo         = "게임이 끝났습니다.";
     public static string birdwishselectInfo   = "참새의 소원을 정하세요.";
 
+    public static string waitingInfo = "다른 사람의 선택을 기다리는 중입니다.";
+
     public static string trickPassInfo            = "패스";
     public static string bombPassInfo             = "폭탄 패스";
     public static string dogTrickInfo             = "개";

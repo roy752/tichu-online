@@ -615,32 +615,12 @@ public class UIManager : MonoBehaviour
 
     public void RenderPlayerInfo()
     {
-        for(int idx = 0; idx < Util.numberOfPlayers; ++idx)
-        {
-            var nowPlayer            = GameManager.instance.players[idx];
-            var nowPlayerInfo        = playerInfo.playerInfo[idx];
-
-            nowPlayerInfo.name.text       = nowPlayer.playerName;
-            nowPlayerInfo.hand.text       = nowPlayer.cards.Count.ToString();
-            nowPlayerInfo.roundScore.text = nowPlayer.roundScore.ToString();
-            nowPlayerInfo.totalScore.text = nowPlayer.totalScore.ToString();
-            nowPlayerInfo.trick.text      = nowPlayer.previousTrick;
-            nowPlayerInfo.largeTichuIconObject.SetActive(nowPlayer.largeTichuFlag);
-            nowPlayerInfo.smallTichuIconObject.SetActive(nowPlayer.smallTichuFlag);
-
-            nowPlayerInfo.playerInfoObject.GetComponent<CanvasGroup>().alpha = 1f;
-
-            nowPlayerInfo.handBounce.StartBounce();
-        }
-    }
-
-    public void UpdatePlayerInfo()
-    {
         for (int idx = 0; idx < Util.numberOfPlayers; ++idx)
         {
             var nowPlayer = GameManager.instance.players[idx];
             var nowPlayerInfo = playerInfo.playerInfo[idx];
 
+            nowPlayerInfo.name.text = nowPlayer.playerName;
             nowPlayerInfo.hand.text = nowPlayer.cards.Count.ToString();
             nowPlayerInfo.roundScore.text = nowPlayer.roundScore.ToString();
             nowPlayerInfo.totalScore.text = nowPlayer.totalScore.ToString();
@@ -653,10 +633,13 @@ public class UIManager : MonoBehaviour
             if (nowPlayer.isFinished) nowInfoRenderer.alpha = 0.5f;
             else nowInfoRenderer.alpha = 1f;
 
-            if(nowPlayer.coroutineFinishFlag == true) nowPlayerInfo.handBounce.EndBounce();
+            if (nowPlayer.coroutineFinishFlag == true) nowPlayerInfo.handBounce.EndBounce();
+            else
+            {
+                if(nowPlayerInfo.handBounce.stopFlag==false) nowPlayerInfo.handBounce.StartBounce();
+            }
         }
     }
-
 
     public void RenderReceivedCard()
     {
@@ -729,5 +712,10 @@ public class UIManager : MonoBehaviour
         {
             info.handBounce.EndBounce();
         }
+    }
+
+    public void ActivateWaitingInfo()
+    {
+        ShowInfo(Util.waitingInfo);
     }
 }
