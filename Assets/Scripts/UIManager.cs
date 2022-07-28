@@ -628,15 +628,35 @@ public class UIManager : MonoBehaviour
             nowPlayerInfo.largeTichuIconObject.SetActive(nowPlayer.largeTichuFlag);
             nowPlayerInfo.smallTichuIconObject.SetActive(nowPlayer.smallTichuFlag);
 
+            nowPlayerInfo.playerInfoObject.GetComponent<CanvasGroup>().alpha = 1f;
+
+            nowPlayerInfo.handBounce.StartBounce();
+        }
+    }
+
+    public void UpdatePlayerInfo()
+    {
+        for (int idx = 0; idx < Util.numberOfPlayers; ++idx)
+        {
+            var nowPlayer = GameManager.instance.players[idx];
+            var nowPlayerInfo = playerInfo.playerInfo[idx];
+
+            nowPlayerInfo.hand.text = nowPlayer.cards.Count.ToString();
+            nowPlayerInfo.roundScore.text = nowPlayer.roundScore.ToString();
+            nowPlayerInfo.totalScore.text = nowPlayer.totalScore.ToString();
+            nowPlayerInfo.trick.text = nowPlayer.previousTrick;
+            nowPlayerInfo.largeTichuIconObject.SetActive(nowPlayer.largeTichuFlag);
+            nowPlayerInfo.smallTichuIconObject.SetActive(nowPlayer.smallTichuFlag);
+
             var nowInfoRenderer = nowPlayerInfo.playerInfoObject.GetComponent<CanvasGroup>();
 
             if (nowPlayer.isFinished) nowInfoRenderer.alpha = 0.5f;
             else nowInfoRenderer.alpha = 1f;
 
-            nowPlayerInfo.handBounce.EndBounce();
-            if (nowPlayer == GameManager.instance.currentPlayer) nowPlayerInfo.handBounce.StartBounce();
+            if(nowPlayer.coroutineFinishFlag == true) nowPlayerInfo.handBounce.EndBounce();
         }
     }
+
 
     public void RenderReceivedCard()
     {

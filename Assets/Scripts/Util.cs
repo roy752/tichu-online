@@ -5,6 +5,7 @@ using TMPro;
 using System.Security.Cryptography;
 using System.Collections.Generic;
 using System.Linq;
+using Random = UnityEngine.Random;
 public static class Util
 {
     public static int numberOfGeneralCardType       = 4;
@@ -221,7 +222,10 @@ public static class Util
     public static float selectDogDuration     = 3.5f;
     public static float roundResultDuration   = 8.5f;
     public static float birdWishDuration      = 30.5f;
-    
+
+    public static float agentLargeTichuWaitDuration = 5f;
+    public static float agentLargeTichuRandomFactor = 5f;
+
     public static float tick      = 0.1f;
     public static float shakeTick = 1 / 60f;
     public static float bounceTick = 1 / 60f;
@@ -835,5 +839,10 @@ public static class Util
         int length = GetStraightFlushLength(straightFlushCode);
         int offset = GetStraightFlushTrickOffset(length);
         return straightFlushCode - offset + length + 1;
+    }
+
+    static public float GetAgentWaitDuration(float duration, float factor)
+    {
+        return duration + Random.Range(0, factor);
     }
 }

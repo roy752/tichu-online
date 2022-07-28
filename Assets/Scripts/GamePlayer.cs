@@ -483,14 +483,12 @@ public class GamePlayer : MonoBehaviour
 
     public IEnumerator ChooseLargeTichuCoroutine()
     {
-        UIManager.instance.RenderPlayerInfo();
-        
         coroutineFinishFlag = false;
 
-
-        if(playerType == Util.PlayerType.Inference||playerType == Util.PlayerType.Heuristic)
+        if(playerType != Util.PlayerType.Player)
         {
-            GameManager.instance.currentPhase = Util.PhaseType.LargeTichuSelectionPhase;
+            agent.currentPhase = Util.PhaseType.LargeTichuSelectionPhase;
+            yield return new WaitForSeconds(Util.GetAgentWaitDuration(Util.agentLargeTichuWaitDuration, Util.agentLargeTichuRandomFactor));
             agent.RequestDecision();
             yield return new WaitUntil(() => agent.isActionEnd);
             agent.isActionEnd = false;

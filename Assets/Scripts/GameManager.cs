@@ -323,14 +323,12 @@ public class GameManager : MonoBehaviour
     }
     IEnumerator StartLargeTichuPhaseCoroutine()
     {
+        ResetPhaseFlag();
         phaseChangeFlag = false;
 
-        foreach (var player in players)
-        {
-            currentPlayer = player;
-            player.ChooseLargeTichu();
-            yield return new WaitUntil(() => player.coroutineFinishFlag);
-        }
+        foreach (var player in players) player.ChooseLargeTichu();
+        yield return new WaitUntil(() => IsPhaseFinished());
+
         phaseChangeFlag = true;
     }
     
@@ -1074,5 +1072,16 @@ public class GameManager : MonoBehaviour
     {
         isGameOver = false;
         foreach (var player in players) player.totalScore = 0;
+    }
+
+    public bool IsPhaseFinished()
+    {
+        foreach(var player in players) if (player.coroutineFinishFlag == false) return false;
+        return true;
+    }
+
+    public void ResetPhaseFlag()
+    {
+        foreach (var player in players) player.coroutineFinishFlag = false;
     }
 }

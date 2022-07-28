@@ -12,7 +12,7 @@ using static Util;
 public class TichuAgent : Agent 
 {
     public bool isActionEnd = false;
-
+    public PhaseType currentPhase;
     public int decodeNumberForDebug;
     
     public GamePlayer player;
@@ -20,11 +20,13 @@ public class TichuAgent : Agent
     {
         isActionEnd = false;
         player = GetComponent<GamePlayer>();
+        currentPhase = PhaseType.NumberOfPhase;
     }
 
     public override void OnEpisodeBegin()
     {
         isActionEnd = false;
+        currentPhase = PhaseType.NumberOfPhase;
     }
 
     public override void OnActionReceived(ActionBuffers actions)

@@ -279,6 +279,7 @@ MonoBehaviour:
   hasUpgradedFromAgentParameters: 1
   MaxStep: 0
   isActionEnd: 0
+  currentPhase: 0
   decodeNumberForDebug: 0
   player: {fileID: 0}
 --- !u!114 &42275123
@@ -1009,6 +1010,7 @@ MonoBehaviour:
   hasUpgradedFromAgentParameters: 1
   MaxStep: 0
   isActionEnd: 0
+  currentPhase: 0
   decodeNumberForDebug: 0
   player: {fileID: 0}
 --- !u!114 &132319125
@@ -12034,7 +12036,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1214989474}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: bce5df8a930333c4ead030cdc7cbc5b0, type: 3}
   m_Name: 
@@ -12044,6 +12046,7 @@ MonoBehaviour:
   hasUpgradedFromAgentParameters: 1
   MaxStep: 0
   isActionEnd: 0
+  currentPhase: 0
   decodeNumberForDebug: 0
   player: {fileID: 0}
 --- !u!114 &1214989478
@@ -16586,6 +16589,7 @@ MonoBehaviour:
   hasUpgradedFromAgentParameters: 1
   MaxStep: 0
   isActionEnd: 0
+  currentPhase: 0
   decodeNumberForDebug: 0
   player: {fileID: 0}
 --- !u!114 &1682067125
