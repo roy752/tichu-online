@@ -1558,7 +1558,7 @@ public class TichuAgent : Agent
 
                     foreach (var cards in straightFlushCards)
                     {
-                        if (cards.value == pairValue)
+                        if (cards.value == pairValue && restPairCount>0)
                         {
                             pairList.Add(cards);
                             --restPairCount;
@@ -1568,7 +1568,7 @@ public class TichuAgent : Agent
 
                     foreach (var cards in straightFlushCards)
                     {
-                        if (cards.value == tripleValue)
+                        if (cards.value == tripleValue&&restTripleCount>0)
                         {
                             tripleList.Add(cards);
                             --restTripleCount;

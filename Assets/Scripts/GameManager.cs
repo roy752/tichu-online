@@ -235,8 +235,8 @@ public class GameManager : MonoBehaviour
             players[idx].roundScore = 0;
         }
 
-        if (players[0].totalScore >= Util.smallGameOverScore && players[0].totalScore > players[1].totalScore) isGameOver = true;
-        if (players[1].totalScore >= Util.smallGameOverScore && players[0].totalScore < players[1].totalScore) isGameOver = true;
+        if (players[0].totalScore >= Util.maximumTotalScore && players[0].totalScore > players[1].totalScore) isGameOver = true;
+        if (players[1].totalScore >= Util.maximumTotalScore && players[0].totalScore < players[1].totalScore) isGameOver = true;
 
         if (trickStack.Count > 0)
         {
