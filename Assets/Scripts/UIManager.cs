@@ -134,6 +134,7 @@ public class UIManager : MonoBehaviour
         selectTrick.submitButton     = nowTrickSelectionObject.Find(Util.trickSelectionSubmitButtonName).GetComponent<Button>();
         selectTrick.passButton       = nowTrickSelectionObject.Find(Util.trickSelectionPassButtonName).GetComponent<Button>();
         selectTrick.smallTichuButton = nowTrickSelectionObject.Find(Util.trickSelectionSmallTichuButtonName).GetComponent<Button>();
+        selectTrick.submitArea = uiParent.transform.Find(Util.trickSelectionSubmitAreaName).GetComponent<TrickSelectHandler>();
         ////////////////////////
 
 
@@ -279,6 +280,8 @@ public class UIManager : MonoBehaviour
 
         //¸®½º³Ê »ðÀÔ.
         selectTrick.submitButton.onClick.AddListener(SelectTrickCall);
+        selectTrick.submitArea.AddAction(SelectTrickCall);
+
         selectTrick.passButton.onClick.AddListener(PassTrickCall);
 
         selectTrick.smallTichuButton.onClick.AddListener(
@@ -299,6 +302,7 @@ public class UIManager : MonoBehaviour
     public void DeactivateTrickSelection()
     {
         selectTrick.submitButton.onClick.RemoveAllListeners();
+        selectTrick.submitArea.ClearAction();
         selectTrick.passButton.onClick.RemoveAllListeners();
         selectTrick.bombButton.onClick.RemoveAllListeners();
         selectTrick.smallTichuButton.onClick.RemoveAllListeners();
@@ -654,7 +658,11 @@ public class UIManager : MonoBehaviour
     {
         if (GameManager.instance.trickStack.Count > 0)
         {
-            foreach (var card in GameManager.instance.trickStack.Peek().cards) card.isFixed = false;
+            foreach (var card in GameManager.instance.trickStack.Peek().cards)
+            {
+                card.isFixed = false;
+                card.transform.position = Util.hiddenCardPosition;
+            }
         }
         if (cardList != null)
         {

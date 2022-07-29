@@ -99,6 +99,7 @@ public static class Util
     public static string trickSelectionSubmitButtonName     = "SubmitButton";
     public static string trickSelectionPassButtonName       = "PassButton";
     public static string trickSelectionSmallTichuButtonName = "SmallTichuButton";
+    public static string trickSelectionSubmitAreaName       = "SubmitArea";
 
     public static string   dragonSelectionPopupObjectName     = "DragonSelectionPopup";
     public static string[] dragonSelectionOpponentButtonNames = new string[] { "PreviousOpponent", "NextOpponent" };
@@ -222,23 +223,32 @@ public static class Util
     public static float trickTakeDuration     = 3.5f;
     public static float selectDragonDuration  = 15.5f;
     public static float selectDogDuration     = 3.5f;
-    public static float roundResultDuration   = 8.5f;
+    public static float roundResultDuration   = 5.5f;
     public static float birdWishDuration      = 30.5f;
 
-    public static float agentLargeTichuWaitDuration = 5f;
-    public static float agentLargeTichuRandomFactor = 10f;
+    public static float agentLargeTichuWaitDuration = 3f;
+    public static float agentLargeTichuRandomFactor = 3f;
 
-    public static float agentSmallTichuWaitDuration = 5f;
-    public static float agentSmallTichuRandomFactor = 5f;
+    public static float agentSmallTichuWaitDuration = 2f;
+    public static float agentSmallTichuRandomFactor = 2f;
 
-    public static float agentExchangeCardWaitDuration = 10f;
-    public static float agentExchangeCardRandomFactor = 10f;
+    public static float agentExchangeCardWaitDuration = 4f;
+    public static float agentExchangeCardRandomFactor = 4f;
 
-    public static float agentReceiveCardWaitDuration = 3f;
-    public static float agentReceiveCardRandomFactor = 3f;
+    public static float agentReceiveCardWaitDuration = 2f;
+    public static float agentReceiveCardRandomFactor = 2f;
 
-    public static float tick      = 0.1f;
-    public static float shakeTick = 1 / 60f;
+    public static float agentTrickSelectWaitDuration = 2f;
+    public static float agentTrickSelectRandomFactor = 4f;
+
+    public static float agentBirdWishSelectWaitDuration = 1f;
+    public static float agentBirdWishSelectRandomFactor = 2f;
+
+    public static float agentDragonSelectWaitDuration = 1f;
+    public static float agentDragonSelectRandomFactor = 2f;
+
+    public static float tick       = 0.1f;
+    public static float shakeTick  = 1 / 60f;
     public static float bounceTick = 1 / 60f;
 
     public static float bounceDelay = 2.5f;
@@ -354,6 +364,8 @@ public static class Util
         public Button submitButton;
         public Button passButton;
         public Button smallTichuButton;
+
+        public TrickSelectHandler submitArea;
     }
 
     public class Trick

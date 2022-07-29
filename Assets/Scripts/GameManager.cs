@@ -76,9 +76,6 @@ public class GameManager : MonoBehaviour
     [HideInInspector]
     public bool isGameOver = false;
 
-    [HideInInspector]
-    public bool isBombPhase;
-
     public int currentTrickPlayerIdx;
     
     [HideInInspector]
@@ -174,131 +171,6 @@ public class GameManager : MonoBehaviour
             }
         }
     }
-   
-    IEnumerator StartDisplayResultCoroutine()
-    {
-        phaseChangeFlag = false;
-        isSelectionEnabled = false;
-        isMultipleSelectionEnabled = false;
-
-        Score[] TeamScore = new Score[numberOfTeam];
-        for (int i = 0; i < TeamScore.Length; ++i) { TeamScore[i].trickScore = 0; TeamScore[i].oneTwoScore = 0; TeamScore[i].tichuScore = 0; }
-        
-        foreach (var player in players) //티츄 선언 점수를 계산한다.
-        {
-            player.ResetPerTrick();
-            int nowTeamIdx = player.playerNumber % numberOfTeam;
-
-            if (player.largeTichuFlag)
-            {
-                if (player.ranking == 1) TeamScore[nowTeamIdx].tichuScore += largeTichuScore;
-                else TeamScore[nowTeamIdx].tichuScore -= largeTichuScore;
-            }
-            else if (player.smallTichuFlag)
-            {
-                if (player.ranking == 1) TeamScore[nowTeamIdx].tichuScore += smallTichuScore;
-                else TeamScore[nowTeamIdx].tichuScore -= smallTichuScore;
-            }
-        }
-
-        int? oneTwoPlayerIdx = FindIfOneTwo(); // 원투를 성공했을 경우 카드 점수는 계산하지 않고 원투 점수를 추가.
-        if (oneTwoPlayerIdx != null)
-        {
-            TeamScore[(int)oneTwoPlayerIdx].oneTwoScore = 200;
-        }
-        else
-        {
-            GamePlayer firstPlace = FindFirstPlace();
-            GamePlayer lastPlace = FindLastPlace();
-            GamePlayer thirdPlace = FindThirdPlace();
-            if (firstPlace == null) Debug.LogError(findFirstPlaceError);
-            if (lastPlace == null) Debug.LogError(findLastPlaceError);
-            if (thirdPlace == null) Debug.LogError(findThirdPlaceError);
-
-            firstPlace.roundScore += lastPlace.roundScore; lastPlace.roundScore = 0; //꼴등은 딴 트릭을 전부 1등에게 준다.
-            TeamScore[1 - lastPlace.playerNumber % 2].trickScore += lastPlace.cards.Sum(x => x.score); //꼴등은 자신의 점수를 전부 상대편에게 준다.
-            while(trickStack.Count>0)
-            {
-                var nowTrick = trickStack.Pop();
-                thirdPlace.roundScore += nowTrick.cards.Sum(x => x.score); //현재 진행중이던 트릭은 전부 3등이 가진다.
-            }
-
-            for (int idx = 0; idx < numberOfPlayers; ++idx) TeamScore[idx % numberOfTeam].trickScore += players[idx].roundScore;
-        }
-
-        for (int idx = 0; idx < numberOfTeam; ++idx) TeamScore[idx].previousScore = players[idx].totalScore;
-
-        for(int idx = 0; idx <numberOfPlayers; ++idx)
-        {
-            var nowTeam = TeamScore[idx % numberOfTeam];
-            players[idx].totalScore += nowTeam.trickScore + nowTeam.tichuScore + nowTeam.oneTwoScore;
-            players[idx].roundScore = 0;
-        }
-
-        if (players[0].totalScore >= Util.maximumTotalScore && players[0].totalScore > players[1].totalScore) isGameOver = true;
-        if (players[1].totalScore >= Util.maximumTotalScore && players[0].totalScore < players[1].totalScore) isGameOver = true;
-
-        if (trickStack.Count > 0)
-        {
-            foreach (var card in trickStack.Peek().cards) { card.isFixed = false; card.transform.position = hiddenCardPosition; }
-        }
-        UIManager.instance.DeactivateRenderCards();
-        UIManager.instance.DeactivateBirdWishNotice();
-        UIManager.instance.DeactivateBounceAll();
-
-        UIManager.instance.RenderPlayerInfo();
-
-        UIManager.instance.ActivateRoundResult(TeamScore);
-        UIManager.instance.Wait(roundResultDuration);
-        yield return new WaitUntil(() => UIManager.instance.IsWaitFinished());
-        UIManager.instance.DeactivateRoundResult();
-
-        AgentManager.instance.Evaluate(TeamScore);
-
-        phaseChangeFlag = true;
-    }
-
-    IEnumerator StartMainPlayPhaseCoroutine()
-    {
-        phaseChangeFlag = false;
-
-        isSelectionEnabled = true;
-        isMultipleSelectionEnabled = true;
-
-        while(isRoundEnd==false)
-        {
-            StartCoroutine(StartTrickCoroutine());
-            yield return new WaitUntil(() => isTrickEnd);
-        }
-        phaseChangeFlag = true;
-    }
-
-    /// <summary>
-    /// 트릭이 끝나면 이 플래그를 true로.
-    /// </summary>
-    public bool trickFinishFlag = false;
-    
-    IEnumerator StartTrickCoroutine()
-    {
-        //시작 플레이어 찾고
-        //플레이어가 낼 족보 결정하고
-        //모두 패스일때까지 카드 내기 반복
-        isTrickEnd = false;
-
-        ResetTrickSetting();
-        while(trickFinishFlag==false)
-        {
-            currentPlayer = players[startPlayerIdx % numberOfPlayers];
-
-            //currentPlayer.ChooseSmallTichu(); 강화학습 전용 스몰티츄. 없애버려야함.
-            yield return new WaitUntil(() => currentPlayer.coroutineFinishFlag); //강화학습 전용 스몰티츄 물음.
-
-            currentPlayer.SelectTrick();
-            yield return new WaitUntil(() => currentPlayer.coroutineFinishFlag);
-        }
-
-        isTrickEnd = true;
-    }
 
     IEnumerator StartLargeTichuPhaseCoroutine()
     {
@@ -336,6 +208,130 @@ public class GameManager : MonoBehaviour
 
         foreach(var player in players) player.ReceiveCard();
         yield return new WaitUntil(() => IsPhaseFinished());
+
+        phaseChangeFlag = true;
+    }
+
+    /// <summary>
+    /// 트릭이 끝나면 이 플래그를 true로.
+    /// </summary>
+    public bool trickFinishFlag = false;
+    
+    IEnumerator StartTrickCoroutine()
+    {
+        //시작 플레이어 찾고
+        //플레이어가 낼 족보 결정하고
+        //모두 패스일때까지 카드 내기 반복
+        isTrickEnd = false;
+
+        ResetTrickSetting();
+
+        while(trickFinishFlag==false)
+        {
+            var nowPlayer = players[FindPlayerIdx()];
+            nowPlayer.coroutineFinishFlag = false;
+            UIManager.instance.RenderPlayerInfo();
+
+            nowPlayer.SelectTrick();
+            yield return new WaitUntil(() => nowPlayer.coroutineFinishFlag);
+        }
+
+        isTrickEnd = true;
+    }
+    IEnumerator StartMainPlayPhaseCoroutine()
+    {
+        phaseChangeFlag = false;
+
+        isSelectionEnabled = true;
+        isMultipleSelectionEnabled = true;
+
+        while(isRoundEnd==false)
+        {
+            StartCoroutine(StartTrickCoroutine());
+            yield return new WaitUntil(() => isTrickEnd);
+        }
+        phaseChangeFlag = true;
+    }
+
+    IEnumerator StartDisplayResultCoroutine()
+    {
+        phaseChangeFlag = false;
+        isSelectionEnabled = false;
+        isMultipleSelectionEnabled = false;
+
+        Score[] TeamScore = new Score[numberOfTeam];
+        for (int i = 0; i < TeamScore.Length; ++i) { TeamScore[i].trickScore = 0; TeamScore[i].oneTwoScore = 0; TeamScore[i].tichuScore = 0; }
+
+        foreach (var player in players) //티츄 선언 점수를 계산한다.
+        {
+            player.ResetPerTrick();
+            int nowTeamIdx = player.playerNumber % numberOfTeam;
+
+            if (player.largeTichuFlag)
+            {
+                if (player.ranking == 1) TeamScore[nowTeamIdx].tichuScore += largeTichuScore;
+                else TeamScore[nowTeamIdx].tichuScore -= largeTichuScore;
+            }
+            else if (player.smallTichuFlag)
+            {
+                if (player.ranking == 1) TeamScore[nowTeamIdx].tichuScore += smallTichuScore;
+                else TeamScore[nowTeamIdx].tichuScore -= smallTichuScore;
+            }
+        }
+
+        int? oneTwoPlayerIdx = FindIfOneTwo(); // 원투를 성공했을 경우 카드 점수는 계산하지 않고 원투 점수를 추가.
+        if (oneTwoPlayerIdx != null)
+        {
+            TeamScore[(int)oneTwoPlayerIdx].oneTwoScore = 200;
+        }
+        else
+        {
+            GamePlayer firstPlace = FindFirstPlace();
+            GamePlayer lastPlace = FindLastPlace();
+            GamePlayer thirdPlace = FindThirdPlace();
+            if (firstPlace == null) Debug.LogError(findFirstPlaceError);
+            if (lastPlace == null) Debug.LogError(findLastPlaceError);
+            if (thirdPlace == null) Debug.LogError(findThirdPlaceError);
+
+            firstPlace.roundScore += lastPlace.roundScore; lastPlace.roundScore = 0; //꼴등은 딴 트릭을 전부 1등에게 준다.
+            TeamScore[1 - lastPlace.playerNumber % 2].trickScore += lastPlace.cards.Sum(x => x.score); //꼴등은 자신의 점수를 전부 상대편에게 준다.
+            while (trickStack.Count > 0)
+            {
+                var nowTrick = trickStack.Pop();
+                thirdPlace.roundScore += nowTrick.cards.Sum(x => x.score); //현재 진행중이던 트릭은 전부 3등이 가진다.
+            }
+
+            for (int idx = 0; idx < numberOfPlayers; ++idx) TeamScore[idx % numberOfTeam].trickScore += players[idx].roundScore;
+        }
+
+        for (int idx = 0; idx < numberOfTeam; ++idx) TeamScore[idx].previousScore = players[idx].totalScore;
+
+        for (int idx = 0; idx < numberOfPlayers; ++idx)
+        {
+            var nowTeam = TeamScore[idx % numberOfTeam];
+            players[idx].totalScore += nowTeam.trickScore + nowTeam.tichuScore + nowTeam.oneTwoScore;
+            players[idx].roundScore = 0;
+        }
+
+        if (players[0].totalScore >= Util.maximumTotalScore && players[0].totalScore > players[1].totalScore) isGameOver = true;
+        if (players[1].totalScore >= Util.maximumTotalScore && players[0].totalScore < players[1].totalScore) isGameOver = true;
+
+        if (trickStack.Count > 0)
+        {
+            foreach (var card in trickStack.Peek().cards) { card.isFixed = false; card.transform.position = hiddenCardPosition; }
+        }
+        UIManager.instance.DeactivateRenderCards();
+        UIManager.instance.DeactivateBirdWishNotice();
+        UIManager.instance.DeactivateBounceAll();
+
+        UIManager.instance.RenderPlayerInfo();
+
+        UIManager.instance.ActivateRoundResult(TeamScore);
+        UIManager.instance.Wait(roundResultDuration);
+        yield return new WaitUntil(() => UIManager.instance.IsWaitFinished());
+        UIManager.instance.DeactivateRoundResult();
+
+        AgentManager.instance.Evaluate(TeamScore);
 
         phaseChangeFlag = true;
     }
@@ -488,9 +484,9 @@ public class GameManager : MonoBehaviour
     }
 
 
-    public bool IsTrickAllPassed()
+    public bool IsTrickAllPassed(GamePlayer player)
     {
-        int idx = currentPlayer.playerNumber + 1;
+        int idx = player.playerNumber + 1;
         for (int i = 0; i < numberOfSlots; ++i)
         {
             var nowPlayer = players[(idx + i) % numberOfPlayers];
@@ -499,20 +495,8 @@ public class GameManager : MonoBehaviour
         return true;
     }
 
-    public bool IsBombAllPassed()
-    {
-        int idx = currentPlayer.playerNumber;
-        for(int i=0; i<numberOfPlayers; ++i)
-        {
-            var nowPlayer = players[(idx + i) % numberOfPlayers];
-            if (nowPlayer.isBombPassed == false) return false;
-        }
-        return true;
-    }
-
     public void ResetTrickSetting()
     {
-        isBombPhase = false;
         trickFinishFlag = false;
         isFirstTrick = true;
         foreach (var player in players) player.ResetPerTrick();
@@ -1018,24 +1002,6 @@ public class GameManager : MonoBehaviour
         }
         return null;
     }
-    public void DeactivateBombPhase()
-    {
-        foreach(var player in players)
-        {
-            player.isBombPassed = false;
-        }
-        isBombPhase = false;
-    }
-
-    public void ActivateBombPhase()
-    {
-        isBombPhase = true;
-    }
-
-    public bool IsBombPhase()
-    {
-        return isBombPhase;
-    }
 
     public void ResetCardMarking()
     {
@@ -1068,5 +1034,11 @@ public class GameManager : MonoBehaviour
     public void ResetPhaseFlag()
     {
         foreach (var player in players) player.coroutineFinishFlag = false;
+    }
+
+    public int FindPlayerIdx()
+    {
+        FindBirdIfFirst();
+        return startPlayerIdx % numberOfPlayers;
     }
 }
