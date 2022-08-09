@@ -7,8 +7,11 @@ public class SelectionHandler : MonoBehaviour
 
     public virtual void OnEnable()
     {
-        edgeObject = transform.Find(Util.edgeObjectName).gameObject;
-        edgeObject.SetActive(false);
+        if (transform.Find(Util.edgeObjectName) != null)
+        {
+            edgeObject = transform.Find(Util.edgeObjectName).gameObject;
+            edgeObject.SetActive(false);
+        }
         isSelected = false;
     }
 

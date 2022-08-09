@@ -6,36 +6,42 @@ public class HandBounce : MonoBehaviour
 {
     Vector3 originalPosition;
     float elapseTime;
+    public bool stopFlag;
+    public bool isDone;
 
     private void Awake()
     {
         originalPosition = gameObject.transform.position;
+        isDone = true;
     }
 
+    IEnumerator t;
     public void StartBounce()
     {
-        t = BounceCoroutine();
-        StartCoroutine(t);
+        if (t == null)
+        {
+            t = BounceCoroutine();
+            StartCoroutine(t);
+        }
     }
 
     public void EndBounce()
     {
         if (t != null)
         {
-            gameObject.transform.position = originalPosition;
             StopCoroutine(t);
             t = null;
         }
     }
-
-    IEnumerator t;
 
     public IEnumerator BounceCoroutine()
     {
         do 
         {
             elapseTime = 0;
-            gameObject.transform.position = originalPosition;
+            if (gameObject.transform.position.y < originalPosition.y - Util.offsetZ)
+                gameObject.transform.position = originalPosition;
+
             while (gameObject.transform.position.y >= originalPosition.y - Util.offsetZ)
             {
                 //v0: util.initialbouncespeed = 초기속도

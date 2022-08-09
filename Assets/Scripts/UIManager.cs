@@ -134,6 +134,7 @@ public class UIManager : MonoBehaviour
         selectTrick.submitButton     = nowTrickSelectionObject.Find(Util.trickSelectionSubmitButtonName).GetComponent<Button>();
         selectTrick.passButton       = nowTrickSelectionObject.Find(Util.trickSelectionPassButtonName).GetComponent<Button>();
         selectTrick.smallTichuButton = nowTrickSelectionObject.Find(Util.trickSelectionSmallTichuButtonName).GetComponent<Button>();
+        selectTrick.submitArea = uiParent.transform.Find(Util.trickSelectionSubmitAreaName).GetComponent<TrickSelectHandler>();
         ////////////////////////
 
 
@@ -279,6 +280,8 @@ public class UIManager : MonoBehaviour
 
         //¸®½º³Ê »ðÀÔ.
         selectTrick.submitButton.onClick.AddListener(SelectTrickCall);
+        selectTrick.submitArea.AddAction(SelectTrickCall);
+
         selectTrick.passButton.onClick.AddListener(PassTrickCall);
 
         selectTrick.smallTichuButton.onClick.AddListener(
@@ -299,6 +302,7 @@ public class UIManager : MonoBehaviour
     public void DeactivateTrickSelection()
     {
         selectTrick.submitButton.onClick.RemoveAllListeners();
+        selectTrick.submitArea.ClearAction();
         selectTrick.passButton.onClick.RemoveAllListeners();
         selectTrick.bombButton.onClick.RemoveAllListeners();
         selectTrick.smallTichuButton.onClick.RemoveAllListeners();
@@ -519,12 +523,10 @@ public class UIManager : MonoBehaviour
 
     public void WritePlayerNameToSlot()
     {
-        for(int idx = GameManager.instance.currentPlayer.playerNumber + 1; idx < GameManager.instance.currentPlayer.playerNumber + 1 + Util.numberOfSlots; ++idx)
+        for(int idx = 1; idx<Util.numberOfPlayers; ++idx)
         {
-            int nowSlotIdx = idx - (GameManager.instance.currentPlayer.playerNumber + 1);
-            int nowPlayerIdx = idx % Util.numberOfPlayers;
-            exchangeCard.slots[nowSlotIdx].player = GameManager.instance.players[nowPlayerIdx];
-            exchangeCard.slots[nowSlotIdx].playerText.text = exchangeCard.slots[nowSlotIdx].player.playerName;
+            exchangeCard.slots[idx-1].player = GameManager.instance.players[idx];
+            exchangeCard.slots[idx-1].playerText.text = exchangeCard.slots[idx-1].player.playerName;
         }
     }
 
@@ -615,16 +617,16 @@ public class UIManager : MonoBehaviour
 
     public void RenderPlayerInfo()
     {
-        for(int idx = 0; idx < Util.numberOfPlayers; ++idx)
+        for (int idx = 0; idx < Util.numberOfPlayers; ++idx)
         {
-            var nowPlayer            = GameManager.instance.players[idx];
-            var nowPlayerInfo        = playerInfo.playerInfo[idx];
+            var nowPlayer = GameManager.instance.players[idx];
+            var nowPlayerInfo = playerInfo.playerInfo[idx];
 
-            nowPlayerInfo.name.text       = nowPlayer.playerName;
-            nowPlayerInfo.hand.text       = nowPlayer.cards.Count.ToString();
+            nowPlayerInfo.name.text = nowPlayer.playerName;
+            nowPlayerInfo.hand.text = nowPlayer.cards.Count.ToString();
             nowPlayerInfo.roundScore.text = nowPlayer.roundScore.ToString();
             nowPlayerInfo.totalScore.text = nowPlayer.totalScore.ToString();
-            nowPlayerInfo.trick.text      = nowPlayer.previousTrick;
+            nowPlayerInfo.trick.text = nowPlayer.previousTrick;
             nowPlayerInfo.largeTichuIconObject.SetActive(nowPlayer.largeTichuFlag);
             nowPlayerInfo.smallTichuIconObject.SetActive(nowPlayer.smallTichuFlag);
 
@@ -633,8 +635,8 @@ public class UIManager : MonoBehaviour
             if (nowPlayer.isFinished) nowInfoRenderer.alpha = 0.5f;
             else nowInfoRenderer.alpha = 1f;
 
-            nowPlayerInfo.handBounce.EndBounce();
-            if (nowPlayer == GameManager.instance.currentPlayer) nowPlayerInfo.handBounce.StartBounce();
+            if (nowPlayer.coroutineFinishFlag == true) nowPlayerInfo.handBounce.EndBounce();
+            else                                       nowPlayerInfo.handBounce.StartBounce();
         }
     }
 
@@ -656,7 +658,11 @@ public class UIManager : MonoBehaviour
     {
         if (GameManager.instance.trickStack.Count > 0)
         {
-            foreach (var card in GameManager.instance.trickStack.Peek().cards) card.isFixed = false;
+            foreach (var card in GameManager.instance.trickStack.Peek().cards)
+            {
+                card.isFixed = false;
+                card.transform.position = Util.hiddenCardPosition;
+            }
         }
         if (cardList != null)
         {
@@ -709,5 +715,10 @@ public class UIManager : MonoBehaviour
         {
             info.handBounce.EndBounce();
         }
+    }
+
+    public void ActivateWaitingInfo()
+    {
+        ShowInfo(Util.waitingInfo);
     }
 }

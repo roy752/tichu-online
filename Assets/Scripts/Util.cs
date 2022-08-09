@@ -5,6 +5,7 @@ using TMPro;
 using System.Security.Cryptography;
 using System.Collections.Generic;
 using System.Linq;
+using Random = UnityEngine.Random;
 public static class Util
 {
     public static int numberOfGeneralCardType       = 4;
@@ -98,6 +99,7 @@ public static class Util
     public static string trickSelectionSubmitButtonName     = "SubmitButton";
     public static string trickSelectionPassButtonName       = "PassButton";
     public static string trickSelectionSmallTichuButtonName = "SmallTichuButton";
+    public static string trickSelectionSubmitAreaName       = "SubmitArea";
 
     public static string   dragonSelectionPopupObjectName     = "DragonSelectionPopup";
     public static string[] dragonSelectionOpponentButtonNames = new string[] { "PreviousOpponent", "NextOpponent" };
@@ -163,6 +165,8 @@ public static class Util
     public static string gameOverInfo         = "게임이 끝났습니다.";
     public static string birdwishselectInfo   = "참새의 소원을 정하세요.";
 
+    public static string waitingInfo = "다른 사람의 선택을 기다리는 중입니다.";
+
     public static string trickPassInfo            = "패스";
     public static string bombPassInfo             = "폭탄 패스";
     public static string dogTrickInfo             = "개";
@@ -209,8 +213,8 @@ public static class Util
     public static string alertLargeTichuMsg   = "정말 라지 티츄를 선언하시겠습니까?";
     public static string alertSmallTichuMsg   = "정말 스몰 티츄를 선언하시겠습니까?";
 
-    public static float largeTichuDuration    = 20.5f;
-    public static float exchangeCardsDuration = 30.5f;
+    public static float largeTichuDuration    = 25.5f;
+    public static float exchangeCardsDuration = 35.5f;
     public static float massageDuration       = 1.5f;
     public static float shakeDuration         = 0.15f;
     public static float receiveCardDuration   = 15.5f;
@@ -219,11 +223,32 @@ public static class Util
     public static float trickTakeDuration     = 3.5f;
     public static float selectDragonDuration  = 15.5f;
     public static float selectDogDuration     = 3.5f;
-    public static float roundResultDuration   = 8.5f;
+    public static float roundResultDuration   = 5.5f;
     public static float birdWishDuration      = 30.5f;
-    
-    public static float tick      = 0.1f;
-    public static float shakeTick = 1 / 60f;
+
+    public static float agentLargeTichuWaitDuration = 3f;
+    public static float agentLargeTichuRandomFactor = 3f;
+
+    public static float agentSmallTichuWaitDuration = 2f;
+    public static float agentSmallTichuRandomFactor = 2f;
+
+    public static float agentExchangeCardWaitDuration = 4f;
+    public static float agentExchangeCardRandomFactor = 4f;
+
+    public static float agentReceiveCardWaitDuration = 2f;
+    public static float agentReceiveCardRandomFactor = 2f;
+
+    public static float agentTrickSelectWaitDuration = 2f;
+    public static float agentTrickSelectRandomFactor = 4f;
+
+    public static float agentBirdWishSelectWaitDuration = 1f;
+    public static float agentBirdWishSelectRandomFactor = 2f;
+
+    public static float agentDragonSelectWaitDuration = 1f;
+    public static float agentDragonSelectRandomFactor = 2f;
+
+    public static float tick       = 0.1f;
+    public static float shakeTick  = 1 / 60f;
     public static float bounceTick = 1 / 60f;
 
     public static float bounceDelay = 2.5f;
@@ -339,6 +364,8 @@ public static class Util
         public Button submitButton;
         public Button passButton;
         public Button smallTichuButton;
+
+        public TrickSelectHandler submitArea;
     }
 
     public class Trick
@@ -835,5 +862,10 @@ public static class Util
         int length = GetStraightFlushLength(straightFlushCode);
         int offset = GetStraightFlushTrickOffset(length);
         return straightFlushCode - offset + length + 1;
+    }
+
+    static public float GetAgentWaitDuration(float duration, float factor)
+    {
+        return duration + Random.Range(0, factor);
     }
 }
