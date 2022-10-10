@@ -255,8 +255,10 @@ public class TichuAgent : Agent
         for (int idx = player.playerNumber; idx < player.playerNumber + Util.numberOfPlayers; ++idx)
         {
             int nowIdx = idx % Util.numberOfPlayers;
-            float nowHand = (float)(GameManager.instance.players[nowIdx].cards.Count) / Util.numberOfCardsPlay;
-            sensor.AddObservation(nowHand);
+            sensor.AddOneHotObservation(GameManager.instance.players[nowIdx].cards.Count, numberOfCardsPlay+1);
+            //int nowIdx = idx % Util.numberOfPlayers;
+            //float nowHand = (float)(GameManager.instance.players[nowIdx].cards.Count) / Util.numberOfCardsPlay;
+            //sensor.AddObservation(nowHand);
         }
 
         //현재 라운드 점수 - each of 4.
