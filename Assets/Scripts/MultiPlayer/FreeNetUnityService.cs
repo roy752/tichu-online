@@ -7,7 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
 
-namespace Assets.Scripts.MultiPlayer
+namespace MultiPlayer
 {
     public class FreeNetUnityService:MonoBehaviour
     {
@@ -57,6 +57,7 @@ namespace Assets.Scripts.MultiPlayer
 
             //유니티 애플리케이션으로 이벤트를 넘겨주기 위해서 매니저에 큐잉시켜 준다.
             eventManager.enqueue(NETWORK_EVENT.connected);
+            Debug.Log("Connected!");
         }
 
         // Update is called once per frame

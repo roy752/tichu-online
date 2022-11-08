@@ -721,4 +721,26 @@ public class UIManager : MonoBehaviour
     {
         ShowInfo(Util.waitingInfo);
     }
+
+    public void SetPlayerInfo(string playerName, byte id)
+    {
+        var nowPlayer = MultiPlayer.GameManager.instance.players[Util.GetRelativePlayerIdx(id, MultiPlayer.GameManager.instance.players[0].playerNumber)];
+        var nowPlayerInfo = playerInfo.playerInfo[Util.GetRelativePlayerIdx(id, MultiPlayer.GameManager.instance.players[0].playerNumber)];
+            
+        nowPlayerInfo.name.text = playerName;
+        nowPlayerInfo.hand.text = nowPlayer.cards.Count.ToString();
+        nowPlayerInfo.roundScore.text = nowPlayer.roundScore.ToString();
+        nowPlayerInfo.totalScore.text = nowPlayer.totalScore.ToString();
+        nowPlayerInfo.trick.text = nowPlayer.previousTrick;
+        nowPlayerInfo.largeTichuIconObject.SetActive(nowPlayer.largeTichuFlag);
+        nowPlayerInfo.smallTichuIconObject.SetActive(nowPlayer.smallTichuFlag);
+
+        var nowInfoRenderer = nowPlayerInfo.playerInfoObject.GetComponent<CanvasGroup>();
+
+        if (nowPlayer.isFinished) nowInfoRenderer.alpha = 0.5f;
+        else nowInfoRenderer.alpha = 1f;
+
+        if (nowPlayer.coroutineFinishFlag == true) nowPlayerInfo.handBounce.EndBounce();
+        else nowPlayerInfo.handBounce.StartBounce();
+    }
 }
