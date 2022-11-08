@@ -37,7 +37,7 @@ namespace MultiPlayer
         public void GameStart(List<int> cardId)
         {
             EventManager.instance.DeactivateInput();
-            GameObject.Find("GameUI").SetActive(true);
+            GameObject.Find("UI").transform.FindChild("GameUI").gameObject.SetActive(true);
             cardId.ForEach(id => players[0].AddCard(cards.Where(x => x.id == id).First()));
             for(int i=0; i<4; ++i)
             UIManager.instance.SetPlayerInfo(players[i].playerName, (byte)players[i].playerNumber);
